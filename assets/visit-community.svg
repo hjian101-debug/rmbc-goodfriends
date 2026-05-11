@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1800 900" role="img" aria-label="Church entry and community illustration">
+  <defs>
+    <linearGradient id="sky" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#d5dfd6"/>
+      <stop offset=".55" stop-color="#f1e7cf"/>
+      <stop offset="1" stop-color="#c79a74"/>
+    </linearGradient>
+    <linearGradient id="path" x1="0" x2="1">
+      <stop offset="0" stop-color="#8e755d"/>
+      <stop offset="1" stop-color="#d9c29d"/>
+    </linearGradient>
+  </defs>
+  <rect width="1800" height="900" fill="url(#sky)"/>
+  <path d="M0 650c290-87 579-123 868-107 322 17 632 100 932 216v141H0z" fill="#486751"/>
+  <path d="M692 900c77-163 158-276 242-341 85 68 183 181 294 341z" fill="url(#path)"/>
+  <g transform="translate(955 262)">
+    <path d="M0 175 250 0l250 175v312H0z" fill="#f7f0df"/>
+    <path d="M250 0 0 175h500z" fill="#9b5f4c"/>
+    <rect x="205" y="282" width="90" height="205" rx="42" fill="#30483d"/>
+    <rect x="66" y="232" width="82" height="90" rx="8" fill="#d8e5da"/>
+    <rect x="352" y="232" width="82" height="90" rx="8" fill="#d8e5da"/>
+    <path d="M250 74v76M212 112h76" stroke="#30483d" stroke-width="18" stroke-linecap="round"/>
+  </g>
+  <g fill="#263d33">
+    <circle cx="520" cy="552" r="42"/>
+    <path d="M455 686c17-70 52-107 94-107 45 0 80 41 93 112-49 28-133 27-187-5z"/>
+    <circle cx="635" cy="584" r="34"/>
+    <path d="M586 704c13-53 42-84 78-84 38 0 68 33 82 87-44 27-113 26-160-3z"/>
+    <circle cx="1415" cy="582" r="36"/>
+    <path d="M1358 710c15-58 47-91 86-91 41 0 73 36 88 96-50 28-125 26-174-5z"/>
+  </g>
+  <g fill="#d5a94d">
+    <circle cx="536" cy="542" r="11"/>
+    <circle cx="648" cy="576" r="9"/>
+    <circle cx="1428" cy="574" r="10"/>
+  </g>
+  <path d="M0 0h1800v900H0z" fill="#fff8ed" opacity=".22"/>
+</svg>
