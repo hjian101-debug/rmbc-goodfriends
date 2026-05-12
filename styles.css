@@ -535,7 +535,7 @@ h3 {
   font-weight: 800;
 }
 
-.steps span {
+.steps span:first-child {
   display: grid;
   place-items: center;
   flex: 0 0 30px;
@@ -544,6 +544,11 @@ h3 {
   border-radius: 50%;
   color: var(--white);
   background: var(--moss);
+}
+
+.steps span:last-child {
+  min-width: 0;
+  color: var(--ink);
 }
 
 .contact {
