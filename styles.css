@@ -122,6 +122,22 @@ a {
   transform: scaleX(1);
 }
 
+.language-button {
+  min-height: 38px;
+  padding: 8px 13px;
+  border: 1px solid currentColor;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.08);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.site-header.is-scrolled .language-button {
+  background: rgba(66, 106, 80, 0.08);
+}
+
 .menu-button {
   display: none;
   width: 44px;
@@ -536,6 +552,10 @@ h3 {
 
   .nav {
     display: none;
+  }
+
+  .language-button {
+    margin-left: auto;
   }
 
   .menu-button {
