@@ -6,7 +6,7 @@
     <meta name="description" content="RMBC 好朋友团契管理员后台" />
     <meta http-equiv="Cache-Control" content="no-store" />
     <title>RMBC 好朋友团契管理员</title>
-    <link rel="stylesheet" href="./admin.css?v=20260511-2" />
+    <link rel="stylesheet" href="./admin.css?v=20260511-4" />
   </head>
   <body>
     <main class="admin-shell">
@@ -16,7 +16,7 @@
           <p class="eyebrow">Admin</p>
           <h1>好朋友团契后台</h1>
           <p>登录后可以管理同工、聚会信息和公告。</p>
-          <form data-login-form>
+          <form data-login-form onsubmit="return rmbcAdminLogin(event)">
             <label>
               账号
               <input name="username" autocomplete="username" required />
@@ -26,7 +26,7 @@
               <input name="password" type="password" autocomplete="current-password" required />
             </label>
             <p class="form-message" data-login-message>账号 gff，密码 gff123</p>
-            <button type="submit">登录</button>
+            <button type="button" onclick="return rmbcAdminLogin(event)">登录</button>
           </form>
         </div>
       </section>
@@ -96,6 +96,49 @@
       </section>
     </main>
 
-    <script src="./admin.js?v=20260511-2"></script>
+    <script>
+      function rmbcAdminLogin(event) {
+        if (event) {
+          event.preventDefault();
+        }
+
+        var form = document.querySelector("[data-login-form]");
+        var message = document.querySelector("[data-login-message]");
+        var loginPanel = document.querySelector("[data-login-panel]");
+        var dashboard = document.querySelector("[data-dashboard]");
+        var username = String((form && form.elements.username && form.elements.username.value) || "")
+          .normalize("NFKC")
+          .trim()
+          .toLowerCase();
+        var password = String((form && form.elements.password && form.elements.password.value) || "")
+          .normalize("NFKC")
+          .trim();
+
+        if (username === "gff" && password === "gff123") {
+          window.localStorage.setItem("rmbc-admin-session", "true");
+          if (message) {
+            message.textContent = "登录成功，正在打开后台...";
+          }
+          if (loginPanel) {
+            loginPanel.hidden = true;
+          }
+          if (dashboard) {
+            dashboard.hidden = false;
+          }
+          window.setTimeout(function () {
+            if (typeof renderAll === "function") {
+              renderAll();
+            }
+          }, 0);
+          return false;
+        }
+
+        if (message) {
+          message.textContent = "账号或密码不正确。请用账号 gff，密码 gff123。";
+        }
+        return false;
+      }
+    </script>
+    <script src="./admin.js?v=20260511-4"></script>
   </body>
 </html>
