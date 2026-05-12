@@ -99,6 +99,10 @@ const defaultContent = {
 
 let content = loadContent();
 
+function cloneContent(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
 function loadContent() {
   try {
     const saved = JSON.parse(window.localStorage.getItem(adminStorageKey));
@@ -113,7 +117,7 @@ function loadContent() {
     window.localStorage.removeItem(adminStorageKey);
   }
 
-  return structuredClone(defaultContent);
+  return cloneContent(defaultContent);
 }
 
 function saveContent() {
@@ -325,8 +329,8 @@ function createEmptyItem(collection) {
 loginForm?.addEventListener("submit", (event) => {
   event.preventDefault();
   const formData = new FormData(loginForm);
-  const username = String(formData.get("username") || "");
-  const password = String(formData.get("password") || "");
+  const username = String(formData.get("username") || "").trim().toLowerCase();
+  const password = String(formData.get("password") || "").trim();
 
   if (username === adminUsername && password === adminPassword) {
     window.localStorage.setItem(sessionKey, "true");
@@ -353,7 +357,7 @@ exportButton?.addEventListener("click", async () => {
 });
 
 resetButton?.addEventListener("click", () => {
-  content = structuredClone(defaultContent);
+  content = cloneContent(defaultContent);
   saveContent();
   renderAll();
 });
