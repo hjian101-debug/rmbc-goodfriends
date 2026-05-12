@@ -74,6 +74,16 @@
         </div>
       </section>
 
+      <section class="section announcements" aria-label="团契公告" data-announcements-section hidden>
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">News</p>
+            <h2 data-i18n="announcements.title">团契公告</h2>
+          </div>
+        </div>
+        <div class="announcement-list" data-announcement-list></div>
+      </section>
+
       <section class="section split" id="about">
         <div class="section-copy">
           <p class="eyebrow">About</p>
@@ -107,20 +117,7 @@
           <p class="eyebrow">Gatherings</p>
           <h2 data-i18n="gatherings.title">近期聚会</h2>
         </div>
-        <div class="event-grid">
-          <article class="event-card">
-            <time datetime="2026-05-15" data-i18n="gatherings.friday">周五</time>
-            <h3 data-i18n="gatherings.bibleStudyTitle">团契查经</h3>
-            <p data-i18n="gatherings.bibleStudyCopy">诗歌、晚餐、查经与分组分享。第一次来的朋友可以直接来，不需要准备。</p>
-            <span>6:00 PM · Crest Community Church, 3431 Mt Vernon Ave, Riverside, CA 92507</span>
-          </article>
-          <article class="event-card">
-            <time datetime="2026-05-31" data-i18n="gatherings.sunday">周日</time>
-            <h3 data-i18n="gatherings.worshipTitle">主日崇拜</h3>
-            <p data-i18n="gatherings.worshipCopy">欢迎与我们一同敬拜，也可以在崇拜后留下来认识新朋友。</p>
-            <span>10:00 AM · RMBC</span>
-          </article>
-        </div>
+        <div class="event-grid" data-event-grid></div>
       </section>
 
       <section class="section team" id="team">
@@ -131,32 +128,7 @@
           </div>
           <p class="section-note" data-i18n="team.note">后续可以把照片、姓名、服事内容和联系方式替换成真实资料。</p>
         </div>
-        <div class="team-grid">
-          <article class="team-card">
-            <img src="./assets/avatar-prayer.svg" alt="代祷关怀同工头像占位" />
-            <div>
-              <h3 data-i18n="team.prayerTitle">代祷关怀</h3>
-              <p data-i18n="team.prayerCopy">关心新朋友与团契成员近况，安排探访和代祷。</p>
-              <a href="mailto:hello@rmbc.example" data-i18n="team.contact">联系同工</a>
-            </div>
-          </article>
-          <article class="team-card">
-            <img src="./assets/avatar-study.svg" alt="查经带领同工头像占位" />
-            <div>
-              <h3 data-i18n="team.studyTitle">查经带领</h3>
-              <p data-i18n="team.studyCopy">预备每周查经内容，带领小组讨论和回应。</p>
-              <a href="mailto:hello@rmbc.example" data-i18n="team.contact">联系同工</a>
-            </div>
-          </article>
-          <article class="team-card">
-            <img src="./assets/avatar-welcome.svg" alt="新朋友接待同工头像占位" />
-            <div>
-              <h3 data-i18n="team.welcomeTitle">新朋友接待</h3>
-              <p data-i18n="team.welcomeCopy">协助确认聚会地点、接送安排和第一次来访信息。</p>
-              <a href="mailto:hello@rmbc.example" data-i18n="team.contact">联系同工</a>
-            </div>
-          </article>
-        </div>
+        <div class="team-grid" data-team-grid></div>
       </section>
 
       <section class="section visit" id="visit">
@@ -194,7 +166,10 @@
 
     <footer class="footer">
       <p>© <span data-year></span> <span data-i18n="footer.name">河滨国语浸信会 RMBC 好朋友团契</span></p>
-      <a href="#home" data-i18n="footer.top">回到顶部</a>
+      <div class="footer-links">
+        <a href="./admin.html" data-i18n="footer.admin">管理员登录</a>
+        <a href="#home" data-i18n="footer.top">回到顶部</a>
+      </div>
     </footer>
 
     <script src="./script.js"></script>

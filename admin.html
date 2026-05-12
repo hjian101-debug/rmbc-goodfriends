@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-Hans">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="RMBC 好朋友团契管理员后台" />
+    <title>RMBC 好朋友团契管理员</title>
+    <link rel="stylesheet" href="./admin.css" />
+  </head>
+  <body>
+    <main class="admin-shell">
+      <section class="login-panel" data-login-panel>
+        <a class="back-link" href="./index.html">返回网站</a>
+        <div class="login-card">
+          <p class="eyebrow">Admin</p>
+          <h1>好朋友团契后台</h1>
+          <p>登录后可以管理同工、聚会信息和公告。</p>
+          <form data-login-form>
+            <label>
+              账号
+              <input name="username" autocomplete="username" required />
+            </label>
+            <label>
+              密码
+              <input name="password" type="password" autocomplete="current-password" required />
+            </label>
+            <p class="form-message" data-login-message></p>
+            <button type="submit">登录</button>
+          </form>
+        </div>
+      </section>
+
+      <section class="dashboard" data-dashboard hidden>
+        <aside class="sidebar">
+          <a class="brand" href="./index.html">
+            <span>好</span>
+            <strong>RMBC GFF</strong>
+          </a>
+          <nav aria-label="后台导航">
+            <a href="#gatherings">聚会信息</a>
+            <a href="#team">同工管理</a>
+            <a href="#announcements">公告管理</a>
+          </nav>
+          <button class="ghost-button" type="button" data-export-button>导出数据</button>
+          <button class="ghost-button" type="button" data-reset-button>恢复默认</button>
+          <button class="ghost-button" type="button" data-logout-button>退出登录</button>
+        </aside>
+
+        <div class="workspace">
+          <header class="workspace-header">
+            <div>
+              <p class="eyebrow">Dashboard</p>
+              <h1>管理员后台</h1>
+            </div>
+            <a class="site-link" href="./index.html">查看网站</a>
+          </header>
+
+          <p class="notice">
+            当前版本会把内容保存到这个浏览器。接入数据库后，同工从任何电脑登录修改，公开网站都能同步显示。
+          </p>
+
+          <section class="admin-section" id="gatherings">
+            <div class="section-bar">
+              <div>
+                <p class="eyebrow">Gatherings</p>
+                <h2>聚会信息</h2>
+              </div>
+              <button type="button" data-add="gatherings">新增聚会</button>
+            </div>
+            <div class="editor-list" data-list="gatherings"></div>
+          </section>
+
+          <section class="admin-section" id="team">
+            <div class="section-bar">
+              <div>
+                <p class="eyebrow">Team</p>
+                <h2>同工管理</h2>
+              </div>
+              <button type="button" data-add="team">新增同工</button>
+            </div>
+            <div class="editor-list" data-list="team"></div>
+          </section>
+
+          <section class="admin-section" id="announcements">
+            <div class="section-bar">
+              <div>
+                <p class="eyebrow">News</p>
+                <h2>公告管理</h2>
+              </div>
+              <button type="button" data-add="announcements">新增公告</button>
+            </div>
+            <div class="editor-list" data-list="announcements"></div>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <script src="./admin.js"></script>
+  </body>
+</html>

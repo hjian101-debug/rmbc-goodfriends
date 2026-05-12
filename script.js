@@ -3,6 +3,97 @@ const menuButton = document.querySelector("[data-menu-button]");
 const mobileNav = document.querySelector("[data-mobile-nav]");
 const year = document.querySelector("[data-year]");
 const languageToggle = document.querySelector("[data-language-toggle]");
+const announcementSection = document.querySelector("[data-announcements-section]");
+const announcementList = document.querySelector("[data-announcement-list]");
+const eventGrid = document.querySelector("[data-event-grid]");
+const teamGrid = document.querySelector("[data-team-grid]");
+
+const adminStorageKey = "rmbc-admin-content";
+
+const defaultContent = {
+  announcements: [
+    {
+      id: "welcome",
+      active: true,
+      date: "2026-05-11",
+      title: {
+        zh: "欢迎来到好朋友团契",
+        en: "Welcome to Good Friends Fellowship",
+      },
+      body: {
+        zh: "如果你是第一次来，可以直接参加周五 6:00 PM 的团契查经。",
+        en: "If this is your first visit, you are welcome to join Friday Bible study at 6:00 PM.",
+      },
+    },
+  ],
+  gatherings: [
+    {
+      id: "friday-bible-study",
+      active: true,
+      day: { zh: "周五", en: "Friday" },
+      title: { zh: "团契查经", en: "Fellowship Bible Study" },
+      description: {
+        zh: "诗歌、晚餐、查经与分组分享。第一次来的朋友可以直接来，不需要准备。",
+        en: "Worship, dinner, Bible study, and group sharing. First-time visitors are welcome to come as they are.",
+      },
+      time: { zh: "6:00 PM", en: "6:00 PM" },
+      location: {
+        zh: "Crest Community Church, 3431 Mt Vernon Ave, Riverside, CA 92507",
+        en: "Crest Community Church, 3431 Mt Vernon Ave, Riverside, CA 92507",
+      },
+    },
+    {
+      id: "sunday-worship",
+      active: true,
+      day: { zh: "周日", en: "Sunday" },
+      title: { zh: "主日崇拜", en: "Sunday Worship" },
+      description: {
+        zh: "欢迎与我们一同敬拜，也可以在崇拜后留下来认识新朋友。",
+        en: "Join us for worship, and feel free to stay afterward to meet new friends.",
+      },
+      time: { zh: "10:00 AM", en: "10:00 AM" },
+      location: { zh: "RMBC", en: "RMBC" },
+    },
+  ],
+  team: [
+    {
+      id: "prayer-care",
+      active: true,
+      name: { zh: "代祷关怀", en: "Prayer And Care" },
+      role: { zh: "关怀同工", en: "Care Team" },
+      bio: {
+        zh: "关心新朋友与团契成员近况，安排探访和代祷。",
+        en: "Cares for newcomers and fellowship members through prayer, follow-up, and visits.",
+      },
+      contact: "hello@rmbc.example",
+      avatar: "./assets/avatar-prayer.svg",
+    },
+    {
+      id: "bible-study",
+      active: true,
+      name: { zh: "查经带领", en: "Bible Study Leaders" },
+      role: { zh: "查经同工", en: "Bible Study Team" },
+      bio: {
+        zh: "预备每周查经内容，带领小组讨论和回应。",
+        en: "Prepares weekly Bible study and leads small-group discussion and response.",
+      },
+      contact: "hello@rmbc.example",
+      avatar: "./assets/avatar-study.svg",
+    },
+    {
+      id: "welcome-team",
+      active: true,
+      name: { zh: "新朋友接待", en: "Welcome Team" },
+      role: { zh: "接待同工", en: "Welcome Team" },
+      bio: {
+        zh: "协助确认聚会地点、接送安排和第一次来访信息。",
+        en: "Helps confirm gathering locations, rides, and first-visit details.",
+      },
+      contact: "hello@rmbc.example",
+      avatar: "./assets/avatar-welcome.svg",
+    },
+  ],
+};
 
 const translations = {
   zh: {
@@ -40,6 +131,7 @@ const translations = {
     "gatherings.bibleStudyCopy": "诗歌、晚餐、查经与分组分享。第一次来的朋友可以直接来，不需要准备。",
     "gatherings.worshipTitle": "主日崇拜",
     "gatherings.worshipCopy": "欢迎与我们一同敬拜，也可以在崇拜后留下来认识新朋友。",
+    "announcements.title": "团契公告",
     "team.title": "同工团队",
     "team.note": "后续可以把照片、姓名、服事内容和联系方式替换成真实资料。",
     "team.prayerTitle": "代祷关怀",
@@ -61,6 +153,7 @@ const translations = {
     "contact.wechat": "微信群二维码稍后添加",
     "contact.map": "查看地图",
     "footer.name": "河滨国语浸信会 RMBC 好朋友团契",
+    "footer.admin": "管理员登录",
     "footer.top": "回到顶部",
     "language.label": "English",
     "language.aria": "Switch to English",
@@ -100,6 +193,7 @@ const translations = {
     "gatherings.bibleStudyCopy": "Worship, dinner, Bible study, and group sharing. First-time visitors are welcome to come as they are.",
     "gatherings.worshipTitle": "Sunday Worship",
     "gatherings.worshipCopy": "Join us for worship, and feel free to stay afterward to meet new friends.",
+    "announcements.title": "Fellowship News",
     "team.title": "Serving Team",
     "team.note": "Photos, names, ministry roles, and contact details can be updated with real team information later.",
     "team.prayerTitle": "Prayer And Care",
@@ -121,6 +215,7 @@ const translations = {
     "contact.wechat": "WeChat QR code coming soon",
     "contact.map": "View Map",
     "footer.name": "RMBC Good Friends Fellowship",
+    "footer.admin": "Admin",
     "footer.top": "Back To Top",
     "language.label": "中文",
     "language.aria": "切换到中文",
@@ -130,6 +225,108 @@ const translations = {
 const getSavedLanguage = () => {
   const saved = window.localStorage.getItem("rmbc-language");
   return saved === "en" || saved === "zh" ? saved : "zh";
+};
+
+const getAdminContent = () => {
+  try {
+    const saved = JSON.parse(window.localStorage.getItem(adminStorageKey));
+    if (saved && typeof saved === "object") {
+      return {
+        announcements: Array.isArray(saved.announcements) ? saved.announcements : defaultContent.announcements,
+        gatherings: Array.isArray(saved.gatherings) ? saved.gatherings : defaultContent.gatherings,
+        team: Array.isArray(saved.team) ? saved.team : defaultContent.team,
+      };
+    }
+  } catch (error) {
+    window.localStorage.removeItem(adminStorageKey);
+  }
+
+  return defaultContent;
+};
+
+const localText = (value, language) => {
+  if (!value) {
+    return "";
+  }
+
+  if (typeof value === "string") {
+    return value;
+  }
+
+  return value[language] || value.zh || value.en || "";
+};
+
+const createElement = (tagName, className, text) => {
+  const element = document.createElement(tagName);
+  if (className) {
+    element.className = className;
+  }
+  if (text) {
+    element.textContent = text;
+  }
+  return element;
+};
+
+const renderContent = (language) => {
+  const content = getAdminContent();
+
+  if (announcementList && announcementSection) {
+    const activeAnnouncements = content.announcements.filter((item) => item.active !== false);
+    announcementSection.hidden = activeAnnouncements.length === 0;
+    announcementList.replaceChildren(
+      ...activeAnnouncements.map((item) => {
+        const article = createElement("article", "announcement-card");
+        article.append(
+          createElement("span", null, item.date || ""),
+          createElement("h3", null, localText(item.title, language)),
+          createElement("p", null, localText(item.body, language)),
+        );
+        return article;
+      }),
+    );
+  }
+
+  if (eventGrid) {
+    eventGrid.replaceChildren(
+      ...content.gatherings.filter((item) => item.active !== false).map((item) => {
+        const article = createElement("article", "event-card");
+        article.append(
+          createElement("time", null, localText(item.day, language)),
+          createElement("h3", null, localText(item.title, language)),
+          createElement("p", null, localText(item.description, language)),
+          createElement("span", null, `${localText(item.time, language)} · ${localText(item.location, language)}`),
+        );
+        return article;
+      }),
+    );
+  }
+
+  if (teamGrid) {
+    teamGrid.replaceChildren(
+      ...content.team.filter((item) => item.active !== false).map((item) => {
+        const article = createElement("article", "team-card");
+        const image = document.createElement("img");
+        image.src = item.avatar || "./assets/avatar-welcome.svg";
+        image.alt = localText(item.name, language);
+
+        const body = document.createElement("div");
+        body.append(
+          createElement("h3", null, localText(item.name, language)),
+          createElement("p", "team-role", localText(item.role, language)),
+          createElement("p", null, localText(item.bio, language)),
+        );
+
+        if (item.contact) {
+          const link = createElement("a", null, translations[language]["team.contact"]);
+          link.href = item.contact.includes("@") ? `mailto:${item.contact}` : item.contact;
+          body.append(link);
+        }
+
+        article.append(image, body);
+        return article;
+      }),
+    );
+  }
 };
 
 const applyLanguage = (language) => {
@@ -155,6 +352,8 @@ const applyLanguage = (language) => {
     languageToggle.textContent = dictionary["language.label"];
     languageToggle.setAttribute("aria-label", dictionary["language.aria"]);
   }
+
+  renderContent(language);
 };
 
 const syncHeader = () => {
