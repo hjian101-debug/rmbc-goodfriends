@@ -8,7 +8,6 @@ const resetButton = document.querySelector("[data-reset-button]");
 const addButtons = document.querySelectorAll("[data-add]");
 
 const adminStorageKey = "rmbc-admin-content";
-const sessionKey = "rmbc-admin-session";
 const adminUsername = "gff";
 const adminPassword = "gff123";
 
@@ -339,7 +338,6 @@ loginForm?.addEventListener("submit", (event) => {
   const password = normalizeLoginValue(formData.get("password"));
 
   if (username === adminUsername && password === adminPassword) {
-    window.localStorage.setItem(sessionKey, "true");
     loginMessage.textContent = "";
     showDashboard();
     return;
@@ -349,7 +347,6 @@ loginForm?.addEventListener("submit", (event) => {
 });
 
 logoutButton?.addEventListener("click", () => {
-  window.localStorage.removeItem(sessionKey);
   showLogin();
 });
 
@@ -377,8 +374,4 @@ addButtons.forEach((button) => {
   });
 });
 
-if (window.localStorage.getItem(sessionKey) === "true") {
-  showDashboard();
-} else {
-  showLogin();
-}
+showLogin();

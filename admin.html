@@ -6,7 +6,7 @@
     <meta name="description" content="RMBC 好朋友团契管理员后台" />
     <meta http-equiv="Cache-Control" content="no-store" />
     <title>RMBC 好朋友团契管理员</title>
-    <link rel="stylesheet" href="./admin.css?v=20260511-4" />
+    <link rel="stylesheet" href="./admin.css?v=20260511-5" />
   </head>
   <body>
     <main class="admin-shell">
@@ -25,7 +25,7 @@
               密码
               <input name="password" type="password" autocomplete="current-password" required />
             </label>
-            <p class="form-message" data-login-message>账号 gff，密码 gff123</p>
+            <p class="form-message" data-login-message></p>
             <button type="button" onclick="return rmbcAdminLogin(event)">登录</button>
           </form>
         </div>
@@ -115,7 +115,6 @@
           .trim();
 
         if (username === "gff" && password === "gff123") {
-          window.localStorage.setItem("rmbc-admin-session", "true");
           if (message) {
             message.textContent = "登录成功，正在打开后台...";
           }
@@ -139,6 +138,6 @@
         return false;
       }
     </script>
-    <script src="./admin.js?v=20260511-4"></script>
+    <script src="./admin.js?v=20260511-5"></script>
   </body>
 </html>
