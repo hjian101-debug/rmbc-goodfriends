@@ -103,6 +103,12 @@ function cloneContent(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
+function normalizeLoginValue(value) {
+  return String(value || "")
+    .normalize("NFKC")
+    .trim();
+}
+
 function loadContent() {
   try {
     const saved = JSON.parse(window.localStorage.getItem(adminStorageKey));
@@ -329,8 +335,8 @@ function createEmptyItem(collection) {
 loginForm?.addEventListener("submit", (event) => {
   event.preventDefault();
   const formData = new FormData(loginForm);
-  const username = String(formData.get("username") || "").trim().toLowerCase();
-  const password = String(formData.get("password") || "").trim();
+  const username = normalizeLoginValue(formData.get("username")).toLowerCase();
+  const password = normalizeLoginValue(formData.get("password"));
 
   if (username === adminUsername && password === adminPassword) {
     window.localStorage.setItem(sessionKey, "true");
@@ -339,7 +345,7 @@ loginForm?.addEventListener("submit", (event) => {
     return;
   }
 
-  loginMessage.textContent = "账号或密码不正确";
+  loginMessage.textContent = "账号或密码不正确。请用账号 gff，密码 gff123。";
 });
 
 logoutButton?.addEventListener("click", () => {
