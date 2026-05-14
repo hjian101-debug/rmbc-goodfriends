@@ -97,8 +97,8 @@ const defaultContent = {
 
 const translations = {
   zh: {
-    "meta.description": "河滨国语浸信会 RMBC 好朋友团契，欢迎学生、职场新人、家庭和朋友一起认识信仰、彼此陪伴。",
-    "page.title": "RMBC 好朋友团契",
+    "meta.description": "RMBC 好朋友团契是河滨国语浸信会 Riverside Mandarin Baptist Church 的团契，欢迎 Riverside 学生、职场、家庭和朋友参加周五查经、周日礼拜，一起认识信仰、彼此陪伴。",
+    "page.title": "RMBC 好朋友团契 | Riverside Mandarin Baptist Church Good Friends Fellowship",
     "brand.subtitle": "好朋友团契",
     "nav.about": "关于",
     "nav.gatherings": "聚会",
@@ -159,8 +159,8 @@ const translations = {
     "language.aria": "Switch to English",
   },
   en: {
-    "meta.description": "RMBC Good Friends Fellowship welcomes students, professionals, families, and friends to grow in faith and community.",
-    "page.title": "RMBC Good Friends Fellowship",
+    "meta.description": "RMBC Good Friends Fellowship is a fellowship of Riverside Mandarin Baptist Church, welcoming students, professionals, families, and friends in Riverside for Friday Bible study and Sunday worship.",
+    "page.title": "RMBC Good Friends Fellowship | Riverside Mandarin Baptist Church",
     "brand.subtitle": "Good Friends Fellowship",
     "nav.about": "About",
     "nav.gatherings": "Gatherings",
