@@ -60,7 +60,52 @@ const defaultContent = {
       scripture: { zh: "", en: "" },
     },
   ],
-  gallery: [],
+  gallery: [
+    {
+      id: "meme-friday",
+      active: true,
+      image: "./assets/photos/meme-friday.svg",
+      title: { zh: "周五干饭预备", en: "Friday Dinner Ready" },
+      caption: {
+        zh: "临时表情包：真实聚会照片确认后再替换。",
+        en: "Temporary meme card until real fellowship photos are approved.",
+      },
+      alt: { zh: "周五团契晚餐表情包插画", en: "Friday fellowship dinner meme illustration" },
+    },
+    {
+      id: "meme-study",
+      active: true,
+      image: "./assets/photos/meme-study.svg",
+      title: { zh: "查经脑洞打开", en: "Study Mode On" },
+      caption: {
+        zh: "带着问题来，也带着一点点周五晚上的精神状态。",
+        en: "Bring questions, curiosity, and a very Friday-night brain.",
+      },
+      alt: { zh: "查经模式表情包插画", en: "Bible study mode meme illustration" },
+    },
+    {
+      id: "meme-prayer",
+      active: true,
+      image: "./assets/photos/meme-prayer.svg",
+      title: { zh: "祷告中，请稍等", en: "BRB Praying" },
+      caption: {
+        zh: "人生加载慢一点也没关系，我们一起祷告。",
+        en: "Life can load slowly; we can pray together while it does.",
+      },
+      alt: { zh: "祷告中表情包插画", en: "Prayer pause meme illustration" },
+    },
+    {
+      id: "meme-welcome",
+      active: true,
+      image: "./assets/photos/meme-welcome.svg",
+      title: { zh: "新朋友雷达启动", en: "Welcome Radar On" },
+      caption: {
+        zh: "第一次来不用紧张，接待同工已经上线。",
+        en: "First visit nerves are normal; the welcome team is online.",
+      },
+      alt: { zh: "欢迎新朋友表情包插画", en: "Welcome radar meme illustration" },
+    },
+  ],
   team: [
     {
       id: "prayer-care",
@@ -315,47 +360,59 @@ const renderContent = (language) => {
   }
 
   if (gallerySection && galleryGrid) {
-    const activePhotos = content.gallery.filter((item) => item.active !== false && item.image);
+    const savedPhotos = content.gallery.filter((item) => item.active !== false && item.image);
+    const defaultPhotos = defaultContent.gallery.filter((item) => item.active !== false && item.image);
+    const activePhotos = savedPhotos.length > 0 ? savedPhotos : defaultPhotos;
+
     gallerySection.hidden = activePhotos.length === 0;
     galleryLinks.forEach((link) => {
       link.hidden = activePhotos.length === 0;
     });
 
-    galleryGrid.replaceChildren(
-      ...activePhotos.map((item) => {
-        const article = createElement("article", "gallery-card");
-        const image = document.createElement("img");
-        const body = document.createElement("div");
-        const title = localText(item.title, language);
-        const caption = localText(item.caption, language);
+    const renderGalleryCards = (photos, allowFallback) => {
+      galleryGrid.replaceChildren(
+        ...photos.map((item) => {
+          const article = createElement("article", "gallery-card");
+          const image = document.createElement("img");
+          const body = document.createElement("div");
+          const title = localText(item.title, language);
+          const caption = localText(item.caption, language);
 
-        image.src = item.image;
-        image.alt = localText(item.alt, language) || title || "Fellowship photo";
-        image.loading = "lazy";
-        image.addEventListener("error", () => {
-          article.remove();
-          if (!galleryGrid.querySelector(".gallery-card")) {
-            gallerySection.hidden = true;
-            galleryLinks.forEach((link) => {
-              link.hidden = true;
-            });
-          }
-        });
+          image.src = item.image;
+          image.alt = localText(item.alt, language) || title || "Fellowship photo";
+          image.loading = "lazy";
+          image.addEventListener("error", () => {
+            article.remove();
+            if (!galleryGrid.querySelector(".gallery-card")) {
+              const fallbackPhotos = defaultPhotos.filter((fallback) => !photos.some((photo) => photo.image === fallback.image));
+              if (allowFallback && fallbackPhotos.length > 0) {
+                renderGalleryCards(fallbackPhotos, false);
+              } else {
+                gallerySection.hidden = true;
+                galleryLinks.forEach((link) => {
+                  link.hidden = true;
+                });
+              }
+            }
+          });
 
-        article.append(image);
-        if (title || caption) {
-          if (title) {
-            body.append(createElement("h3", null, title));
+          article.append(image);
+          if (title || caption) {
+            if (title) {
+              body.append(createElement("h3", null, title));
+            }
+            if (caption) {
+              body.append(createElement("p", null, caption));
+            }
+            article.append(body);
           }
-          if (caption) {
-            body.append(createElement("p", null, caption));
-          }
-          article.append(body);
-        }
 
-        return article;
-      }),
-    );
+          return article;
+        }),
+      );
+    };
+
+    renderGalleryCards(activePhotos, savedPhotos.length > 0);
   } else {
     galleryLinks.forEach((link) => {
       link.hidden = true;
