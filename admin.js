@@ -58,6 +58,7 @@ const defaultContent = {
       scripture: { zh: "", en: "" },
     },
   ],
+  gallery: [],
   team: [
     {
       id: "prayer-care",
@@ -130,6 +131,13 @@ function normalizeContent(value) {
     location: ensureLocalizedValue(item.location),
     scripture: ensureLocalizedValue(item.scripture),
   }));
+  next.gallery = (Array.isArray(next.gallery) ? next.gallery : []).map((item) => ({
+    ...item,
+    title: ensureLocalizedValue(item.title),
+    caption: ensureLocalizedValue(item.caption),
+    alt: ensureLocalizedValue(item.alt),
+    image: item.image || "",
+  }));
 
   return next;
 }
@@ -147,6 +155,7 @@ function loadContent() {
       return normalizeContent({
         announcements: Array.isArray(saved.announcements) ? saved.announcements : defaultContent.announcements,
         gatherings: Array.isArray(saved.gatherings) ? saved.gatherings : defaultContent.gatherings,
+        gallery: Array.isArray(saved.gallery) ? saved.gallery : defaultContent.gallery,
         team: Array.isArray(saved.team) ? saved.team : defaultContent.team,
       });
     }
@@ -266,6 +275,35 @@ function renderGatherings() {
   );
 }
 
+function renderGallery() {
+  const list = document.querySelector('[data-list="gallery"]');
+  list.replaceChildren(
+    ...content.gallery.map((item) => {
+      const card = document.createElement("article");
+      const fields = document.createElement("div");
+      card.className = "editor-card";
+      fields.className = "field-grid";
+
+      fields.append(
+        createInput("照片网址", item.image, (value) => { item.image = value; }, { full: true }),
+        createInput("中文标题", item.title.zh, (value) => { item.title.zh = value; }),
+        createInput("English title", item.title.en, (value) => { item.title.en = value; }),
+        createInput("中文替代文字", item.alt.zh, (value) => { item.alt.zh = value; }),
+        createInput("English alt text", item.alt.en, (value) => { item.alt.en = value; }),
+        createInput("中文说明", item.caption.zh, (value) => { item.caption.zh = value; }, { full: true, multiline: true }),
+        createInput("English caption", item.caption.en, (value) => { item.caption.en = value; }, { full: true, multiline: true }),
+      );
+
+      card.append(
+        cardHeader(item.title.zh || "照片", item.image || "等待添加照片网址", "gallery", item),
+        fields,
+        activeToggle(item),
+      );
+      return card;
+    }),
+  );
+}
+
 function renderTeam() {
   const list = document.querySelector('[data-list="team"]');
   list.replaceChildren(
@@ -325,6 +363,7 @@ function renderAnnouncements() {
 
 function renderAll() {
   renderGatherings();
+  renderGallery();
   renderTeam();
   renderAnnouncements();
 }
@@ -342,6 +381,17 @@ function createEmptyItem(collection) {
       time: { zh: "", en: "" },
       location: { zh: "", en: "" },
       scripture: { zh: "", en: "" },
+    };
+  }
+
+  if (collection === "gallery") {
+    return {
+      id,
+      active: true,
+      image: "",
+      title: { zh: "团契照片", en: "Fellowship Photo" },
+      caption: { zh: "", en: "" },
+      alt: { zh: "", en: "" },
     };
   }
 

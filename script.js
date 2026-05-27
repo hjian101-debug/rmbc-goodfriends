@@ -6,6 +6,9 @@ const languageToggle = document.querySelector("[data-language-toggle]");
 const announcementSection = document.querySelector("[data-announcements-section]");
 const announcementList = document.querySelector("[data-announcement-list]");
 const eventGrid = document.querySelector("[data-event-grid]");
+const gallerySection = document.querySelector("[data-gallery-section]");
+const galleryGrid = document.querySelector("[data-gallery-grid]");
+const galleryLinks = document.querySelectorAll("[data-gallery-link]");
 const teamGrid = document.querySelector("[data-team-grid]");
 
 const adminStorageKey = "rmbc-admin-content";
@@ -57,6 +60,7 @@ const defaultContent = {
       scripture: { zh: "", en: "" },
     },
   ],
+  gallery: [],
   team: [
     {
       id: "prayer-care",
@@ -104,6 +108,7 @@ const translations = {
     "brand.subtitle": "好朋友团契",
     "nav.about": "关于",
     "nav.gatherings": "聚会",
+    "nav.gallery": "照片",
     "nav.team": "同工",
     "nav.visit": "来访",
     "nav.contact": "联系",
@@ -135,6 +140,7 @@ const translations = {
     "gatherings.worshipTitle": "主日崇拜",
     "gatherings.worshipCopy": "欢迎与我们一同敬拜，也可以在崇拜后留下来认识新朋友。",
     "announcements.title": "团契公告",
+    "gallery.title": "团契照片",
     "team.title": "同工团队",
     "team.prayerTitle": "代祷关怀",
     "team.prayerCopy": "关心新朋友与团契成员近况，安排探访和代祷。",
@@ -164,6 +170,7 @@ const translations = {
     "brand.subtitle": "Good Friends Fellowship",
     "nav.about": "About",
     "nav.gatherings": "Gatherings",
+    "nav.gallery": "Photos",
     "nav.team": "Team",
     "nav.visit": "Visit",
     "nav.contact": "Contact",
@@ -195,6 +202,7 @@ const translations = {
     "gatherings.worshipTitle": "Sunday Worship",
     "gatherings.worshipCopy": "Join us for worship, and feel free to stay afterward to meet new friends.",
     "announcements.title": "Fellowship News",
+    "gallery.title": "Fellowship Photos",
     "team.title": "Serving Team",
     "team.prayerTitle": "Prayer And Care",
     "team.prayerCopy": "Cares for newcomers and fellowship members through prayer, follow-up, and visits.",
@@ -232,6 +240,7 @@ const getAdminContent = () => {
       return {
         announcements: Array.isArray(saved.announcements) ? saved.announcements : defaultContent.announcements,
         gatherings: Array.isArray(saved.gatherings) ? saved.gatherings : defaultContent.gatherings,
+        gallery: Array.isArray(saved.gallery) ? saved.gallery : defaultContent.gallery,
         team: Array.isArray(saved.team) ? saved.team : defaultContent.team,
       };
     }
@@ -303,6 +312,45 @@ const renderContent = (language) => {
         return article;
       }),
     );
+  }
+
+  if (gallerySection && galleryGrid) {
+    const activePhotos = content.gallery.filter((item) => item.active !== false && item.image);
+    gallerySection.hidden = activePhotos.length === 0;
+    galleryLinks.forEach((link) => {
+      link.hidden = activePhotos.length === 0;
+    });
+
+    galleryGrid.replaceChildren(
+      ...activePhotos.map((item) => {
+        const article = createElement("article", "gallery-card");
+        const image = document.createElement("img");
+        const body = document.createElement("div");
+        const title = localText(item.title, language);
+        const caption = localText(item.caption, language);
+
+        image.src = item.image;
+        image.alt = localText(item.alt, language) || title || "Fellowship photo";
+        image.loading = "lazy";
+
+        article.append(image);
+        if (title || caption) {
+          if (title) {
+            body.append(createElement("h3", null, title));
+          }
+          if (caption) {
+            body.append(createElement("p", null, caption));
+          }
+          article.append(body);
+        }
+
+        return article;
+      }),
+    );
+  } else {
+    galleryLinks.forEach((link) => {
+      link.hidden = true;
+    });
   }
 
   if (teamGrid) {

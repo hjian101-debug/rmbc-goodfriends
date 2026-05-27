@@ -7,7 +7,7 @@
     <meta name="robots" content="noindex, nofollow" />
     <meta http-equiv="Cache-Control" content="no-store" />
     <title>RMBC 好朋友团契管理员</title>
-    <link rel="stylesheet" href="./admin.css?v=20260527-1" />
+    <link rel="stylesheet" href="./admin.css?v=20260527-2" />
   </head>
   <body>
     <main class="admin-shell">
@@ -40,6 +40,7 @@
           </a>
           <nav aria-label="后台导航">
             <a href="#gatherings">聚会信息</a>
+            <a href="#gallery">照片管理</a>
             <a href="#team">同工管理</a>
             <a href="#announcements">公告管理</a>
           </nav>
@@ -70,6 +71,17 @@
               <button type="button" data-add="gatherings">新增聚会</button>
             </div>
             <div class="editor-list" data-list="gatherings"></div>
+          </section>
+
+          <section class="admin-section" id="gallery">
+            <div class="section-bar">
+              <div>
+                <p class="eyebrow">Photos</p>
+                <h2>照片管理</h2>
+              </div>
+              <button type="button" data-add="gallery">新增照片</button>
+            </div>
+            <div class="editor-list" data-list="gallery"></div>
           </section>
 
           <section class="admin-section" id="team">
@@ -139,6 +151,6 @@
         return false;
       }
     </script>
-    <script src="./admin.js?v=20260527-1"></script>
+    <script src="./admin.js?v=20260527-2"></script>
   </body>
 </html>
