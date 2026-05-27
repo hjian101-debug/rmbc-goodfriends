@@ -41,6 +41,7 @@ const defaultContent = {
         zh: "Crest Community Church, 3431 Mt Vernon Ave, Riverside, CA 92507",
         en: "Crest Community Church, 3431 Mt Vernon Ave, Riverside, CA 92507",
       },
+      scripture: { zh: "", en: "" },
     },
     {
       id: "sunday-worship",
@@ -53,6 +54,7 @@ const defaultContent = {
       },
       time: { zh: "10:00 AM", en: "10:00 AM" },
       location: { zh: "RMBC", en: "RMBC" },
+      scripture: { zh: "", en: "" },
     },
   ],
   team: [
@@ -129,6 +131,7 @@ const translations = {
     "gatherings.sunday": "周日",
     "gatherings.bibleStudyTitle": "团契查经",
     "gatherings.bibleStudyCopy": "诗歌、晚餐、查经与分组分享。第一次来的朋友可以直接来，不需要准备。",
+    "gatherings.scriptureLabel": "本周经文：",
     "gatherings.worshipTitle": "主日崇拜",
     "gatherings.worshipCopy": "欢迎与我们一同敬拜，也可以在崇拜后留下来认识新朋友。",
     "announcements.title": "团契公告",
@@ -188,6 +191,7 @@ const translations = {
     "gatherings.sunday": "Sunday",
     "gatherings.bibleStudyTitle": "Fellowship Bible Study",
     "gatherings.bibleStudyCopy": "Worship, dinner, Bible study, and group sharing. First-time visitors are welcome to come as they are.",
+    "gatherings.scriptureLabel": "Scripture: ",
     "gatherings.worshipTitle": "Sunday Worship",
     "gatherings.worshipCopy": "Join us for worship, and feel free to stay afterward to meet new friends.",
     "announcements.title": "Fellowship News",
@@ -284,12 +288,18 @@ const renderContent = (language) => {
     eventGrid.replaceChildren(
       ...content.gatherings.filter((item) => item.active !== false).map((item) => {
         const article = createElement("article", "event-card");
+        const scripture = localText(item.scripture, language);
         article.append(
           createElement("time", null, localText(item.day, language)),
           createElement("h3", null, localText(item.title, language)),
           createElement("p", null, localText(item.description, language)),
-          createElement("span", null, `${localText(item.time, language)} · ${localText(item.location, language)}`),
         );
+
+        if (scripture) {
+          article.append(createElement("p", "event-scripture", `${translations[language]["gatherings.scriptureLabel"]}${scripture}`));
+        }
+
+        article.append(createElement("span", null, `${localText(item.time, language)} · ${localText(item.location, language)}`));
         return article;
       }),
     );

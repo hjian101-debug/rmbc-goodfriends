@@ -446,6 +446,16 @@ h3 {
   color: var(--muted);
 }
 
+.event-card p.event-scripture {
+  margin: 0 0 18px;
+  padding: 11px 13px;
+  border-left: 3px solid var(--gold);
+  color: var(--moss-dark);
+  background: var(--soft);
+  font-size: 15px;
+  font-weight: 800;
+}
+
 .event-card span {
   margin-top: auto;
   color: var(--moss);

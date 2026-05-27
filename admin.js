@@ -42,6 +42,7 @@ const defaultContent = {
         zh: "Crest Community Church, 3431 Mt Vernon Ave, Riverside, CA 92507",
         en: "Crest Community Church, 3431 Mt Vernon Ave, Riverside, CA 92507",
       },
+      scripture: { zh: "", en: "" },
     },
     {
       id: "sunday-worship",
@@ -54,6 +55,7 @@ const defaultContent = {
       },
       time: { zh: "10:00 AM", en: "10:00 AM" },
       location: { zh: "RMBC", en: "RMBC" },
+      scripture: { zh: "", en: "" },
     },
   ],
   team: [
@@ -102,6 +104,36 @@ function cloneContent(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
+function ensureLocalizedValue(value) {
+  if (value && typeof value === "object") {
+    return {
+      zh: value.zh || "",
+      en: value.en || "",
+    };
+  }
+
+  return {
+    zh: value || "",
+    en: "",
+  };
+}
+
+function normalizeContent(value) {
+  const next = cloneContent(value);
+
+  next.gatherings = next.gatherings.map((item) => ({
+    ...item,
+    day: ensureLocalizedValue(item.day),
+    title: ensureLocalizedValue(item.title),
+    description: ensureLocalizedValue(item.description),
+    time: ensureLocalizedValue(item.time),
+    location: ensureLocalizedValue(item.location),
+    scripture: ensureLocalizedValue(item.scripture),
+  }));
+
+  return next;
+}
+
 function normalizeLoginValue(value) {
   return String(value || "")
     .normalize("NFKC")
@@ -112,17 +144,17 @@ function loadContent() {
   try {
     const saved = JSON.parse(window.localStorage.getItem(adminStorageKey));
     if (saved && typeof saved === "object") {
-      return {
+      return normalizeContent({
         announcements: Array.isArray(saved.announcements) ? saved.announcements : defaultContent.announcements,
         gatherings: Array.isArray(saved.gatherings) ? saved.gatherings : defaultContent.gatherings,
         team: Array.isArray(saved.team) ? saved.team : defaultContent.team,
-      };
+      });
     }
   } catch (error) {
     window.localStorage.removeItem(adminStorageKey);
   }
 
-  return cloneContent(defaultContent);
+  return normalizeContent(defaultContent);
 }
 
 function saveContent() {
@@ -218,6 +250,8 @@ function renderGatherings() {
         createInput("English time", item.time.en, (value) => { item.time.en = value; }),
         createInput("中文地点", item.location.zh, (value) => { item.location.zh = value; }, { full: true }),
         createInput("English location", item.location.en, (value) => { item.location.en = value; }, { full: true }),
+        createInput("中文查经经文", item.scripture.zh, (value) => { item.scripture.zh = value; }, { full: true }),
+        createInput("English scripture", item.scripture.en, (value) => { item.scripture.en = value; }, { full: true }),
         createInput("中文说明", item.description.zh, (value) => { item.description.zh = value; }, { full: true, multiline: true }),
         createInput("English description", item.description.en, (value) => { item.description.en = value; }, { full: true, multiline: true }),
       );
@@ -307,6 +341,7 @@ function createEmptyItem(collection) {
       description: { zh: "", en: "" },
       time: { zh: "", en: "" },
       location: { zh: "", en: "" },
+      scripture: { zh: "", en: "" },
     };
   }
 
@@ -343,7 +378,7 @@ loginForm?.addEventListener("submit", (event) => {
     return;
   }
 
-  loginMessage.textContent = "账号或密码不正确。请用账号 gff，密码 gff123。";
+  loginMessage.textContent = "账号或密码不正确。";
 });
 
 logoutButton?.addEventListener("click", () => {
@@ -360,7 +395,7 @@ exportButton?.addEventListener("click", async () => {
 });
 
 resetButton?.addEventListener("click", () => {
-  content = cloneContent(defaultContent);
+  content = normalizeContent(defaultContent);
   saveContent();
   renderAll();
 });
