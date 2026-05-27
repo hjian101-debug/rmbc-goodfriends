@@ -332,6 +332,15 @@ const renderContent = (language) => {
         image.src = item.image;
         image.alt = localText(item.alt, language) || title || "Fellowship photo";
         image.loading = "lazy";
+        image.addEventListener("error", () => {
+          article.remove();
+          if (!galleryGrid.querySelector(".gallery-card")) {
+            gallerySection.hidden = true;
+            galleryLinks.forEach((link) => {
+              link.hidden = true;
+            });
+          }
+        });
 
         article.append(image);
         if (title || caption) {
