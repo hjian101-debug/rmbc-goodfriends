@@ -421,6 +421,8 @@ h3 {
 .announcement-card p {
   margin: 10px 0 0;
   color: var(--muted);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .event-grid {
