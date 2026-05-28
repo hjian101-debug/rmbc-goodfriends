@@ -17,7 +17,7 @@
           <p class="eyebrow">Admin</p>
           <h1>好朋友团契后台</h1>
           <p>登录后可以管理同工、聚会信息和公告。</p>
-          <form data-login-form onsubmit="return rmbcAdminLogin(event)">
+          <form data-login-form>
             <label>
               账号
               <input name="username" autocomplete="username" required />
@@ -27,7 +27,7 @@
               <input name="password" type="password" autocomplete="current-password" required />
             </label>
             <p class="form-message" data-login-message></p>
-            <button type="button" onclick="return rmbcAdminLogin(event)">登录</button>
+            <button type="submit">登录</button>
           </form>
         </div>
       </section>
@@ -59,7 +59,7 @@
           </header>
 
           <p class="notice">
-            当前版本会把内容保存到这个浏览器。接入数据库后，同工从任何电脑登录修改，公开网站都能同步显示。
+            当前内容会保存到 Supabase 数据库。同工从任何电脑登录修改后，公开网站都会同步显示。
           </p>
 
           <section class="admin-section" id="gatherings">
@@ -112,48 +112,8 @@
       </section>
     </main>
 
-    <script>
-      function rmbcAdminLogin(event) {
-        if (event) {
-          event.preventDefault();
-        }
-
-        var form = document.querySelector("[data-login-form]");
-        var message = document.querySelector("[data-login-message]");
-        var loginPanel = document.querySelector("[data-login-panel]");
-        var dashboard = document.querySelector("[data-dashboard]");
-        var username = String((form && form.elements.username && form.elements.username.value) || "")
-          .normalize("NFKC")
-          .trim()
-          .toLowerCase();
-        var password = String((form && form.elements.password && form.elements.password.value) || "")
-          .normalize("NFKC")
-          .trim();
-
-        if (username === "gff" && password === "gff123") {
-          if (message) {
-            message.textContent = "登录成功，正在打开后台...";
-          }
-          if (loginPanel) {
-            loginPanel.hidden = true;
-          }
-          if (dashboard) {
-            dashboard.hidden = false;
-          }
-          window.setTimeout(function () {
-            if (typeof renderAll === "function") {
-              renderAll();
-            }
-          }, 0);
-          return false;
-        }
-
-        if (message) {
-          message.textContent = "账号或密码不正确。";
-        }
-        return false;
-      }
-    </script>
-    <script src="./admin.js?v=20260527-4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./supabase-config.js?v=20260527-1"></script>
+    <script src="./admin.js?v=20260527-5"></script>
   </body>
 </html>

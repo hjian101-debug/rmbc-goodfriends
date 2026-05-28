@@ -12,6 +12,9 @@ const galleryLinks = document.querySelectorAll("[data-gallery-link]");
 const teamGrid = document.querySelector("[data-team-grid]");
 
 const adminStorageKey = "rmbc-admin-content";
+const supabaseConfig = window.RMBC_SUPABASE_CONFIG || {};
+let supabaseClient = null;
+let remoteContent = null;
 
 const defaultContent = {
   announcements: [
@@ -278,22 +281,69 @@ const getSavedLanguage = () => {
   return saved === "en" || saved === "zh" ? saved : "zh";
 };
 
-const getAdminContent = () => {
+const hasSupabaseConfig = () => Boolean(supabaseConfig.url && supabaseConfig.anonKey && window.supabase);
+
+const getSupabaseClient = () => {
+  if (!hasSupabaseConfig()) {
+    return null;
+  }
+
+  if (!supabaseClient) {
+    supabaseClient = window.supabase.createClient(supabaseConfig.url, supabaseConfig.anonKey);
+  }
+
+  return supabaseClient;
+};
+
+const normalizePublicContent = (value) => {
+  if (value && typeof value === "object") {
+    return {
+      announcements: Array.isArray(value.announcements) ? value.announcements : defaultContent.announcements,
+      gatherings: Array.isArray(value.gatherings) ? value.gatherings : defaultContent.gatherings,
+      gallery: Array.isArray(value.gallery) ? value.gallery : defaultContent.gallery,
+      team: Array.isArray(value.team) ? value.team : defaultContent.team,
+    };
+  }
+
+  return defaultContent;
+};
+
+const getLocalContent = () => {
   try {
     const saved = JSON.parse(window.localStorage.getItem(adminStorageKey));
-    if (saved && typeof saved === "object") {
-      return {
-        announcements: Array.isArray(saved.announcements) ? saved.announcements : defaultContent.announcements,
-        gatherings: Array.isArray(saved.gatherings) ? saved.gatherings : defaultContent.gatherings,
-        gallery: Array.isArray(saved.gallery) ? saved.gallery : defaultContent.gallery,
-        team: Array.isArray(saved.team) ? saved.team : defaultContent.team,
-      };
+    if (saved) {
+      return normalizePublicContent(saved);
     }
   } catch (error) {
     window.localStorage.removeItem(adminStorageKey);
   }
 
   return defaultContent;
+};
+
+const getAdminContent = () => remoteContent || getLocalContent();
+
+const loadSupabaseContent = async () => {
+  const client = getSupabaseClient();
+  if (!client) {
+    return;
+  }
+
+  const { data, error } = await client
+    .from("site_content")
+    .select("value")
+    .eq("key", supabaseConfig.contentKey || "main")
+    .maybeSingle();
+
+  if (error) {
+    console.warn("Unable to load Supabase content", error);
+    return;
+  }
+
+  if (data?.value) {
+    remoteContent = normalizePublicContent(data.value);
+    applyLanguage(currentLanguage);
+  }
 };
 
 const localText = (value, language) => {
@@ -487,6 +537,7 @@ if (year) {
 
 let currentLanguage = getSavedLanguage();
 applyLanguage(currentLanguage);
+loadSupabaseContent();
 
 languageToggle?.addEventListener("click", () => {
   currentLanguage = currentLanguage === "zh" ? "en" : "zh";

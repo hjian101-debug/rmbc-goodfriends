@@ -8,8 +8,9 @@ const resetButton = document.querySelector("[data-reset-button]");
 const addButtons = document.querySelectorAll("[data-add]");
 
 const adminStorageKey = "rmbc-admin-content";
-const adminUsername = "gff";
-const adminPassword = "gff123";
+const supabaseConfig = window.RMBC_SUPABASE_CONFIG || {};
+let supabaseClient = null;
+let saveTimer = null;
 
 const defaultContent = {
   announcements: [
@@ -144,7 +145,7 @@ const defaultContent = {
   ],
 };
 
-let content = loadContent();
+let content = normalizeContent(defaultContent);
 
 function cloneContent(value) {
   return JSON.parse(JSON.stringify(value));
@@ -165,7 +166,12 @@ function ensureLocalizedValue(value) {
 }
 
 function normalizeContent(value) {
-  const next = cloneContent(value);
+  const next = cloneContent(value && typeof value === "object" ? value : defaultContent);
+
+  next.announcements = Array.isArray(next.announcements) ? next.announcements : defaultContent.announcements;
+  next.gatherings = Array.isArray(next.gatherings) ? next.gatherings : defaultContent.gatherings;
+  next.gallery = Array.isArray(next.gallery) ? next.gallery : defaultContent.gallery;
+  next.team = Array.isArray(next.team) ? next.team : defaultContent.team;
 
   next.gatherings = next.gatherings.map((item) => ({
     ...item,
@@ -193,7 +199,34 @@ function normalizeLoginValue(value) {
     .trim();
 }
 
-function loadContent() {
+function resolveLoginEmail(value) {
+  const username = normalizeLoginValue(value).toLowerCase();
+  return username.includes("@") ? username : `${username}@rmbc.local`;
+}
+
+function hasSupabaseConfig() {
+  return Boolean(supabaseConfig.url && supabaseConfig.anonKey && window.supabase);
+}
+
+function getSupabaseClient() {
+  if (!hasSupabaseConfig()) {
+    return null;
+  }
+
+  if (!supabaseClient) {
+    supabaseClient = window.supabase.createClient(supabaseConfig.url, supabaseConfig.anonKey);
+  }
+
+  return supabaseClient;
+}
+
+function setLoginMessage(message) {
+  if (loginMessage) {
+    loginMessage.textContent = message;
+  }
+}
+
+function loadLocalContent() {
   try {
     const saved = JSON.parse(window.localStorage.getItem(adminStorageKey));
     if (saved && typeof saved === "object") {
@@ -211,13 +244,67 @@ function loadContent() {
   return normalizeContent(defaultContent);
 }
 
-function saveContent() {
+async function loadRemoteContent() {
+  const client = getSupabaseClient();
+  if (!client) {
+    content = loadLocalContent();
+    return;
+  }
+
+  const { data, error } = await client
+    .from("site_content")
+    .select("value")
+    .eq("key", supabaseConfig.contentKey || "main")
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  content = normalizeContent(data?.value || defaultContent);
   window.localStorage.setItem(adminStorageKey, JSON.stringify(content));
 }
 
-function showDashboard() {
+async function saveRemoteContent() {
+  const client = getSupabaseClient();
+  if (!client) {
+    return;
+  }
+
+  const { error } = await client
+    .from("site_content")
+    .upsert({
+      key: supabaseConfig.contentKey || "main",
+      value: content,
+      updated_at: new Date().toISOString(),
+    });
+
+  if (error) {
+    setLoginMessage("保存到 Supabase 失败，请检查网络或权限。");
+    console.error(error);
+    return;
+  }
+
+  setLoginMessage("已保存到 Supabase。");
+}
+
+function saveContent() {
+  window.localStorage.setItem(adminStorageKey, JSON.stringify(content));
+  window.clearTimeout(saveTimer);
+  saveTimer = window.setTimeout(saveRemoteContent, 500);
+}
+
+async function showDashboard() {
   loginPanel.hidden = true;
   dashboard.hidden = false;
+  setLoginMessage("正在读取 Supabase 内容...");
+  try {
+    await loadRemoteContent();
+    setLoginMessage("");
+  } catch (error) {
+    setLoginMessage("读取 Supabase 内容失败，请检查数据库表和权限。");
+    console.error(error);
+  }
   renderAll();
 }
 
@@ -461,22 +548,35 @@ function createEmptyItem(collection) {
   };
 }
 
-loginForm?.addEventListener("submit", (event) => {
+loginForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
-  const formData = new FormData(loginForm);
-  const username = normalizeLoginValue(formData.get("username")).toLowerCase();
-  const password = normalizeLoginValue(formData.get("password"));
+  const client = getSupabaseClient();
 
-  if (username === adminUsername && password === adminPassword) {
-    loginMessage.textContent = "";
-    showDashboard();
+  if (!client) {
+    setLoginMessage("请先在 supabase-config.js 填入 Supabase URL 和 anon key。");
     return;
   }
 
-  loginMessage.textContent = "账号或密码不正确。";
+  const formData = new FormData(loginForm);
+  const email = resolveLoginEmail(formData.get("username"));
+  const password = normalizeLoginValue(formData.get("password"));
+
+  setLoginMessage("正在登录...");
+  const { error } = await client.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    setLoginMessage("邮箱或密码不正确，或这个账号还没有创建。");
+    return;
+  }
+
+  await showDashboard();
 });
 
-logoutButton?.addEventListener("click", () => {
+logoutButton?.addEventListener("click", async () => {
+  const client = getSupabaseClient();
+  if (client) {
+    await client.auth.signOut();
+  }
   showLogin();
 });
 
@@ -504,4 +604,23 @@ addButtons.forEach((button) => {
   });
 });
 
-showLogin();
+async function initAdmin() {
+  const client = getSupabaseClient();
+
+  if (!client) {
+    content = loadLocalContent();
+    setLoginMessage("请先配置 Supabase 后再登录后台。");
+    showLogin();
+    return;
+  }
+
+  const { data } = await client.auth.getSession();
+  if (data.session) {
+    await showDashboard();
+    return;
+  }
+
+  showLogin();
+}
+
+initAdmin();
