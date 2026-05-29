@@ -614,11 +614,7 @@ async function initAdmin() {
     return;
   }
 
-  const { data } = await client.auth.getSession();
-  if (data.session) {
-    await showDashboard();
-    return;
-  }
+  await client.auth.signOut();
 
   showLogin();
 }
