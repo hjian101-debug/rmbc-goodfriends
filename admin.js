@@ -60,7 +60,10 @@ const defaultContent = {
         en: "Join us for worship, and feel free to stay afterward to meet new friends.",
       },
       time: { zh: "10:00 AM", en: "10:00 AM" },
-      location: { zh: "RMBC", en: "RMBC" },
+      location: {
+        zh: "RMBC, 4889 Tyler Street, Riverside, CA 92503",
+        en: "RMBC, 4889 Tyler Street, Riverside, CA 92503",
+      },
       scripture: { zh: "", en: "" },
     },
   ],

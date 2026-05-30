@@ -35,7 +35,7 @@
     />
     <meta name="twitter:image" content="https://rmbc-goodfriendsfellowship.onrender.com/assets/hero-fellowship.svg" />
     <title>RMBC 好朋友团契 | Riverside Mandarin Baptist Church Good Friends Fellowship</title>
-    <link rel="stylesheet" href="./styles.css?v=20260530-12" />
+    <link rel="stylesheet" href="./styles.css?v=20260530-13" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -89,7 +89,15 @@
             },
             "location": {
               "@type": "Place",
-              "name": "RMBC"
+              "name": "Riverside Mandarin Baptist Church",
+              "address": {
+                "@type": "PostalAddress",
+                "streetAddress": "4889 Tyler Street",
+                "addressLocality": "Riverside",
+                "addressRegion": "CA",
+                "postalCode": "92503",
+                "addressCountry": "US"
+              }
             }
           }
         ]
@@ -255,8 +263,11 @@
         <div class="contact-actions">
           <a class="contact-link" href="mailto:hello@rmbc.example" data-i18n="contact.email">团契邮箱 hello@rmbc.example</a>
           <a class="contact-link" href="#team" data-i18n="contact.welcome">联系接待同工</a>
-          <a class="contact-link" href="https://www.google.com/maps/search/?api=1&query=Riverside%20Mandarin%20Baptist%20Church">
-            <span data-i18n="contact.map">查看地图</span>
+          <a class="contact-link" href="https://www.google.com/maps/search/?api=1&query=Crest%20Community%20Church%203431%20Mt%20Vernon%20Ave%20Riverside%20CA%2092507">
+            <span data-i18n="contact.gffMap">好朋友团契周五地址：Crest Community Church, 3431 Mt Vernon Ave</span>
+          </a>
+          <a class="contact-link" href="https://www.google.com/maps/search/?api=1&query=Riverside%20Mandarin%20Baptist%20Church%204889%20Tyler%20Street%20Riverside%20CA%2092503">
+            <span data-i18n="contact.rmbcMap">RMBC 主日地址：4889 Tyler Street</span>
           </a>
         </div>
       </section>
@@ -272,6 +283,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="./supabase-config.js?v=20260527-1"></script>
-    <script src="./script.js?v=20260530-12"></script>
+    <script src="./script.js?v=20260530-13"></script>
   </body>
 </html>
