@@ -304,6 +304,28 @@ textarea {
   color: var(--muted);
 }
 
+.editor-subsection {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  background: var(--soft);
+}
+
+.editor-subsection h4 {
+  margin: 0;
+  color: var(--moss-dark);
+  font-size: 16px;
+}
+
+.editor-subsection .field-grid {
+  grid-template-columns: 1fr;
+}
+
+.editor-subsection textarea {
+  min-height: 150px;
+}
+
 .card-actions {
   display: flex;
   flex-wrap: wrap;

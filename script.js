@@ -5,7 +5,9 @@ const year = document.querySelector("[data-year]");
 const languageToggle = document.querySelector("[data-language-toggle]");
 const announcementSection = document.querySelector("[data-announcements-section]");
 const announcementList = document.querySelector("[data-announcement-list]");
+const gatheringsLayout = document.querySelector("[data-gatherings-layout]");
 const eventGrid = document.querySelector("[data-event-grid]");
+const scripturePanel = document.querySelector("[data-scripture-panel]");
 const gallerySection = document.querySelector("[data-gallery-section]");
 const galleryGrid = document.querySelector("[data-gallery-grid]");
 const galleryLinks = document.querySelectorAll("[data-gallery-link]");
@@ -185,6 +187,7 @@ const translations = {
     "gatherings.bibleStudyTitle": "团契查经",
     "gatherings.bibleStudyCopy": "诗歌、晚餐、查经与分组分享。第一次来的朋友可以直接来，不需要准备。",
     "gatherings.scriptureLabel": "本周经文：",
+    "gatherings.scriptureTitle": "本周经文",
     "gatherings.worshipTitle": "主日崇拜",
     "gatherings.worshipCopy": "欢迎与我们一同敬拜，也可以在崇拜后留下来认识新朋友。",
     "announcements.title": "团契公告",
@@ -247,6 +250,7 @@ const translations = {
     "gatherings.bibleStudyTitle": "Fellowship Bible Study",
     "gatherings.bibleStudyCopy": "Worship, dinner, Bible study, and group sharing. First-time visitors are welcome to come as they are.",
     "gatherings.scriptureLabel": "Scripture: ",
+    "gatherings.scriptureTitle": "This Week's Scripture",
     "gatherings.worshipTitle": "Sunday Worship",
     "gatherings.worshipCopy": "Join us for worship, and feel free to stay afterward to meet new friends.",
     "announcements.title": "Fellowship News",
@@ -389,24 +393,55 @@ const renderContent = (language) => {
   }
 
   if (eventGrid) {
+    const activeGatherings = content.gatherings.filter((item) => item.active !== false);
     eventGrid.replaceChildren(
-      ...content.gatherings.filter((item) => item.active !== false).map((item) => {
+      ...activeGatherings.map((item) => {
         const article = createElement("article", "event-card");
-        const scripture = localText(item.scripture, language);
         article.append(
           createElement("time", null, localText(item.day, language)),
           createElement("h3", null, localText(item.title, language)),
           createElement("p", null, localText(item.description, language)),
         );
 
-        if (scripture) {
-          article.append(createElement("p", "event-scripture", `${translations[language]["gatherings.scriptureLabel"]}${scripture}`));
-        }
-
         article.append(createElement("span", null, `${localText(item.time, language)} · ${localText(item.location, language)}`));
         return article;
       }),
     );
+
+    if (scripturePanel && gatheringsLayout) {
+      const scriptureItems = activeGatherings
+        .map((item) => ({
+          title: localText(item.title, language),
+          scripture: localText(item.scripture, language),
+        }))
+        .filter((item) => item.scripture);
+
+      gatheringsLayout.classList.toggle("has-scripture", scriptureItems.length > 0);
+      scripturePanel.hidden = scriptureItems.length === 0;
+      scripturePanel.replaceChildren();
+
+      if (scriptureItems.length > 0) {
+        const heading = document.createElement("div");
+        const list = document.createElement("div");
+        heading.className = "scripture-heading";
+        list.className = "scripture-list";
+        heading.append(
+          createElement("p", "eyebrow", "Scripture"),
+          createElement("h3", null, translations[language]["gatherings.scriptureTitle"]),
+        );
+
+        scriptureItems.forEach((item) => {
+          const article = createElement("article", "scripture-entry");
+          if (item.title) {
+            article.append(createElement("span", null, item.title));
+          }
+          article.append(createElement("p", null, item.scripture));
+          list.append(article);
+        });
+
+        scripturePanel.append(heading, list);
+      }
+    }
   }
 
   if (gallerySection && galleryGrid) {

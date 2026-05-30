@@ -379,6 +379,19 @@ function createInput(labelText, value, onInput, options = {}) {
   return label;
 }
 
+function createEditorSubsection(title, ...children) {
+  const wrapper = document.createElement("div");
+  const heading = document.createElement("h4");
+  const grid = document.createElement("div");
+
+  wrapper.className = "editor-subsection full";
+  heading.textContent = title;
+  grid.className = "field-grid";
+  grid.append(...children);
+  wrapper.append(heading, grid);
+  return wrapper;
+}
+
 function moveItem(collection, index, direction) {
   const nextIndex = index + direction;
   if (nextIndex < 0 || nextIndex >= content[collection].length) {
@@ -593,10 +606,13 @@ function renderGatherings() {
         createInput("English time", item.time.en, (value) => { item.time.en = value; }),
         createInput("中文地点", item.location.zh, (value) => { item.location.zh = value; }, { full: true }),
         createInput("English location", item.location.en, (value) => { item.location.en = value; }, { full: true }),
-        createInput("中文查经经文", item.scripture.zh, (value) => { item.scripture.zh = value; }, { full: true }),
-        createInput("English scripture", item.scripture.en, (value) => { item.scripture.en = value; }, { full: true }),
         createInput("中文说明", item.description.zh, (value) => { item.description.zh = value; }, { full: true, multiline: true }),
         createInput("English description", item.description.en, (value) => { item.description.en = value; }, { full: true, multiline: true }),
+        createEditorSubsection(
+          "查经经文",
+          createInput("中文经文", item.scripture.zh, (value) => { item.scripture.zh = value; }, { full: true, multiline: true }),
+          createInput("English scripture", item.scripture.en, (value) => { item.scripture.en = value; }, { full: true, multiline: true }),
+        ),
       );
 
       card.append(
