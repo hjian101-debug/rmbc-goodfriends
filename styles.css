@@ -532,17 +532,28 @@ h3 {
 }
 
 .gallery {
+  position: relative;
   width: 100%;
   max-width: none;
+  overflow: hidden;
   color: var(--ink);
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
-  background:
-    linear-gradient(180deg, var(--soft) 0%, var(--paper) 34%, var(--paper) 100%);
+  background: var(--paper);
+}
+
+.gallery::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: clamp(220px, 28vw, 360px);
+  border-bottom: 1px solid var(--line);
+  background: var(--soft);
+  content: "";
 }
 
 .gallery > .section-heading,
 .gallery > .gallery-grid {
+  position: relative;
   width: min(1120px, calc(100% - 36px));
   margin-left: auto;
   margin-right: auto;
