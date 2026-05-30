@@ -427,6 +427,7 @@ h3 {
 }
 
 .gatherings-layout {
+  --gathering-panel-height: clamp(340px, 32vw, 430px);
   display: grid;
   gap: 16px;
   align-items: start;
@@ -434,6 +435,7 @@ h3 {
 
 .gatherings-layout.has-scripture {
   grid-template-columns: minmax(0, 0.94fr) minmax(320px, 0.78fr);
+  align-items: stretch;
 }
 
 .event-grid {
@@ -444,6 +446,12 @@ h3 {
 
 .gatherings-layout.has-scripture .event-grid {
   grid-template-columns: 1fr;
+}
+
+.gatherings-layout.has-scripture .event-card,
+.gatherings-layout.has-scripture .scripture-panel {
+  height: var(--gathering-panel-height);
+  min-height: 0;
 }
 
 .event-card {
@@ -474,26 +482,35 @@ h3 {
 }
 
 .scripture-panel {
+  display: flex;
+  flex-direction: column;
   min-height: 274px;
   padding: 30px;
   border-left: 4px solid var(--gold);
+  overflow: hidden;
 }
 
 .scripture-heading {
-  margin-bottom: 24px;
+  flex: 0 0 auto;
+  margin-bottom: 18px;
 }
 
 .scripture-heading h3 {
-  font-size: clamp(24px, 3vw, 36px);
+  font-size: clamp(24px, 2.8vw, 34px);
 }
 
 .scripture-list {
   display: grid;
-  gap: 22px;
+  gap: 18px;
+  min-height: 0;
+  padding-right: 8px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-color: var(--gold) transparent;
 }
 
 .scripture-entry + .scripture-entry {
-  padding-top: 22px;
+  padding-top: 18px;
   border-top: 1px solid var(--line);
 }
 
@@ -507,9 +524,9 @@ h3 {
 .scripture-entry p {
   margin: 8px 0 0;
   color: var(--moss-dark);
-  font-size: clamp(19px, 2.1vw, 26px);
-  font-weight: 850;
-  line-height: 1.55;
+  font-size: clamp(17px, 1.45vw, 22px);
+  font-weight: 800;
+  line-height: 1.52;
   overflow-wrap: anywhere;
   white-space: pre-wrap;
 }
@@ -809,6 +826,15 @@ h3 {
 
   .event-card {
     min-height: 220px;
+  }
+
+  .gatherings-layout.has-scripture .event-card {
+    height: auto;
+    min-height: 220px;
+  }
+
+  .gatherings-layout.has-scripture .scripture-panel {
+    height: 360px;
   }
 
   .team-card {
