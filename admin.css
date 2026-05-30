@@ -219,6 +219,23 @@ textarea {
   text-align: left;
 }
 
+.primary-action {
+  color: var(--moss-dark);
+  border-color: transparent;
+  background: var(--gold);
+  text-align: center;
+}
+
+.primary-action:hover {
+  background: #c5973d;
+}
+
+.primary-action:disabled {
+  color: rgba(255, 255, 255, 0.72);
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.14);
+}
+
 .workspace {
   padding: clamp(24px, 4vw, 54px);
 }
@@ -249,6 +266,10 @@ textarea {
 
 .save-status[data-tone="saved"] {
   color: var(--moss-dark);
+}
+
+.save-status[data-tone="dirty"] {
+  color: var(--terracotta);
 }
 
 .save-status[data-tone="error"] {

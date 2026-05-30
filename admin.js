@@ -3,6 +3,7 @@ const dashboard = document.querySelector("[data-dashboard]");
 const loginForm = document.querySelector("[data-login-form]");
 const loginMessage = document.querySelector("[data-login-message]");
 const logoutButton = document.querySelector("[data-logout-button]");
+const saveButton = document.querySelector("[data-save-button]");
 const exportButton = document.querySelector("[data-export-button]");
 const refreshButton = document.querySelector("[data-refresh-button]");
 const resetButton = document.querySelector("[data-reset-button]");
@@ -13,7 +14,8 @@ const adminStorageKey = "rmbc-admin-content";
 const supabaseConfig = window.RMBC_SUPABASE_CONFIG || {};
 const storageBucket = supabaseConfig.storageBucket || "site-media";
 let supabaseClient = null;
-let saveTimer = null;
+let hasUnsavedChanges = false;
+let isSaving = false;
 
 const defaultContent = {
   announcements: [
@@ -236,6 +238,21 @@ function setSaveStatus(message, tone = "idle") {
   }
 }
 
+function updateSaveButton() {
+  if (!saveButton) {
+    return;
+  }
+
+  saveButton.disabled = isSaving || !hasUnsavedChanges;
+  saveButton.textContent = isSaving ? "保存中..." : hasUnsavedChanges ? "保存到网站" : "已保存";
+}
+
+function markUnsaved(message = "有未保存修改") {
+  hasUnsavedChanges = true;
+  setSaveStatus(message, "dirty");
+  updateSaveButton();
+}
+
 function loadLocalContent() {
   try {
     const saved = JSON.parse(window.localStorage.getItem(adminStorageKey));
@@ -278,9 +295,14 @@ async function loadRemoteContent() {
 async function saveRemoteContent() {
   const client = getSupabaseClient();
   if (!client) {
-    setSaveStatus("已保存在本机", "saved");
-    return;
+    setSaveStatus("已保存在本机，尚未发布到网站", "dirty");
+    updateSaveButton();
+    return false;
   }
+
+  isSaving = true;
+  setSaveStatus("正在保存到网站...", "saving");
+  updateSaveButton();
 
   const { error } = await client
     .from("site_content")
@@ -292,20 +314,24 @@ async function saveRemoteContent() {
 
   if (error) {
     setLoginMessage("保存到 Supabase 失败，请检查网络或权限。");
-    setSaveStatus("保存失败", "error");
+    setSaveStatus("保存失败，公开网站未更新", "error");
+    isSaving = false;
+    updateSaveButton();
     console.error(error);
-    return;
+    return false;
   }
 
   setLoginMessage("已保存到 Supabase。");
-  setSaveStatus(`已保存 ${new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" })}`, "saved");
+  hasUnsavedChanges = false;
+  isSaving = false;
+  setSaveStatus(`已保存到网站 ${new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" })}`, "saved");
+  updateSaveButton();
+  return true;
 }
 
-function saveContent() {
+function saveContent(message = "有未保存修改") {
   window.localStorage.setItem(adminStorageKey, JSON.stringify(content));
-  setSaveStatus("正在保存...", "saving");
-  window.clearTimeout(saveTimer);
-  saveTimer = window.setTimeout(saveRemoteContent, 500);
+  markUnsaved(message);
 }
 
 async function showDashboard() {
@@ -316,9 +342,13 @@ async function showDashboard() {
     await loadRemoteContent();
     setLoginMessage("");
     setSaveStatus("已读取数据库", "saved");
+    hasUnsavedChanges = false;
+    isSaving = false;
+    updateSaveButton();
   } catch (error) {
     setLoginMessage("读取 Supabase 内容失败，请检查数据库表和权限。");
     setSaveStatus("读取失败", "error");
+    updateSaveButton();
     console.error(error);
   }
   renderAll();
@@ -394,7 +424,7 @@ function cardHeader(title, subtitle, collection, item, index) {
   remove.type = "button";
   remove.textContent = "删除";
   remove.addEventListener("click", () => {
-    if (!window.confirm(`确定删除「${title}」吗？删除后会同步到公开网站。`)) {
+    if (!window.confirm(`确定删除「${title}」吗？删除后需要点击「保存到网站」才会更新公开网站。`)) {
       return;
     }
 
@@ -478,7 +508,7 @@ async function uploadGalleryFile(item, file, button) {
     item.alt.en = item.title.en;
   }
 
-  saveContent();
+  saveContent("照片已上传，有未保存修改");
   renderAll();
 }
 
@@ -731,11 +761,15 @@ logoutButton?.addEventListener("click", async () => {
   showLogin();
 });
 
+saveButton?.addEventListener("click", async () => {
+  await saveRemoteContent();
+});
+
 exportButton?.addEventListener("click", async () => {
   const data = JSON.stringify(content, null, 2);
   await navigator.clipboard.writeText(data);
   exportButton.textContent = "已复制到剪贴板";
-  setSaveStatus("数据已复制", "saved");
+  setSaveStatus(hasUnsavedChanges ? "数据已复制，但仍有未保存修改" : "数据已复制", hasUnsavedChanges ? "dirty" : "saved");
   window.setTimeout(() => {
     exportButton.textContent = "导出数据";
   }, 1800);
@@ -750,15 +784,19 @@ refreshButton?.addEventListener("click", async () => {
   try {
     await loadRemoteContent();
     renderAll();
+    hasUnsavedChanges = false;
+    isSaving = false;
     setSaveStatus("已重新读取数据库", "saved");
+    updateSaveButton();
   } catch (error) {
     setSaveStatus("读取失败", "error");
+    updateSaveButton();
     console.error(error);
   }
 });
 
 resetButton?.addEventListener("click", () => {
-  if (!window.confirm("确定恢复默认内容吗？这会覆盖当前数据库内容。")) {
+  if (!window.confirm("确定恢复默认内容吗？恢复后需要点击「保存到网站」才会更新公开网站。")) {
     return;
   }
 
@@ -774,6 +812,15 @@ addButtons.forEach((button) => {
     saveContent();
     renderAll();
   });
+});
+
+window.addEventListener("beforeunload", (event) => {
+  if (!hasUnsavedChanges) {
+    return;
+  }
+
+  event.preventDefault();
+  event.returnValue = "";
 });
 
 async function initAdmin() {

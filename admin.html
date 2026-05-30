@@ -7,7 +7,7 @@
     <meta name="robots" content="noindex, nofollow" />
     <meta http-equiv="Cache-Control" content="no-store" />
     <title>RMBC 好朋友团契管理员</title>
-    <link rel="stylesheet" href="./admin.css?v=20260529-1" />
+    <link rel="stylesheet" href="./admin.css?v=20260530-1" />
   </head>
   <body>
     <main class="admin-shell">
@@ -44,6 +44,7 @@
             <a href="#team">同工管理</a>
             <a href="#announcements">公告管理</a>
           </nav>
+          <button class="ghost-button primary-action" type="button" data-save-button disabled>已保存</button>
           <button class="ghost-button" type="button" data-export-button>导出数据</button>
           <button class="ghost-button" type="button" data-refresh-button>重新读取数据库</button>
           <button class="ghost-button" type="button" data-reset-button>恢复默认</button>
@@ -61,7 +62,7 @@
           </header>
 
           <p class="notice">
-            当前内容会保存到 Supabase 数据库。同工从任何电脑登录修改后，公开网站都会同步显示。
+            修改会先保存在本机草稿。点击「保存到网站」后，公开网站才会同步更新。
           </p>
 
           <section class="admin-section" id="gatherings">
@@ -84,7 +85,7 @@
               <button type="button" data-add="gallery">新增照片</button>
             </div>
             <p class="notice">
-              可以直接上传照片，后台会存到 Supabase Storage，并自动把公开图片地址保存到数据库。
+              可以直接上传照片，后台会存到 Supabase Storage。上传后请点击「保存到网站」，公开网站才会显示新照片。
             </p>
             <div class="editor-list" data-list="gallery"></div>
           </section>
@@ -115,7 +116,7 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="./supabase-config.js?v=20260529-1"></script>
-    <script src="./admin.js?v=20260529-1"></script>
+    <script src="./supabase-config.js?v=20260530-1"></script>
+    <script src="./admin.js?v=20260530-1"></script>
   </body>
 </html>
