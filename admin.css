@@ -59,6 +59,11 @@ button:hover {
   background: var(--moss-dark);
 }
 
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
 .admin-shell {
   min-height: 100vh;
 }
@@ -232,6 +237,24 @@ textarea {
   background: var(--white);
 }
 
+.save-status {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-weight: 850;
+}
+
+.save-status[data-tone="saving"] {
+  color: var(--moss);
+}
+
+.save-status[data-tone="saved"] {
+  color: var(--moss-dark);
+}
+
+.save-status[data-tone="error"] {
+  color: var(--terracotta);
+}
+
 .notice {
   margin: 18px 0 32px;
   padding: 16px 18px;
@@ -287,6 +310,35 @@ textarea {
   background: var(--terracotta);
 }
 
+.image-upload {
+  display: grid;
+  grid-template-columns: minmax(160px, 240px) minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  padding: 12px;
+  border: 1px dashed var(--line);
+  background: var(--paper);
+}
+
+.image-preview {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  background: var(--soft);
+}
+
+.upload-controls {
+  display: grid;
+  gap: 8px;
+}
+
+.upload-controls p {
+  margin: 0;
+  color: var(--muted);
+  font-weight: 750;
+}
+
 .field-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
@@ -325,6 +377,10 @@ textarea {
   }
 
   .field-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .image-upload {
     grid-template-columns: 1fr;
   }
 }

@@ -15,6 +15,10 @@ The table stores one JSON content record:
 - `key`: `main`
 - `value`: announcements, gatherings, gallery, and team content
 
+The same SQL also creates a public Storage bucket:
+
+- `site-media`: public image files uploaded from the admin dashboard
+
 ## 3. Create the admin account
 
 Open Authentication > Users, then add an admin user with this email:
@@ -37,6 +41,7 @@ window.RMBC_SUPABASE_CONFIG = {
   url: "https://your-project.supabase.co",
   anonKey: "your-publishable-key",
   contentKey: "main",
+  storageBucket: "site-media",
 };
 ```
 

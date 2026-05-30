@@ -4,11 +4,14 @@ const loginForm = document.querySelector("[data-login-form]");
 const loginMessage = document.querySelector("[data-login-message]");
 const logoutButton = document.querySelector("[data-logout-button]");
 const exportButton = document.querySelector("[data-export-button]");
+const refreshButton = document.querySelector("[data-refresh-button]");
 const resetButton = document.querySelector("[data-reset-button]");
+const saveStatus = document.querySelector("[data-save-status]");
 const addButtons = document.querySelectorAll("[data-add]");
 
 const adminStorageKey = "rmbc-admin-content";
 const supabaseConfig = window.RMBC_SUPABASE_CONFIG || {};
+const storageBucket = supabaseConfig.storageBucket || "site-media";
 let supabaseClient = null;
 let saveTimer = null;
 
@@ -226,6 +229,13 @@ function setLoginMessage(message) {
   }
 }
 
+function setSaveStatus(message, tone = "idle") {
+  if (saveStatus) {
+    saveStatus.textContent = message;
+    saveStatus.dataset.tone = tone;
+  }
+}
+
 function loadLocalContent() {
   try {
     const saved = JSON.parse(window.localStorage.getItem(adminStorageKey));
@@ -268,6 +278,7 @@ async function loadRemoteContent() {
 async function saveRemoteContent() {
   const client = getSupabaseClient();
   if (!client) {
+    setSaveStatus("已保存在本机", "saved");
     return;
   }
 
@@ -281,15 +292,18 @@ async function saveRemoteContent() {
 
   if (error) {
     setLoginMessage("保存到 Supabase 失败，请检查网络或权限。");
+    setSaveStatus("保存失败", "error");
     console.error(error);
     return;
   }
 
   setLoginMessage("已保存到 Supabase。");
+  setSaveStatus(`已保存 ${new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" })}`, "saved");
 }
 
 function saveContent() {
   window.localStorage.setItem(adminStorageKey, JSON.stringify(content));
+  setSaveStatus("正在保存...", "saving");
   window.clearTimeout(saveTimer);
   saveTimer = window.setTimeout(saveRemoteContent, 500);
 }
@@ -301,8 +315,10 @@ async function showDashboard() {
   try {
     await loadRemoteContent();
     setLoginMessage("");
+    setSaveStatus("已读取数据库", "saved");
   } catch (error) {
     setLoginMessage("读取 Supabase 内容失败，请检查数据库表和权限。");
+    setSaveStatus("读取失败", "error");
     console.error(error);
   }
   renderAll();
@@ -333,28 +349,62 @@ function createInput(labelText, value, onInput, options = {}) {
   return label;
 }
 
-function cardHeader(title, subtitle, collection, item) {
+function moveItem(collection, index, direction) {
+  const nextIndex = index + direction;
+  if (nextIndex < 0 || nextIndex >= content[collection].length) {
+    return;
+  }
+
+  const entries = content[collection];
+  [entries[index], entries[nextIndex]] = [entries[nextIndex], entries[index]];
+  saveContent();
+  renderAll();
+}
+
+function cardHeader(title, subtitle, collection, item, index) {
   const header = document.createElement("header");
   const titleBlock = document.createElement("div");
   const heading = document.createElement("h3");
   const note = document.createElement("p");
   const actions = document.createElement("div");
+  const up = document.createElement("button");
+  const down = document.createElement("button");
   const remove = document.createElement("button");
 
   heading.textContent = title;
   note.textContent = subtitle;
   actions.className = "card-actions";
+  up.className = "small-button";
+  up.type = "button";
+  up.textContent = "上移";
+  up.disabled = index === 0;
+  up.addEventListener("click", () => {
+    moveItem(collection, index, -1);
+  });
+
+  down.className = "small-button";
+  down.type = "button";
+  down.textContent = "下移";
+  down.disabled = index === content[collection].length - 1;
+  down.addEventListener("click", () => {
+    moveItem(collection, index, 1);
+  });
+
   remove.className = "small-button danger-button";
   remove.type = "button";
   remove.textContent = "删除";
   remove.addEventListener("click", () => {
+    if (!window.confirm(`确定删除「${title}」吗？删除后会同步到公开网站。`)) {
+      return;
+    }
+
     content[collection] = content[collection].filter((entry) => entry.id !== item.id);
     saveContent();
     renderAll();
   });
 
   titleBlock.append(heading, note);
-  actions.append(remove);
+  actions.append(up, down, remove);
   header.append(titleBlock, actions);
   return header;
 }
@@ -373,10 +423,108 @@ function activeToggle(item) {
   return label;
 }
 
+function safeFileName(fileName) {
+  return String(fileName || "photo")
+    .normalize("NFKD")
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80) || "photo";
+}
+
+async function uploadGalleryFile(item, file, button) {
+  const client = getSupabaseClient();
+  if (!client) {
+    setSaveStatus("请先连接 Supabase", "error");
+    return;
+  }
+
+  if (!file || !file.type.startsWith("image/")) {
+    setSaveStatus("请选择图片文件", "error");
+    return;
+  }
+
+  if (file.size > 10 * 1024 * 1024) {
+    setSaveStatus("图片不能超过 10MB", "error");
+    return;
+  }
+
+  const originalText = button.textContent;
+  button.disabled = true;
+  button.textContent = "上传中...";
+  setSaveStatus("正在上传照片...", "saving");
+
+  const path = `gallery/${item.id}-${Date.now()}-${safeFileName(file.name)}`;
+  const { error } = await client.storage.from(storageBucket).upload(path, file, {
+    cacheControl: "3600",
+    contentType: file.type,
+    upsert: false,
+  });
+
+  if (error) {
+    button.disabled = false;
+    button.textContent = originalText;
+    setSaveStatus("照片上传失败", "error");
+    console.error(error);
+    return;
+  }
+
+  const { data } = client.storage.from(storageBucket).getPublicUrl(path);
+  item.image = data.publicUrl;
+  if (!item.alt.zh && item.title.zh) {
+    item.alt.zh = item.title.zh;
+  }
+  if (!item.alt.en && item.title.en) {
+    item.alt.en = item.title.en;
+  }
+
+  saveContent();
+  renderAll();
+}
+
+function createGalleryUpload(item) {
+  const wrapper = document.createElement("div");
+  const preview = document.createElement("img");
+  const controls = document.createElement("div");
+  const upload = document.createElement("button");
+  const fileInput = document.createElement("input");
+  const note = document.createElement("p");
+
+  wrapper.className = "image-upload full";
+  preview.className = "image-preview";
+  preview.src = item.image || "./assets/hero-fellowship.svg";
+  preview.alt = item.alt.zh || item.title.zh || "照片预览";
+
+  controls.className = "upload-controls";
+  upload.type = "button";
+  upload.className = "small-button";
+  upload.textContent = "上传照片";
+  fileInput.type = "file";
+  fileInput.accept = "image/jpeg,image/png,image/webp,image/gif";
+  fileInput.hidden = true;
+  note.textContent = "支持 JPG、PNG、WebP、GIF，单张最多 10MB。";
+
+  upload.addEventListener("click", () => {
+    fileInput.click();
+  });
+
+  fileInput.addEventListener("change", async () => {
+    const file = fileInput.files?.[0];
+    if (file) {
+      await uploadGalleryFile(item, file, upload);
+      fileInput.value = "";
+    }
+  });
+
+  controls.append(upload, note, fileInput);
+  wrapper.append(preview, controls);
+  return wrapper;
+}
+
 function renderGatherings() {
   const list = document.querySelector('[data-list="gatherings"]');
   list.replaceChildren(
-    ...content.gatherings.map((item) => {
+    ...content.gatherings.map((item, index) => {
       const card = document.createElement("article");
       const fields = document.createElement("div");
       card.className = "editor-card";
@@ -398,7 +546,7 @@ function renderGatherings() {
       );
 
       card.append(
-        cardHeader(item.title.zh || "聚会", item.time.zh || "", "gatherings", item),
+        cardHeader(item.title.zh || "聚会", item.time.zh || "", "gatherings", item, index),
         fields,
         activeToggle(item),
       );
@@ -410,13 +558,14 @@ function renderGatherings() {
 function renderGallery() {
   const list = document.querySelector('[data-list="gallery"]');
   list.replaceChildren(
-    ...content.gallery.map((item) => {
+    ...content.gallery.map((item, index) => {
       const card = document.createElement("article");
       const fields = document.createElement("div");
       card.className = "editor-card";
       fields.className = "field-grid";
 
       fields.append(
+        createGalleryUpload(item),
         createInput("照片网址", item.image, (value) => { item.image = value; }, { full: true }),
         createInput("中文标题", item.title.zh, (value) => { item.title.zh = value; }),
         createInput("English title", item.title.en, (value) => { item.title.en = value; }),
@@ -427,7 +576,7 @@ function renderGallery() {
       );
 
       card.append(
-        cardHeader(item.title.zh || "照片", item.image || "等待添加照片网址", "gallery", item),
+        cardHeader(item.title.zh || "照片", item.image || "等待添加照片网址", "gallery", item, index),
         fields,
         activeToggle(item),
       );
@@ -439,7 +588,7 @@ function renderGallery() {
 function renderTeam() {
   const list = document.querySelector('[data-list="team"]');
   list.replaceChildren(
-    ...content.team.map((item) => {
+    ...content.team.map((item, index) => {
       const card = document.createElement("article");
       const fields = document.createElement("div");
       card.className = "editor-card";
@@ -457,7 +606,7 @@ function renderTeam() {
       );
 
       card.append(
-        cardHeader(item.name.zh || "同工", item.role.zh || "", "team", item),
+        cardHeader(item.name.zh || "同工", item.role.zh || "", "team", item, index),
         fields,
         activeToggle(item),
       );
@@ -469,7 +618,7 @@ function renderTeam() {
 function renderAnnouncements() {
   const list = document.querySelector('[data-list="announcements"]');
   list.replaceChildren(
-    ...content.announcements.map((item) => {
+    ...content.announcements.map((item, index) => {
       const card = document.createElement("article");
       const fields = document.createElement("div");
       card.className = "editor-card";
@@ -484,7 +633,7 @@ function renderAnnouncements() {
       );
 
       card.append(
-        cardHeader(item.title.zh || "公告", item.date || "", "announcements", item),
+        cardHeader(item.title.zh || "公告", item.date || "", "announcements", item, index),
         fields,
         activeToggle(item),
       );
@@ -575,7 +724,9 @@ loginForm?.addEventListener("submit", async (event) => {
 logoutButton?.addEventListener("click", async () => {
   const client = getSupabaseClient();
   if (client) {
-    await client.auth.signOut();
+    await client.auth.signOut().catch((error) => {
+      console.error(error);
+    });
   }
   showLogin();
 });
@@ -584,12 +735,33 @@ exportButton?.addEventListener("click", async () => {
   const data = JSON.stringify(content, null, 2);
   await navigator.clipboard.writeText(data);
   exportButton.textContent = "已复制到剪贴板";
+  setSaveStatus("数据已复制", "saved");
   window.setTimeout(() => {
     exportButton.textContent = "导出数据";
   }, 1800);
 });
 
+refreshButton?.addEventListener("click", async () => {
+  if (!window.confirm("确定重新读取数据库内容吗？当前未保存的输入会被覆盖。")) {
+    return;
+  }
+
+  setSaveStatus("正在读取数据库...", "saving");
+  try {
+    await loadRemoteContent();
+    renderAll();
+    setSaveStatus("已重新读取数据库", "saved");
+  } catch (error) {
+    setSaveStatus("读取失败", "error");
+    console.error(error);
+  }
+});
+
 resetButton?.addEventListener("click", () => {
+  if (!window.confirm("确定恢复默认内容吗？这会覆盖当前数据库内容。")) {
+    return;
+  }
+
   content = normalizeContent(defaultContent);
   saveContent();
   renderAll();
@@ -614,7 +786,7 @@ async function initAdmin() {
     return;
   }
 
-  await client.auth.signOut();
+  await client.auth.signOut({ scope: "local" }).catch(() => {});
 
   showLogin();
 }
