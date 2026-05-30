@@ -636,12 +636,16 @@ function renderGallery() {
 
       fields.append(
         createGalleryUpload(item),
-        createInput("中文标题", item.title.zh, (value) => { item.title.zh = value; }),
-        createInput("English title", item.title.en, (value) => { item.title.en = value; }),
-        createInput("中文替代文字", item.alt.zh, (value) => { item.alt.zh = value; }),
-        createInput("English alt text", item.alt.en, (value) => { item.alt.en = value; }),
-        createInput("中文说明", item.caption.zh, (value) => { item.caption.zh = value; }, { full: true, multiline: true }),
-        createInput("English caption", item.caption.en, (value) => { item.caption.en = value; }, { full: true, multiline: true }),
+        createInput("中文标题", item.title.zh, (value) => {
+          item.title.zh = value;
+          item.alt.zh = value;
+        }),
+        createInput("English title", item.title.en, (value) => {
+          item.title.en = value;
+          item.alt.en = value;
+        }),
+        createInput("中文照片说明", item.caption.zh, (value) => { item.caption.zh = value; }, { full: true, multiline: true }),
+        createInput("English photo caption", item.caption.en, (value) => { item.caption.en = value; }, { full: true, multiline: true }),
       );
 
       card.append(

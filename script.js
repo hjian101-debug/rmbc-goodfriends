@@ -464,7 +464,7 @@ const renderContent = (language) => {
           const caption = localText(item.caption, language);
 
           image.src = item.image;
-          image.alt = localText(item.alt, language) || title || "Fellowship photo";
+          image.alt = title || localText(item.alt, language) || "Fellowship photo";
           image.loading = "lazy";
           image.addEventListener("error", () => {
             article.remove();
