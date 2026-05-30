@@ -572,18 +572,7 @@ h3 {
   max-width: none;
   overflow: hidden;
   color: var(--ink);
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
   background: var(--paper);
-}
-
-.gallery::before {
-  position: absolute;
-  inset: 0 0 auto;
-  height: clamp(220px, 28vw, 360px);
-  border-bottom: 1px solid var(--line);
-  background: var(--soft);
-  content: "";
 }
 
 .gallery > .section-heading,
@@ -667,6 +656,14 @@ h3 {
   max-width: 620px;
   margin: 8px 0 0;
   color: rgba(255, 255, 255, 0.86);
+}
+
+.team {
+  width: 100%;
+  max-width: none;
+  padding-left: max(18px, calc((100vw - 1120px) / 2));
+  padding-right: max(18px, calc((100vw - 1120px) / 2));
+  background: var(--soft);
 }
 
 .team .section-heading {
