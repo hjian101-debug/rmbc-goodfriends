@@ -124,7 +124,6 @@ h3 {
 }
 
 .login-card p:not(.eyebrow),
-.notice,
 .form-message {
   color: var(--muted);
 }
@@ -276,14 +275,6 @@ textarea {
   color: var(--terracotta);
 }
 
-.notice {
-  margin: 18px 0 32px;
-  padding: 16px 18px;
-  border: 1px solid var(--line);
-  background: var(--soft);
-  font-weight: 750;
-}
-
 .admin-section {
   padding: 34px 0;
   border-top: 1px solid var(--line);
@@ -349,15 +340,18 @@ textarea {
   background: var(--soft);
 }
 
+.avatar-upload {
+  grid-template-columns: minmax(120px, 180px) minmax(0, 1fr);
+}
+
+.avatar-preview {
+  aspect-ratio: 1;
+  border-radius: 50%;
+}
+
 .upload-controls {
   display: grid;
   gap: 8px;
-}
-
-.upload-controls p {
-  margin: 0;
-  color: var(--muted);
-  font-weight: 750;
 }
 
 .field-grid {

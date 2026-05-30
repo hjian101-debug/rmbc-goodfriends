@@ -462,8 +462,9 @@ function safeFileName(fileName) {
     .slice(0, 80) || "photo";
 }
 
-async function uploadGalleryFile(item, file, button) {
+async function uploadImageFile(item, field, file, button, options = {}) {
   const client = getSupabaseClient();
+  const label = options.label || "图片";
   if (!client) {
     setSaveStatus("请先连接 Supabase", "error");
     return;
@@ -482,9 +483,10 @@ async function uploadGalleryFile(item, file, button) {
   const originalText = button.textContent;
   button.disabled = true;
   button.textContent = "上传中...";
-  setSaveStatus("正在上传照片...", "saving");
+  setSaveStatus(`正在上传${label}...`, "saving");
 
-  const path = `gallery/${item.id}-${Date.now()}-${safeFileName(file.name)}`;
+  const folder = options.folder || "uploads";
+  const path = `${folder}/${item.id}-${Date.now()}-${safeFileName(file.name)}`;
   const { error } = await client.storage.from(storageBucket).upload(path, file, {
     cacheControl: "3600",
     contentType: file.type,
@@ -494,45 +496,44 @@ async function uploadGalleryFile(item, file, button) {
   if (error) {
     button.disabled = false;
     button.textContent = originalText;
-    setSaveStatus("照片上传失败", "error");
+    setSaveStatus(`${label}上传失败`, "error");
     console.error(error);
     return;
   }
 
   const { data } = client.storage.from(storageBucket).getPublicUrl(path);
-  item.image = data.publicUrl;
-  if (!item.alt.zh && item.title.zh) {
+  item[field] = data.publicUrl;
+  if (field === "image" && !item.alt.zh && item.title.zh) {
     item.alt.zh = item.title.zh;
   }
-  if (!item.alt.en && item.title.en) {
+  if (field === "image" && !item.alt.en && item.title.en) {
     item.alt.en = item.title.en;
   }
 
-  saveContent("照片已上传，有未保存修改");
+  saveContent(`${label}已上传，有未保存修改`);
   renderAll();
 }
 
-function createGalleryUpload(item) {
+function createImageUpload(item, options) {
   const wrapper = document.createElement("div");
   const preview = document.createElement("img");
   const controls = document.createElement("div");
   const upload = document.createElement("button");
   const fileInput = document.createElement("input");
-  const note = document.createElement("p");
+  const field = options.field || "image";
 
-  wrapper.className = "image-upload full";
-  preview.className = "image-preview";
-  preview.src = item.image || "./assets/hero-fellowship.svg";
-  preview.alt = item.alt.zh || item.title.zh || "照片预览";
+  wrapper.className = `image-upload ${options.compact ? "avatar-upload " : ""}full`;
+  preview.className = `image-preview ${options.compact ? "avatar-preview" : ""}`;
+  preview.src = item[field] || options.fallback || "./assets/hero-fellowship.svg";
+  preview.alt = options.alt || item.alt?.zh || item.title?.zh || item.name?.zh || "图片预览";
 
   controls.className = "upload-controls";
   upload.type = "button";
   upload.className = "small-button";
-  upload.textContent = "上传照片";
+  upload.textContent = options.buttonText || "上传图片";
   fileInput.type = "file";
   fileInput.accept = "image/jpeg,image/png,image/webp,image/gif";
   fileInput.hidden = true;
-  note.textContent = "支持 JPG、PNG、WebP、GIF，单张最多 10MB。";
 
   upload.addEventListener("click", () => {
     fileInput.click();
@@ -541,14 +542,37 @@ function createGalleryUpload(item) {
   fileInput.addEventListener("change", async () => {
     const file = fileInput.files?.[0];
     if (file) {
-      await uploadGalleryFile(item, file, upload);
+      await uploadImageFile(item, field, file, upload, options);
       fileInput.value = "";
     }
   });
 
-  controls.append(upload, note, fileInput);
+  controls.append(upload, fileInput);
   wrapper.append(preview, controls);
   return wrapper;
+}
+
+function createGalleryUpload(item) {
+  return createImageUpload(item, {
+    field: "image",
+    folder: "gallery",
+    label: "照片",
+    buttonText: "上传照片",
+    fallback: "./assets/hero-fellowship.svg",
+    alt: item.alt.zh || item.title.zh || "照片预览",
+  });
+}
+
+function createAvatarUpload(item) {
+  return createImageUpload(item, {
+    field: "avatar",
+    folder: "team",
+    label: "头像",
+    buttonText: "上传头像",
+    fallback: "./assets/avatar-welcome.svg",
+    alt: item.name.zh || "头像预览",
+    compact: true,
+  });
 }
 
 function renderGatherings() {
@@ -596,7 +620,6 @@ function renderGallery() {
 
       fields.append(
         createGalleryUpload(item),
-        createInput("照片网址", item.image, (value) => { item.image = value; }, { full: true }),
         createInput("中文标题", item.title.zh, (value) => { item.title.zh = value; }),
         createInput("English title", item.title.en, (value) => { item.title.en = value; }),
         createInput("中文替代文字", item.alt.zh, (value) => { item.alt.zh = value; }),
@@ -606,7 +629,7 @@ function renderGallery() {
       );
 
       card.append(
-        cardHeader(item.title.zh || "照片", item.image || "等待添加照片网址", "gallery", item, index),
+        cardHeader(item.title.zh || "照片", item.image ? "已上传照片" : "等待上传照片", "gallery", item, index),
         fields,
         activeToggle(item),
       );
@@ -625,12 +648,12 @@ function renderTeam() {
       fields.className = "field-grid";
 
       fields.append(
+        createAvatarUpload(item),
         createInput("中文姓名/岗位", item.name.zh, (value) => { item.name.zh = value; }),
         createInput("English name/role", item.name.en, (value) => { item.name.en = value; }),
         createInput("中文服事", item.role.zh, (value) => { item.role.zh = value; }),
         createInput("English ministry", item.role.en, (value) => { item.role.en = value; }),
         createInput("联系方式", item.contact, (value) => { item.contact = value; }),
-        createInput("头像网址", item.avatar, (value) => { item.avatar = value; }),
         createInput("中文简介", item.bio.zh, (value) => { item.bio.zh = value; }, { full: true, multiline: true }),
         createInput("English bio", item.bio.en, (value) => { item.bio.en = value; }, { full: true, multiline: true }),
       );
