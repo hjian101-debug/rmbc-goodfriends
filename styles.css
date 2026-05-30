@@ -475,10 +475,45 @@ h3 {
   color: var(--muted);
 }
 
-.event-card span {
+.event-rhythm {
   margin-top: auto;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+}
+
+.event-rhythm-title {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--terracotta);
+  font-size: 12px;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.event-rhythm-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.event-rhythm-items span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 7px 11px;
+  color: var(--moss-dark);
+  background: var(--soft);
+  font-size: 14px;
+  font-weight: 850;
+}
+
+.event-card span {
   color: var(--moss);
   font-weight: 800;
+}
+
+.event-card > span {
+  margin-top: 22px;
 }
 
 .scripture-panel {

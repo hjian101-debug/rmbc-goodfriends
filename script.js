@@ -188,6 +188,11 @@ const translations = {
     "gatherings.bibleStudyCopy": "诗歌、晚餐、查经与分组分享。第一次来的朋友可以直接来，不需要准备。",
     "gatherings.scriptureLabel": "本周经文：",
     "gatherings.scriptureTitle": "本周经文",
+    "gatherings.rhythmTitle": "聚会流程",
+    "gatherings.rhythmDinner": "晚餐",
+    "gatherings.rhythmStudy": "查经",
+    "gatherings.rhythmShare": "分享",
+    "gatherings.rhythmPrayer": "祷告",
     "gatherings.worshipTitle": "主日崇拜",
     "gatherings.worshipCopy": "欢迎与我们一同敬拜，也可以在崇拜后留下来认识新朋友。",
     "announcements.title": "团契公告",
@@ -251,6 +256,11 @@ const translations = {
     "gatherings.bibleStudyCopy": "Worship, dinner, Bible study, and group sharing. First-time visitors are welcome to come as they are.",
     "gatherings.scriptureLabel": "Scripture: ",
     "gatherings.scriptureTitle": "This Week's Scripture",
+    "gatherings.rhythmTitle": "Gathering Rhythm",
+    "gatherings.rhythmDinner": "Dinner",
+    "gatherings.rhythmStudy": "Bible Study",
+    "gatherings.rhythmShare": "Sharing",
+    "gatherings.rhythmPrayer": "Prayer",
     "gatherings.worshipTitle": "Sunday Worship",
     "gatherings.worshipCopy": "Join us for worship, and feel free to stay afterward to meet new friends.",
     "announcements.title": "Fellowship News",
@@ -397,10 +407,26 @@ const renderContent = (language) => {
     eventGrid.replaceChildren(
       ...activeGatherings.map((item) => {
         const article = createElement("article", "event-card");
+        const rhythm = document.createElement("div");
+        const rhythmTitle = createElement("span", "event-rhythm-title", translations[language]["gatherings.rhythmTitle"]);
+        const rhythmItems = document.createElement("div");
+        rhythm.className = "event-rhythm";
+        rhythmItems.className = "event-rhythm-items";
+        [
+          translations[language]["gatherings.rhythmDinner"],
+          translations[language]["gatherings.rhythmStudy"],
+          translations[language]["gatherings.rhythmShare"],
+          translations[language]["gatherings.rhythmPrayer"],
+        ].forEach((label) => {
+          rhythmItems.append(createElement("span", null, label));
+        });
+        rhythm.append(rhythmTitle, rhythmItems);
+
         article.append(
           createElement("time", null, localText(item.day, language)),
           createElement("h3", null, localText(item.title, language)),
           createElement("p", null, localText(item.description, language)),
+          rhythm,
         );
 
         article.append(createElement("span", null, `${localText(item.time, language)} · ${localText(item.location, language)}`));
