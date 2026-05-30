@@ -373,6 +373,21 @@ const createElement = (tagName, className, text) => {
   return element;
 };
 
+const applyPhotoShape = (article, image) => {
+  const width = image.naturalWidth || 1;
+  const height = image.naturalHeight || 1;
+  const ratio = width / height;
+  article.classList.remove("is-wide", "is-tall", "is-square");
+
+  if (ratio >= 1.28) {
+    article.classList.add("is-wide");
+  } else if (ratio <= 0.82) {
+    article.classList.add("is-tall");
+  } else {
+    article.classList.add("is-square");
+  }
+};
+
 const renderContent = (language) => {
   const content = getAdminContent();
 
@@ -455,6 +470,7 @@ const renderContent = (language) => {
     });
 
     const renderGalleryCards = (photos, allowFallback) => {
+      galleryGrid.classList.toggle("is-single", photos.length === 1);
       galleryGrid.replaceChildren(
         ...photos.map((item) => {
           const article = createElement("article", "gallery-card");
@@ -466,6 +482,12 @@ const renderContent = (language) => {
           image.src = item.image;
           image.alt = title || localText(item.alt, language) || "Fellowship photo";
           image.loading = "lazy";
+          image.addEventListener("load", () => {
+            applyPhotoShape(article, image);
+          }, { once: true });
+          if (image.complete) {
+            applyPhotoShape(article, image);
+          }
           image.addEventListener("error", () => {
             article.remove();
             if (!galleryGrid.querySelector(".gallery-card")) {

@@ -152,8 +152,9 @@ textarea {
 }
 
 textarea {
-  min-height: 92px;
-  resize: vertical;
+  min-height: 46px;
+  overflow: hidden;
+  resize: none;
 }
 
 .form-message {
@@ -323,7 +324,7 @@ textarea {
 }
 
 .editor-subsection textarea {
-  min-height: 150px;
+  min-height: 46px;
 }
 
 .card-actions {

@@ -363,6 +363,11 @@ function textValue(value, fallback = "") {
   return value || fallback;
 }
 
+function resizeMultilineField(field) {
+  field.style.height = "auto";
+  field.style.height = `${field.scrollHeight + 2}px`;
+}
+
 function createInput(labelText, value, onInput, options = {}) {
   const label = document.createElement("label");
   label.className = options.full ? "full" : "";
@@ -370,10 +375,21 @@ function createInput(labelText, value, onInput, options = {}) {
 
   const field = options.multiline ? document.createElement("textarea") : document.createElement("input");
   field.value = textValue(value);
+  if (options.multiline) {
+    field.rows = 1;
+  }
   field.addEventListener("input", () => {
     onInput(field.value);
+    if (options.multiline) {
+      resizeMultilineField(field);
+    }
     saveContent();
   });
+  if (options.multiline) {
+    window.requestAnimationFrame(() => {
+      resizeMultilineField(field);
+    });
+  }
 
   label.append(field);
   return label;
