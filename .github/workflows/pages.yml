@@ -24,6 +24,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Update sitemap
+        run: node scripts/update-sitemap.js
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
 

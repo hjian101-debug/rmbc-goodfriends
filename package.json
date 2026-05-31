@@ -1,0 +1,6 @@
+{
+  "scripts": {
+    "update:sitemap": "node scripts/update-sitemap.js",
+    "setup:githooks": "git config core.hooksPath .githooks"
+  }
+}
