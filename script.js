@@ -526,56 +526,47 @@ const renderContent = (language) => {
       const shouldScroll = photos.length > 4;
       const displayPhotos = shouldScroll ? [...photos, ...photos] : photos;
       const track = document.createElement("div");
+      const rows = [document.createElement("div"), document.createElement("div")];
       track.className = "gallery-track";
+      rows.forEach((row) => {
+        row.className = "gallery-row";
+      });
       galleryGrid.classList.toggle("is-scrollable", shouldScroll);
       galleryGrid.classList.toggle("is-single", photos.length === 1);
-      track.replaceChildren(
-        ...displayPhotos.map((item, index) => {
-          const article = createElement("article", "gallery-card");
-          const image = document.createElement("img");
-          const body = document.createElement("div");
-          const title = localText(item.title, language);
-          const caption = localText(item.caption, language);
+      displayPhotos.forEach((item, index) => {
+        const article = createElement("article", "gallery-card");
+        const image = document.createElement("img");
+        const title = localText(item.title, language);
 
-          article.classList.add(index % 3 === 1 ? "is-medium" : "is-wide");
-          if (index >= photos.length) {
-            article.setAttribute("aria-hidden", "true");
+        article.classList.add(["is-large", "is-small", "is-wide", "is-medium", "is-tall"][index % 5]);
+        if (index >= photos.length) {
+          article.setAttribute("aria-hidden", "true");
+        }
+        image.src = item.image;
+        image.alt = title || localText(item.alt, language) || "Fellowship photo";
+        image.loading = "lazy";
+        image.addEventListener("load", () => {
+          article.classList.add(image.naturalHeight > image.naturalWidth * 1.12 ? "is-portrait" : "is-landscape");
+        }, { once: true });
+        image.addEventListener("error", () => {
+          article.remove();
+          if (!galleryGrid.querySelector(".gallery-card")) {
+            const fallbackPhotos = defaultPhotos.filter((fallback) => !photos.some((photo) => photo.image === fallback.image));
+            if (allowFallback && fallbackPhotos.length > 0) {
+              renderGalleryCards(fallbackPhotos, false);
+            } else {
+              gallerySection.hidden = true;
+              galleryLinks.forEach((link) => {
+                link.hidden = true;
+              });
+            }
           }
-          image.src = item.image;
-          image.alt = title || localText(item.alt, language) || "Fellowship photo";
-          image.loading = "lazy";
-          image.addEventListener("load", () => {
-            article.classList.add(image.naturalHeight > image.naturalWidth * 1.12 ? "is-portrait" : "is-landscape");
-          }, { once: true });
-          image.addEventListener("error", () => {
-            article.remove();
-            if (!galleryGrid.querySelector(".gallery-card")) {
-              const fallbackPhotos = defaultPhotos.filter((fallback) => !photos.some((photo) => photo.image === fallback.image));
-              if (allowFallback && fallbackPhotos.length > 0) {
-                renderGalleryCards(fallbackPhotos, false);
-              } else {
-                gallerySection.hidden = true;
-                galleryLinks.forEach((link) => {
-                  link.hidden = true;
-                });
-              }
-            }
-          });
+        });
 
-          article.append(image);
-          if (title || caption) {
-            if (title) {
-              body.append(createElement("h3", null, title));
-            }
-            if (caption) {
-              body.append(createElement("p", null, caption));
-            }
-            article.append(body);
-          }
-
-          return article;
-        }),
-      );
+        article.append(image);
+        rows[index % 2].append(article);
+      });
+      track.replaceChildren(...rows);
       galleryGrid.replaceChildren(track);
     };
 
