@@ -602,10 +602,10 @@ h3 {
 }
 
 .gallery-grid {
-  height: 520px;
+  height: 426px;
   overflow-x: auto;
   overflow-y: hidden;
-  padding-bottom: 14px;
+  padding-bottom: 16px;
   overscroll-behavior-x: contain;
   scroll-snap-type: x proximity;
   scrollbar-color: var(--gold) rgba(41, 67, 54, 0.12);
@@ -614,9 +614,9 @@ h3 {
 .gallery-track {
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: 350px;
-  grid-template-rows: repeat(2, 245px);
-  gap: 24px;
+  grid-auto-columns: 158px;
+  grid-template-rows: repeat(2, 188px);
+  gap: 18px;
   width: max-content;
 }
 
@@ -634,16 +634,21 @@ h3 {
   display: block;
   overflow: hidden;
   border: 1px solid var(--line);
-  background: var(--white);
-  box-shadow: 0 18px 44px rgba(23, 33, 29, 0.12);
+  background: #f8f6ef;
+  box-shadow: 0 12px 30px rgba(23, 33, 29, 0.1);
   scroll-snap-align: start;
 }
 
 .gallery-card.is-landscape {
+  grid-column: span 3;
+}
+
+.gallery-card.is-landscape.is-medium {
   grid-column: span 2;
 }
 
 .gallery-card.is-portrait {
+  grid-column: span 2;
   grid-row: span 2;
 }
 
@@ -669,7 +674,7 @@ h3 {
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   transition: transform 180ms ease;
 }
 
@@ -1009,17 +1014,22 @@ h3 {
   }
 
   .gallery-grid {
-    height: 440px;
+    height: 350px;
   }
 
   .gallery-track {
-    grid-auto-columns: 260px;
-    grid-template-rows: repeat(2, 205px);
+    grid-auto-columns: 132px;
+    grid-template-rows: repeat(2, 156px);
     gap: 16px;
   }
 
   .gallery-card.is-landscape {
-    grid-column: span 1;
+    grid-column: span 2;
+  }
+
+  .gallery-card.is-landscape.is-medium,
+  .gallery-card.is-portrait {
+    grid-column: span 2;
   }
 
   .studies-hero {

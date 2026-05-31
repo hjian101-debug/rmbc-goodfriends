@@ -537,6 +537,7 @@ const renderContent = (language) => {
           const title = localText(item.title, language);
           const caption = localText(item.caption, language);
 
+          article.classList.add(index % 3 === 1 ? "is-medium" : "is-wide");
           if (index >= photos.length) {
             article.setAttribute("aria-hidden", "true");
           }
