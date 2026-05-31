@@ -585,6 +585,14 @@ h3 {
   margin-right: auto;
 }
 
+.section-note {
+  max-width: 320px;
+  margin: 0;
+  color: var(--muted);
+  font-weight: 750;
+  text-align: right;
+}
+
 .gallery .eyebrow {
   color: var(--terracotta);
 }
@@ -594,24 +602,59 @@ h3 {
 }
 
 .gallery-grid {
-  column-width: 320px;
-  column-gap: 18px;
+  height: 520px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 14px;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  scrollbar-color: var(--gold) rgba(41, 67, 54, 0.12);
+}
+
+.gallery-track {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 350px;
+  grid-template-rows: repeat(2, 245px);
+  gap: 24px;
+  width: max-content;
+}
+
+.gallery-grid.is-scrollable .gallery-track {
+  animation: gallery-drift 58s linear infinite;
+}
+
+.gallery-grid.is-scrollable:hover .gallery-track,
+.gallery-grid.is-scrollable:focus-within .gallery-track {
+  animation-play-state: paused;
 }
 
 .gallery-card {
   position: relative;
-  display: inline-block;
-  width: 100%;
-  margin: 0 0 18px;
+  display: block;
   overflow: hidden;
   border: 1px solid var(--line);
   background: var(--white);
   box-shadow: 0 18px 44px rgba(23, 33, 29, 0.12);
-  break-inside: avoid;
+  scroll-snap-align: start;
+}
+
+.gallery-card.is-landscape {
+  grid-column: span 2;
+}
+
+.gallery-card.is-portrait {
+  grid-row: span 2;
 }
 
 .gallery-grid.is-single {
-  column-width: auto;
+  height: auto;
+  overflow: visible;
+}
+
+.gallery-grid.is-single .gallery-track {
+  display: block;
+  width: auto;
 }
 
 .gallery-grid.is-single .gallery-card {
@@ -625,8 +668,8 @@ h3 {
 .gallery-card img {
   display: block;
   width: 100%;
-  height: auto;
-  object-fit: contain;
+  height: 100%;
+  object-fit: cover;
   transition: transform 180ms ease;
 }
 
@@ -658,6 +701,101 @@ h3 {
   max-width: 620px;
   margin: 8px 0 0;
   color: rgba(255, 255, 255, 0.86);
+}
+
+@keyframes gallery-drift {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.studies-page {
+  padding-top: 88px;
+  background: var(--paper);
+}
+
+.studies-hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 32px;
+  align-items: end;
+  padding-bottom: 48px;
+}
+
+.studies-hero h1 {
+  color: var(--ink);
+}
+
+.studies-hero p {
+  max-width: 720px;
+  color: var(--muted);
+  font-size: clamp(18px, 2vw, 25px);
+}
+
+.studies-archive {
+  padding-top: 0;
+}
+
+.study-list {
+  display: grid;
+  gap: 18px;
+}
+
+.study-card {
+  display: grid;
+  grid-template-columns: minmax(140px, 0.3fr) minmax(0, 1fr);
+  gap: 24px;
+  padding: 28px;
+  border: 1px solid var(--line);
+  background: var(--white);
+}
+
+.study-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--terracotta);
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.study-card h2 {
+  grid-column: 2;
+  font-size: clamp(26px, 3vw, 42px);
+}
+
+.study-card blockquote,
+.study-card h3,
+.study-card p {
+  grid-column: 2;
+}
+
+.study-card blockquote {
+  margin: 0;
+  padding-left: 18px;
+  border-left: 5px solid var(--gold);
+  color: var(--moss-dark);
+  font-size: clamp(19px, 2vw, 28px);
+  font-weight: 850;
+  line-height: 1.55;
+}
+
+.study-card h3 {
+  margin-top: 8px;
+  color: var(--terracotta);
+  font-size: 16px;
+  text-transform: uppercase;
+}
+
+.study-card p,
+.empty-state {
+  color: var(--muted);
+  font-size: 19px;
+  line-height: 1.7;
 }
 
 .team {
@@ -865,8 +1003,39 @@ h3 {
     display: block;
   }
 
+  .section-note {
+    margin-top: 10px;
+    text-align: left;
+  }
+
   .gallery-grid {
-    column-width: auto;
+    height: 440px;
+  }
+
+  .gallery-track {
+    grid-auto-columns: 260px;
+    grid-template-rows: repeat(2, 205px);
+    gap: 16px;
+  }
+
+  .gallery-card.is-landscape {
+    grid-column: span 1;
+  }
+
+  .studies-hero {
+    display: grid;
+    align-items: start;
+  }
+
+  .study-card {
+    grid-template-columns: 1fr;
+  }
+
+  .study-card h2,
+  .study-card blockquote,
+  .study-card h3,
+  .study-card p {
+    grid-column: 1;
   }
 
   .event-card {

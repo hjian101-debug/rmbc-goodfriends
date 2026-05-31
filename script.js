@@ -12,6 +12,7 @@ const gallerySection = document.querySelector("[data-gallery-section]");
 const galleryGrid = document.querySelector("[data-gallery-grid]");
 const galleryLinks = document.querySelectorAll("[data-gallery-link]");
 const teamGrid = document.querySelector("[data-team-grid]");
+const studiesList = document.querySelector("[data-studies-list]");
 
 const adminStorageKey = "rmbc-admin-content";
 const supabaseConfig = window.RMBC_SUPABASE_CONFIG || {};
@@ -66,6 +67,23 @@ const defaultContent = {
         en: "RMBC, 4889 Tyler Street, Riverside, CA 92503",
       },
       scripture: { zh: "", en: "" },
+    },
+  ],
+  studies: [
+    {
+      id: "john-3-16",
+      active: true,
+      date: "2026-05-29",
+      title: { zh: "神爱世人", en: "For God So Loved The World" },
+      passage: { zh: "约翰福音 3:16", en: "John 3:16" },
+      scripture: {
+        zh: "神爱世人，甚至将他的独生子赐给他们，叫一切信他的，不至灭亡，反得永生。",
+        en: "For God so loved the world that he gave his only Son, that whoever believes in him should not perish but have eternal life.",
+      },
+      summary: {
+        zh: "我们一起思想神主动的爱、信心的回应，以及福音带来的盼望。",
+        en: "We reflected on God's initiating love, the response of faith, and the hope of the gospel.",
+      },
     },
   ],
   gallery: [
@@ -158,9 +176,11 @@ const translations = {
   zh: {
     "meta.description": "RMBC 好朋友团契是河滨国语浸信会 Riverside Mandarin Baptist Church 的团契，欢迎 Riverside 学生、职场、家庭和朋友参加周五查经、周日礼拜，一起认识信仰、彼此陪伴。",
     "page.title": "RMBC 好朋友团契 | Riverside Mandarin Baptist Church Good Friends Fellowship",
+    "studies.pageTitle": "过去查经内容 | RMBC 好朋友团契",
     "brand.subtitle": "好朋友团契",
     "nav.about": "关于",
     "nav.gatherings": "聚会",
+    "nav.studies": "查经归档",
     "nav.gallery": "照片",
     "nav.team": "同工",
     "nav.visit": "来访",
@@ -201,6 +221,12 @@ const translations = {
     "gatherings.worshipCopy": "欢迎与我们一同敬拜，也可以在崇拜后留下来认识新朋友。",
     "announcements.title": "团契公告",
     "gallery.title": "团契照片",
+    "gallery.hint": "可左右滑动查看更多照片",
+    "studies.title": "过去查经内容",
+    "studies.copy": "这里会整理已经查过的经文、主题和重点，方便回顾。",
+    "studies.empty": "还没有归档的查经内容。",
+    "studies.back": "返回首页",
+    "studies.notes": "查经重点",
     "team.title": "同工团队",
     "team.prayerTitle": "代祷关怀",
     "team.prayerCopy": "关心新朋友与团契成员近况，安排探访和代祷。",
@@ -228,9 +254,11 @@ const translations = {
   en: {
     "meta.description": "RMBC Good Friends Fellowship is a fellowship of Riverside Mandarin Baptist Church, welcoming students, professionals, families, and friends in Riverside for Friday Bible study and Sunday worship.",
     "page.title": "RMBC Good Friends Fellowship | Riverside Mandarin Baptist Church",
+    "studies.pageTitle": "Past Bible Studies | RMBC Good Friends Fellowship",
     "brand.subtitle": "Good Friends Fellowship",
     "nav.about": "About",
     "nav.gatherings": "Gatherings",
+    "nav.studies": "Studies",
     "nav.gallery": "Photos",
     "nav.team": "Team",
     "nav.visit": "Visit",
@@ -271,6 +299,12 @@ const translations = {
     "gatherings.worshipCopy": "Join us for worship, and feel free to stay afterward to meet new friends.",
     "announcements.title": "Fellowship News",
     "gallery.title": "Fellowship Photos",
+    "gallery.hint": "Swipe horizontally to see more photos",
+    "studies.title": "Past Bible Studies",
+    "studies.copy": "A simple archive of passages, themes, and notes from previous Bible studies.",
+    "studies.empty": "No archived Bible studies yet.",
+    "studies.back": "Back Home",
+    "studies.notes": "Study Notes",
     "team.title": "Serving Team",
     "team.prayerTitle": "Prayer And Care",
     "team.prayerCopy": "Cares for newcomers and fellowship members through prayer, follow-up, and visits.",
@@ -321,6 +355,7 @@ const normalizePublicContent = (value) => {
     return {
       announcements: Array.isArray(value.announcements) ? value.announcements : defaultContent.announcements,
       gatherings: Array.isArray(value.gatherings) ? value.gatherings : defaultContent.gatherings,
+      studies: Array.isArray(value.studies) ? value.studies : defaultContent.studies,
       gallery: Array.isArray(value.gallery) ? value.gallery : defaultContent.gallery,
       team: Array.isArray(value.team) ? value.team : defaultContent.team,
     };
@@ -488,18 +523,29 @@ const renderContent = (language) => {
     });
 
     const renderGalleryCards = (photos, allowFallback) => {
+      const shouldScroll = photos.length > 4;
+      const displayPhotos = shouldScroll ? [...photos, ...photos] : photos;
+      const track = document.createElement("div");
+      track.className = "gallery-track";
+      galleryGrid.classList.toggle("is-scrollable", shouldScroll);
       galleryGrid.classList.toggle("is-single", photos.length === 1);
-      galleryGrid.replaceChildren(
-        ...photos.map((item) => {
+      track.replaceChildren(
+        ...displayPhotos.map((item, index) => {
           const article = createElement("article", "gallery-card");
           const image = document.createElement("img");
           const body = document.createElement("div");
           const title = localText(item.title, language);
           const caption = localText(item.caption, language);
 
+          if (index >= photos.length) {
+            article.setAttribute("aria-hidden", "true");
+          }
           image.src = item.image;
           image.alt = title || localText(item.alt, language) || "Fellowship photo";
           image.loading = "lazy";
+          image.addEventListener("load", () => {
+            article.classList.add(image.naturalHeight > image.naturalWidth * 1.12 ? "is-portrait" : "is-landscape");
+          }, { once: true });
           image.addEventListener("error", () => {
             article.remove();
             if (!galleryGrid.querySelector(".gallery-card")) {
@@ -529,6 +575,7 @@ const renderContent = (language) => {
           return article;
         }),
       );
+      galleryGrid.replaceChildren(track);
     };
 
     renderGalleryCards(activePhotos, savedPhotos.length > 0);
@@ -564,12 +611,48 @@ const renderContent = (language) => {
       }),
     );
   }
+
+  if (studiesList) {
+    const studies = (content.studies || [])
+      .filter((item) => item.active !== false)
+      .sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
+
+    if (studies.length === 0) {
+      studiesList.replaceChildren(createElement("p", "empty-state", translations[language]["studies.empty"]));
+    } else {
+      studiesList.replaceChildren(
+        ...studies.map((item) => {
+          const article = createElement("article", "study-card");
+          const meta = createElement("div", "study-meta");
+          const title = localText(item.title, language);
+          const passage = localText(item.passage, language);
+          const scripture = localText(item.scripture, language);
+          const summary = localText(item.summary, language);
+
+          if (item.date) {
+            meta.append(createElement("span", null, item.date));
+          }
+          if (passage) {
+            meta.append(createElement("span", null, passage));
+          }
+          article.append(meta, createElement("h2", null, title || passage || translations[language]["studies.title"]));
+          if (scripture) {
+            article.append(createElement("blockquote", null, scripture));
+          }
+          if (summary) {
+            article.append(createElement("h3", null, translations[language]["studies.notes"]), createElement("p", null, summary));
+          }
+          return article;
+        }),
+      );
+    }
+  }
 };
 
 const applyLanguage = (language) => {
   const dictionary = translations[language];
   document.documentElement.lang = language === "zh" ? "zh-Hans" : "en";
-  document.title = dictionary["page.title"];
+  document.title = document.body.dataset.page === "studies" ? dictionary["studies.pageTitle"] : dictionary["page.title"];
 
   document.querySelectorAll("[data-i18n]").forEach((element) => {
     const key = element.dataset.i18n;
@@ -594,7 +677,7 @@ const applyLanguage = (language) => {
 };
 
 const syncHeader = () => {
-  header.classList.toggle("is-scrolled", window.scrollY > 20);
+  header.classList.toggle("is-scrolled", document.body.dataset.page === "studies" || window.scrollY > 20);
 };
 
 syncHeader();

@@ -67,6 +67,23 @@ const defaultContent = {
       scripture: { zh: "", en: "" },
     },
   ],
+  studies: [
+    {
+      id: "john-3-16",
+      active: true,
+      date: "2026-05-29",
+      title: { zh: "神爱世人", en: "For God So Loved The World" },
+      passage: { zh: "约翰福音 3:16", en: "John 3:16" },
+      scripture: {
+        zh: "神爱世人，甚至将他的独生子赐给他们，叫一切信他的，不至灭亡，反得永生。",
+        en: "For God so loved the world that he gave his only Son, that whoever believes in him should not perish but have eternal life.",
+      },
+      summary: {
+        zh: "我们一起思想神主动的爱、信心的回应，以及福音带来的盼望。",
+        en: "We reflected on God's initiating love, the response of faith, and the hope of the gospel.",
+      },
+    },
+  ],
   gallery: [
     {
       id: "meme-friday",
@@ -178,6 +195,7 @@ function normalizeContent(value) {
 
   next.announcements = Array.isArray(next.announcements) ? next.announcements : defaultContent.announcements;
   next.gatherings = Array.isArray(next.gatherings) ? next.gatherings : defaultContent.gatherings;
+  next.studies = Array.isArray(next.studies) ? next.studies : defaultContent.studies;
   next.gallery = Array.isArray(next.gallery) ? next.gallery : defaultContent.gallery;
   next.team = Array.isArray(next.team) ? next.team : defaultContent.team;
 
@@ -196,6 +214,14 @@ function normalizeContent(value) {
     caption: ensureLocalizedValue(item.caption),
     alt: ensureLocalizedValue(item.alt),
     image: item.image || "",
+  }));
+  next.studies = (Array.isArray(next.studies) ? next.studies : []).map((item) => ({
+    ...item,
+    date: item.date || "",
+    title: ensureLocalizedValue(item.title),
+    passage: ensureLocalizedValue(item.passage),
+    scripture: ensureLocalizedValue(item.scripture),
+    summary: ensureLocalizedValue(item.summary),
   }));
 
   return next;
@@ -263,6 +289,7 @@ function loadLocalContent() {
       return normalizeContent({
         announcements: Array.isArray(saved.announcements) ? saved.announcements : defaultContent.announcements,
         gatherings: Array.isArray(saved.gatherings) ? saved.gatherings : defaultContent.gatherings,
+        studies: Array.isArray(saved.studies) ? saved.studies : defaultContent.studies,
         gallery: Array.isArray(saved.gallery) ? saved.gallery : defaultContent.gallery,
         team: Array.isArray(saved.team) ? saved.team : defaultContent.team,
       });
@@ -677,6 +704,37 @@ function renderGallery() {
   );
 }
 
+function renderStudies() {
+  const list = document.querySelector('[data-list="studies"]');
+  list.replaceChildren(
+    ...content.studies.map((item, index) => {
+      const card = document.createElement("article");
+      const fields = document.createElement("div");
+      card.className = "editor-card";
+      fields.className = "field-grid";
+
+      fields.append(
+        createInput("日期", item.date, (value) => { item.date = value; }),
+        createInput("中文主题", item.title.zh, (value) => { item.title.zh = value; }),
+        createInput("English title", item.title.en, (value) => { item.title.en = value; }),
+        createInput("中文经文出处", item.passage.zh, (value) => { item.passage.zh = value; }),
+        createInput("English passage", item.passage.en, (value) => { item.passage.en = value; }),
+        createInput("中文经文内容", item.scripture.zh, (value) => { item.scripture.zh = value; }, { full: true, multiline: true }),
+        createInput("English scripture", item.scripture.en, (value) => { item.scripture.en = value; }, { full: true, multiline: true }),
+        createInput("中文查经重点", item.summary.zh, (value) => { item.summary.zh = value; }, { full: true, multiline: true }),
+        createInput("English study notes", item.summary.en, (value) => { item.summary.en = value; }, { full: true, multiline: true }),
+      );
+
+      card.append(
+        cardHeader(item.title.zh || "查经内容", item.date || item.passage.zh || "", "studies", item, index),
+        fields,
+        activeToggle(item),
+      );
+      return card;
+    }),
+  );
+}
+
 function renderTeam() {
   const list = document.querySelector('[data-list="team"]');
   list.replaceChildren(
@@ -737,6 +795,7 @@ function renderAnnouncements() {
 function renderAll() {
   renderGatherings();
   renderGallery();
+  renderStudies();
   renderTeam();
   renderAnnouncements();
 }
@@ -765,6 +824,18 @@ function createEmptyItem(collection) {
       title: { zh: "团契照片", en: "Fellowship Photo" },
       caption: { zh: "", en: "" },
       alt: { zh: "", en: "" },
+    };
+  }
+
+  if (collection === "studies") {
+    return {
+      id,
+      active: true,
+      date: new Date().toISOString().slice(0, 10),
+      title: { zh: "新查经内容", en: "New Bible Study" },
+      passage: { zh: "", en: "" },
+      scripture: { zh: "", en: "" },
+      summary: { zh: "", en: "" },
     };
   }
 

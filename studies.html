@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-Hans">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="RMBC 好朋友团契过去查经内容归档。"
+      data-i18n-content="studies.copy"
+    />
+    <meta name="robots" content="index, follow" />
+    <title>过去查经内容 | RMBC 好朋友团契</title>
+    <link rel="stylesheet" href="./styles.css?v=20260530-14" />
+  </head>
+  <body data-page="studies">
+    <header class="site-header is-scrolled" data-header>
+      <a class="brand" href="./index.html#home" aria-label="RMBC 好朋友团契首页">
+        <span class="brand-mark">好</span>
+        <span>
+          <strong>RMBC</strong>
+          <small data-i18n="brand.subtitle">好朋友团契</small>
+        </span>
+      </a>
+      <nav class="nav" aria-label="主导航">
+        <a href="./index.html#about" data-i18n="nav.about">关于</a>
+        <a href="./index.html#gatherings" data-i18n="nav.gatherings">聚会</a>
+        <a href="./studies.html" data-i18n="nav.studies">查经归档</a>
+        <a href="./index.html#gallery" data-i18n="nav.gallery">照片</a>
+        <a href="./index.html#team" data-i18n="nav.team">同工</a>
+        <a href="./index.html#contact" data-i18n="nav.contact">联系</a>
+      </nav>
+      <button class="language-button" type="button" data-language-toggle aria-label="Switch to English">English</button>
+      <button class="menu-button" type="button" aria-expanded="false" aria-controls="mobileNav" data-menu-button>
+        <span></span>
+        <span></span>
+      </button>
+    </header>
+
+    <nav class="mobile-nav" id="mobileNav" aria-label="移动端导航" data-mobile-nav>
+      <a href="./index.html#about" data-i18n="nav.about">关于</a>
+      <a href="./index.html#gatherings" data-i18n="nav.gatherings">聚会</a>
+      <a href="./studies.html" data-i18n="nav.studies">查经归档</a>
+      <a href="./index.html#gallery" data-i18n="nav.gallery">照片</a>
+      <a href="./index.html#team" data-i18n="nav.team">同工</a>
+      <a href="./index.html#contact" data-i18n="nav.contact">联系</a>
+    </nav>
+
+    <main class="studies-page">
+      <section class="section studies-hero">
+        <div>
+          <p class="eyebrow">Bible Study Archive</p>
+          <h1 data-i18n="studies.title">过去查经内容</h1>
+          <p data-i18n="studies.copy">这里会整理已经查过的经文、主题和重点，方便回顾。</p>
+        </div>
+        <a class="button primary" href="./index.html" data-i18n="studies.back">返回首页</a>
+      </section>
+
+      <section class="section studies-archive" aria-label="过去查经内容">
+        <div class="study-list" data-studies-list></div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>© <span data-year></span> <span data-i18n="footer.name">河滨国语浸信会 RMBC 好朋友团契</span></p>
+      <a href="./admin.html" data-i18n="footer.admin">管理员登录</a>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./supabase-config.js?v=20260530-5"></script>
+    <script src="./script.js?v=20260530-14"></script>
+  </body>
+</html>

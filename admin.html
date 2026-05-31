@@ -40,6 +40,7 @@
           </a>
           <nav aria-label="后台导航">
             <a href="#gatherings">聚会信息</a>
+            <a href="#studies">查经归档</a>
             <a href="#gallery">照片管理</a>
             <a href="#team">同工管理</a>
             <a href="#announcements">公告管理</a>
@@ -83,6 +84,17 @@
             <div class="editor-list" data-list="gallery"></div>
           </section>
 
+          <section class="admin-section" id="studies">
+            <div class="section-bar">
+              <div>
+                <p class="eyebrow">Bible Study Archive</p>
+                <h2>查经归档</h2>
+              </div>
+              <button type="button" data-add="studies">新增查经内容</button>
+            </div>
+            <div class="editor-list" data-list="studies"></div>
+          </section>
+
           <section class="admin-section" id="team">
             <div class="section-bar">
               <div>
@@ -110,6 +122,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="./supabase-config.js?v=20260530-5"></script>
-    <script src="./admin.js?v=20260530-6"></script>
+    <script src="./admin.js?v=20260530-7"></script>
   </body>
 </html>
