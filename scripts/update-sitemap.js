@@ -2,7 +2,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const root = path.resolve(__dirname, "..");
-const siteUrl = "https://rmbc-goodfriendsfellowship.onrender.com";
+const siteUrl = "https://rmbc-goodfriends.pages.dev";
 const today = new Date().toISOString().slice(0, 10);
 
 const pageConfig = new Map([
