@@ -9,13 +9,17 @@ const refreshButton = document.querySelector("[data-refresh-button]");
 const resetButton = document.querySelector("[data-reset-button]");
 const saveStatus = document.querySelector("[data-save-status]");
 const addButtons = document.querySelectorAll("[data-add]");
+const adminPageButtons = document.querySelectorAll("[data-admin-page]");
+const adminSections = document.querySelectorAll("[data-admin-section]");
 
 const adminStorageKey = "rmbc-admin-content";
+const adminPageStorageKey = "rmbc-admin-page";
 const supabaseConfig = window.RMBC_SUPABASE_CONFIG || {};
 const storageBucket = supabaseConfig.storageBucket || "site-media";
 let supabaseClient = null;
 let hasUnsavedChanges = false;
 let isSaving = false;
+let activeAdminPage = "gatherings";
 
 const defaultContent = {
   announcements: [
@@ -367,6 +371,7 @@ function saveContent(message = "有未保存修改") {
 async function showDashboard() {
   loginPanel.hidden = true;
   dashboard.hidden = false;
+  setActiveAdminPage(window.localStorage.getItem(adminPageStorageKey) || activeAdminPage);
   setLoginMessage("正在读取 Supabase 内容...");
   try {
     await loadRemoteContent();
@@ -800,6 +805,23 @@ function renderAll() {
   renderAnnouncements();
 }
 
+function setActiveAdminPage(page) {
+  const hasPage = [...adminSections].some((section) => section.dataset.adminSection === page);
+  const nextPage = hasPage ? page : "gatherings";
+  activeAdminPage = nextPage;
+  window.localStorage.setItem(adminPageStorageKey, nextPage);
+
+  adminSections.forEach((section) => {
+    section.hidden = section.dataset.adminSection !== nextPage;
+  });
+
+  adminPageButtons.forEach((button) => {
+    const isActive = button.dataset.adminPage === nextPage;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-current", isActive ? "page" : "false");
+  });
+}
+
 function createEmptyItem(collection) {
   const id = `${collection}-${Date.now()}`;
 
@@ -944,6 +966,12 @@ addButtons.forEach((button) => {
     content[collection].push(createEmptyItem(collection));
     saveContent();
     renderAll();
+  });
+});
+
+adminPageButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    setActiveAdminPage(button.dataset.adminPage);
   });
 });
 

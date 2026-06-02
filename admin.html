@@ -7,7 +7,7 @@
     <meta name="robots" content="noindex, nofollow" />
     <meta http-equiv="Cache-Control" content="no-store" />
     <title>RMBC 好朋友团契管理员</title>
-    <link rel="stylesheet" href="./admin.css?v=20260530-5" />
+    <link rel="stylesheet" href="./admin.css?v=20260602-1" />
   </head>
   <body>
     <main class="admin-shell">
@@ -38,12 +38,12 @@
             <span>好</span>
             <strong>RMBC GFF</strong>
           </a>
-          <nav aria-label="后台导航">
-            <a href="#gatherings">聚会信息</a>
-            <a href="#studies">查经归档</a>
-            <a href="#gallery">照片管理</a>
-            <a href="#team">同工管理</a>
-            <a href="#announcements">公告管理</a>
+          <nav class="admin-nav" aria-label="后台导航">
+            <button type="button" data-admin-page="gatherings">聚会信息</button>
+            <button type="button" data-admin-page="studies">查经归档</button>
+            <button type="button" data-admin-page="gallery">照片管理</button>
+            <button type="button" data-admin-page="team">同工管理</button>
+            <button type="button" data-admin-page="announcements">公告管理</button>
           </nav>
           <button class="ghost-button primary-action" type="button" data-save-button disabled>已保存</button>
           <button class="ghost-button" type="button" data-export-button>导出数据</button>
@@ -62,7 +62,7 @@
             <a class="site-link" href="./index.html" target="_blank" rel="noopener">预览公开网站</a>
           </header>
 
-          <section class="admin-section" id="gatherings">
+          <section class="admin-section" id="gatherings" data-admin-section="gatherings">
             <div class="section-bar">
               <div>
                 <p class="eyebrow">Gatherings</p>
@@ -73,7 +73,7 @@
             <div class="editor-list" data-list="gatherings"></div>
           </section>
 
-          <section class="admin-section" id="gallery">
+          <section class="admin-section" id="gallery" data-admin-section="gallery" hidden>
             <div class="section-bar">
               <div>
                 <p class="eyebrow">Photos</p>
@@ -84,7 +84,7 @@
             <div class="editor-list" data-list="gallery"></div>
           </section>
 
-          <section class="admin-section" id="studies">
+          <section class="admin-section" id="studies" data-admin-section="studies" hidden>
             <div class="section-bar">
               <div>
                 <p class="eyebrow">Bible Study Archive</p>
@@ -95,7 +95,7 @@
             <div class="editor-list" data-list="studies"></div>
           </section>
 
-          <section class="admin-section" id="team">
+          <section class="admin-section" id="team" data-admin-section="team" hidden>
             <div class="section-bar">
               <div>
                 <p class="eyebrow">Team</p>
@@ -106,7 +106,7 @@
             <div class="editor-list" data-list="team"></div>
           </section>
 
-          <section class="admin-section" id="announcements">
+          <section class="admin-section" id="announcements" data-admin-section="announcements" hidden>
             <div class="section-bar">
               <div>
                 <p class="eyebrow">News</p>
@@ -122,6 +122,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="./supabase-config.js?v=20260530-5"></script>
-    <script src="./admin.js?v=20260530-7"></script>
+    <script src="./admin.js?v=20260602-1"></script>
   </body>
 </html>
