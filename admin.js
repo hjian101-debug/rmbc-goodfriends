@@ -63,11 +63,13 @@ const defaultContent = {
         zh: "欢迎与我们一同敬拜，也可以在崇拜后留下来认识新朋友。",
         en: "Join us for worship, and feel free to stay afterward to meet new friends.",
       },
-      time: { zh: "10:00 AM", en: "10:00 AM" },
+      time: { zh: "10:00-11:20 AM", en: "10:00-11:20 AM" },
       location: {
         zh: "RMBC, 4889 Tyler Street, Riverside, CA 92503",
         en: "RMBC, 4889 Tyler Street, Riverside, CA 92503",
       },
+      liveTime: { zh: "主日直播 9:50 AM", en: "Livestream starts at 9:50 AM" },
+      liveUrl: "http://tiny.cc/RMBC",
       scripture: { zh: "", en: "" },
     },
   ],
@@ -210,6 +212,8 @@ function normalizeContent(value) {
     description: ensureLocalizedValue(item.description),
     time: ensureLocalizedValue(item.time),
     location: ensureLocalizedValue(item.location),
+    liveTime: ensureLocalizedValue(item.liveTime),
+    liveUrl: item.liveUrl || "",
     scripture: ensureLocalizedValue(item.scripture),
   }));
   next.gallery = (Array.isArray(next.gallery) ? next.gallery : []).map((item) => ({
@@ -657,6 +661,9 @@ function renderGatherings() {
         createInput("English time", item.time.en, (value) => { item.time.en = value; }),
         createInput("中文地点", item.location.zh, (value) => { item.location.zh = value; }, { full: true }),
         createInput("English location", item.location.en, (value) => { item.location.en = value; }, { full: true }),
+        createInput("直播链接", item.liveUrl, (value) => { item.liveUrl = value; }, { full: true }),
+        createInput("中文直播时间", item.liveTime.zh, (value) => { item.liveTime.zh = value; }),
+        createInput("English livestream time", item.liveTime.en, (value) => { item.liveTime.en = value; }),
         createInput("中文说明", item.description.zh, (value) => { item.description.zh = value; }, { full: true, multiline: true }),
         createInput("English description", item.description.en, (value) => { item.description.en = value; }, { full: true, multiline: true }),
         createEditorSubsection(
@@ -834,6 +841,8 @@ function createEmptyItem(collection) {
       description: { zh: "", en: "" },
       time: { zh: "", en: "" },
       location: { zh: "", en: "" },
+      liveTime: { zh: "", en: "" },
+      liveUrl: "",
       scripture: { zh: "", en: "" },
     };
   }

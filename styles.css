@@ -518,6 +518,20 @@ h3 {
   margin-top: 22px;
 }
 
+.event-live-link {
+  align-self: flex-start;
+  margin-top: 14px;
+  color: var(--terracotta);
+  font-size: 15px;
+  font-weight: 850;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.event-live-link:hover {
+  color: var(--moss-dark);
+}
+
 .scripture-panel {
   display: flex;
   flex-direction: column;

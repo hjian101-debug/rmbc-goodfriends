@@ -61,11 +61,13 @@ const defaultContent = {
         zh: "欢迎与我们一同敬拜，也可以在崇拜后留下来认识新朋友。",
         en: "Join us for worship, and feel free to stay afterward to meet new friends.",
       },
-      time: { zh: "10:00 AM", en: "10:00 AM" },
+      time: { zh: "10:00-11:20 AM", en: "10:00-11:20 AM" },
       location: {
         zh: "RMBC, 4889 Tyler Street, Riverside, CA 92503",
         en: "RMBC, 4889 Tyler Street, Riverside, CA 92503",
       },
+      liveTime: { zh: "主日直播 9:50 AM", en: "Livestream starts at 9:50 AM" },
+      liveUrl: "http://tiny.cc/RMBC",
       scripture: { zh: "", en: "" },
     },
   ],
@@ -219,6 +221,7 @@ const translations = {
     "gatherings.rhythmPrayer": "祷告",
     "gatherings.worshipTitle": "主日崇拜",
     "gatherings.worshipCopy": "欢迎与我们一同敬拜，也可以在崇拜后留下来认识新朋友。",
+    "gatherings.liveLabel": "主日直播",
     "announcements.title": "团契公告",
     "gallery.title": "团契照片",
     "gallery.hint": "可左右滑动查看更多照片",
@@ -297,6 +300,7 @@ const translations = {
     "gatherings.rhythmPrayer": "Prayer",
     "gatherings.worshipTitle": "Sunday Worship",
     "gatherings.worshipCopy": "Join us for worship, and feel free to stay afterward to meet new friends.",
+    "gatherings.liveLabel": "Sunday livestream",
     "announcements.title": "Fellowship News",
     "gallery.title": "Fellowship Photos",
     "gallery.hint": "Swipe horizontally to see more photos",
@@ -480,6 +484,8 @@ const createStructuredEvent = ({
   startTime,
   endTime,
   location,
+  attendanceMode = "https://schema.org/OfflineEventAttendanceMode",
+  virtualLocation,
 }) => {
   const date = getNextPacificDate(weekday, startHour);
   return {
@@ -490,12 +496,13 @@ const createStructuredEvent = ({
     description,
     startDate: `${date}T${startTime}:00`,
     endDate: `${date}T${endTime}:00`,
-    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+    eventAttendanceMode: attendanceMode,
     eventStatus: "https://schema.org/EventScheduled",
     image: [`${siteUrl}/assets/hero-fellowship.svg`],
     isAccessibleForFree: true,
     inLanguage: ["zh-Hans", "en"],
     location,
+    ...(virtualLocation ? { virtualLocation } : {}),
     organizer: {
       "@type": "Organization",
       name: "RMBC Good Friends Fellowship",
@@ -544,7 +551,12 @@ const injectEventStructuredData = () => {
         weekday: 0,
         startHour: 10,
         startTime: "10:00",
-        endTime: "11:30",
+        endTime: "11:20",
+        attendanceMode: "https://schema.org/MixedEventAttendanceMode",
+        virtualLocation: {
+          "@type": "VirtualLocation",
+          url: "http://tiny.cc/RMBC",
+        },
         location: eventPlace("Riverside Mandarin Baptist Church", "4889 Tyler Street", "92503"),
       }),
     ],
@@ -598,7 +610,16 @@ const renderContent = (language) => {
           rhythm,
         );
 
-        article.append(createElement("span", null, `${localText(item.time, language)} · ${localText(item.location, language)}`));
+        const details = createElement("span", null, `${localText(item.time, language)} · ${localText(item.location, language)}`);
+        article.append(details);
+
+        if (item.liveUrl) {
+          const liveLink = createElement("a", "event-live-link", localText(item.liveTime, language) || translations[language]["gatherings.liveLabel"]);
+          liveLink.href = item.liveUrl;
+          liveLink.target = "_blank";
+          liveLink.rel = "noopener";
+          article.append(liveLink);
+        }
         return article;
       }),
     );
