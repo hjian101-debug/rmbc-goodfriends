@@ -356,7 +356,7 @@ h3 {
 
 .feature-list article,
 .event-card,
-.scripture-panel {
+.scripture-card {
   background: var(--white);
   border: 1px solid var(--line);
 }
@@ -451,7 +451,7 @@ h3 {
 }
 
 .gatherings-layout.has-scripture .event-card,
-.gatherings-layout.has-scripture .scripture-panel {
+.gatherings-layout.has-scripture .scripture-card {
   height: var(--gathering-panel-height);
   min-height: 0;
 }
@@ -533,6 +533,11 @@ h3 {
 }
 
 .scripture-panel {
+  display: grid;
+  gap: 16px;
+}
+
+.scripture-card {
   display: flex;
   flex-direction: column;
   min-height: 274px;
@@ -1097,7 +1102,7 @@ h3 {
     min-height: 220px;
   }
 
-  .gatherings-layout.has-scripture .scripture-panel {
+  .gatherings-layout.has-scripture .scripture-card {
     height: 360px;
   }
 

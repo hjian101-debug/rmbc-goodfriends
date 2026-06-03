@@ -651,25 +651,27 @@ const renderContent = (language) => {
       scripturePanel.replaceChildren();
 
       if (scriptureItems.length > 0) {
-        const heading = document.createElement("div");
-        const list = document.createElement("div");
-        heading.className = "scripture-heading";
-        list.className = "scripture-list";
-        heading.append(
-          createElement("p", "eyebrow", "Scripture"),
-          createElement("h3", null, translations[language]["gatherings.scriptureTitle"]),
-        );
-
         scriptureItems.forEach((item) => {
+          const card = createElement("article", "scripture-card");
+          const heading = document.createElement("div");
+          const list = document.createElement("div");
           const article = createElement("article", "scripture-entry");
+
+          heading.className = "scripture-heading";
+          list.className = "scripture-list";
+          heading.append(
+            createElement("p", "eyebrow", "Scripture"),
+            createElement("h3", null, translations[language]["gatherings.scriptureTitle"]),
+          );
+
           if (item.title) {
             article.append(createElement("span", null, item.title));
           }
           article.append(createElement("p", null, item.scripture));
           list.append(article);
+          card.append(heading, list);
+          scripturePanel.append(card);
         });
-
-        scripturePanel.append(heading, list);
       }
     }
   }
