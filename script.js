@@ -219,6 +219,9 @@ const translations = {
     "gatherings.rhythmStudy": "查经",
     "gatherings.rhythmShare": "分享",
     "gatherings.rhythmPrayer": "祷告",
+    "gatherings.rhythmLivestream": "直播 9:50",
+    "gatherings.rhythmWorship": "崇拜 10:00",
+    "gatherings.rhythmDismissal": "结束 11:20",
     "gatherings.worshipTitle": "主日崇拜",
     "gatherings.worshipCopy": "欢迎与我们一同敬拜，也可以在崇拜后留下来认识新朋友。",
     "gatherings.liveLabel": "主日直播",
@@ -298,6 +301,9 @@ const translations = {
     "gatherings.rhythmStudy": "Bible Study",
     "gatherings.rhythmShare": "Sharing",
     "gatherings.rhythmPrayer": "Prayer",
+    "gatherings.rhythmLivestream": "Livestream 9:50",
+    "gatherings.rhythmWorship": "Worship 10:00",
+    "gatherings.rhythmDismissal": "Ends 11:20",
     "gatherings.worshipTitle": "Sunday Worship",
     "gatherings.worshipCopy": "Join us for worship, and feel free to stay afterward to meet new friends.",
     "gatherings.liveLabel": "Sunday livestream",
@@ -591,14 +597,22 @@ const renderContent = (language) => {
         const rhythm = document.createElement("div");
         const rhythmTitle = createElement("span", "event-rhythm-title", translations[language]["gatherings.rhythmTitle"]);
         const rhythmItems = document.createElement("div");
+        const isSundayWorship = item.id === "sunday-worship";
         rhythm.className = "event-rhythm";
         rhythmItems.className = "event-rhythm-items";
-        [
-          translations[language]["gatherings.rhythmDinner"],
-          translations[language]["gatherings.rhythmStudy"],
-          translations[language]["gatherings.rhythmShare"],
-          translations[language]["gatherings.rhythmPrayer"],
-        ].forEach((label) => {
+        const rhythmLabels = isSundayWorship
+          ? [
+              translations[language]["gatherings.rhythmLivestream"],
+              translations[language]["gatherings.rhythmWorship"],
+              translations[language]["gatherings.rhythmDismissal"],
+            ]
+          : [
+              translations[language]["gatherings.rhythmDinner"],
+              translations[language]["gatherings.rhythmStudy"],
+              translations[language]["gatherings.rhythmShare"],
+              translations[language]["gatherings.rhythmPrayer"],
+            ];
+        rhythmLabels.forEach((label) => {
           rhythmItems.append(createElement("span", null, label));
         });
         rhythm.append(rhythmTitle, rhythmItems);
