@@ -425,6 +425,133 @@ const createElement = (tagName, className, text) => {
   return element;
 };
 
+const siteUrl = "https://rmbc-goodfriends.pages.dev";
+const pacificTimeZone = "America/Los_Angeles";
+
+const getPacificParts = (date) => {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: pacificTimeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(date);
+  return Object.fromEntries(parts.map((part) => [part.type, part.value]));
+};
+
+const formatDateOnly = (date) => date.toISOString().slice(0, 10);
+
+const getNextPacificDate = (weekday, eventHour) => {
+  const nowParts = getPacificParts(new Date());
+  const today = new Date(Date.UTC(Number(nowParts.year), Number(nowParts.month) - 1, Number(nowParts.day)));
+  const currentWeekday = today.getUTCDay();
+  let daysAhead = (weekday - currentWeekday + 7) % 7;
+
+  if (daysAhead === 0 && Number(nowParts.hour) >= eventHour) {
+    daysAhead = 7;
+  }
+
+  today.setUTCDate(today.getUTCDate() + daysAhead);
+  return formatDateOnly(today);
+};
+
+const eventPlace = (name, streetAddress, postalCode) => ({
+  "@type": "Place",
+  name,
+  address: {
+    "@type": "PostalAddress",
+    streetAddress,
+    addressLocality: "Riverside",
+    addressRegion: "CA",
+    postalCode,
+    addressCountry: "US",
+  },
+});
+
+const createStructuredEvent = ({
+  id,
+  name,
+  alternateName,
+  description,
+  weekday,
+  startHour,
+  startTime,
+  endTime,
+  location,
+}) => {
+  const date = getNextPacificDate(weekday, startHour);
+  return {
+    "@type": "Event",
+    "@id": `${siteUrl}/#${id}-${date}`,
+    name,
+    alternateName,
+    description,
+    startDate: `${date}T${startTime}:00`,
+    endDate: `${date}T${endTime}:00`,
+    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+    eventStatus: "https://schema.org/EventScheduled",
+    image: [`${siteUrl}/assets/hero-fellowship.svg`],
+    isAccessibleForFree: true,
+    inLanguage: ["zh-Hans", "en"],
+    location,
+    organizer: {
+      "@type": "Organization",
+      name: "RMBC Good Friends Fellowship",
+      url: siteUrl,
+    },
+    offers: {
+      "@type": "Offer",
+      url: siteUrl,
+      price: "0",
+      priceCurrency: "USD",
+      availability: "https://schema.org/InStock",
+      validFrom: `${date}T00:00:00`,
+    },
+  };
+};
+
+const injectEventStructuredData = () => {
+  if (!eventGrid) {
+    return;
+  }
+
+  document.querySelector("[data-structured-events]")?.remove();
+
+  const script = document.createElement("script");
+  script.type = "application/ld+json";
+  script.dataset.structuredEvents = "true";
+  script.textContent = JSON.stringify({
+    "@context": "https://schema.org",
+    "@graph": [
+      createStructuredEvent({
+        id: "friday-bible-study",
+        name: "Fellowship Bible Study",
+        alternateName: "团契查经",
+        description: "RMBC 好朋友团契周五中文查经、晚餐、诗歌、分享和祷告，欢迎 Riverside 与 UCR 附近的新朋友参加。",
+        weekday: 5,
+        startHour: 18,
+        startTime: "18:00",
+        endTime: "21:00",
+        location: eventPlace("Crest Community Church", "3431 Mt Vernon Ave", "92507"),
+      }),
+      createStructuredEvent({
+        id: "sunday-worship",
+        name: "Sunday Worship",
+        alternateName: "主日崇拜",
+        description: "Riverside Mandarin Baptist Church 主日崇拜，欢迎好朋友团契和新朋友一同敬拜。",
+        weekday: 0,
+        startHour: 10,
+        startTime: "10:00",
+        endTime: "11:30",
+        location: eventPlace("Riverside Mandarin Baptist Church", "4889 Tyler Street", "92503"),
+      }),
+    ],
+  });
+  document.head.append(script);
+};
+
 const renderContent = (language) => {
   const content = getAdminContent();
 
@@ -681,6 +808,7 @@ if (year) {
 
 let currentLanguage = getSavedLanguage();
 applyLanguage(currentLanguage);
+injectEventStructuredData();
 loadSupabaseContent();
 
 languageToggle?.addEventListener("click", () => {
