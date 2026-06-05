@@ -1020,6 +1020,7 @@ h3 {
 .contact-actions {
   display: grid;
   gap: 12px;
+  align-self: end;
 }
 
 .contact-link {
