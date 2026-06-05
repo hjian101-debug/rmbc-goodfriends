@@ -788,7 +788,7 @@ const renderContent = (language) => {
           const heading = document.createElement("div");
           const grid = document.createElement("div");
 
-          section.className = "photo-category";
+          section.className = `photo-category photo-category-${category.id}`;
           heading.className = "photo-category-heading";
           grid.className = "photo-grid";
           heading.append(
