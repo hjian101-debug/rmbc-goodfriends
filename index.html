@@ -35,7 +35,7 @@
     />
     <meta name="twitter:image" content="https://rmbc-goodfriends.pages.dev/assets/hero-fellowship.svg" />
     <title>RMBC 好朋友团契 | Riverside 华人教会中文查经与 Good Friends Fellowship</title>
-    <link rel="stylesheet" href="./styles.css?v=20260605-2" />
+    <link rel="stylesheet" href="./styles.css?v=20260605-3" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -220,19 +220,45 @@
       </section>
 
       <section class="section contact" id="contact">
-        <div>
+        <div class="contact-copy">
           <p class="eyebrow">Contact</p>
           <h2 data-i18n="contact.title">联系好朋友团契</h2>
         </div>
         <div class="contact-actions">
           <a class="contact-link" href="mailto:hello@rmbc.example" data-i18n="contact.email">团契邮箱 hello@rmbc.example</a>
           <a class="contact-link" href="#team" data-i18n="contact.welcome">联系接待同工</a>
-          <a class="contact-link" href="https://www.google.com/maps/search/?api=1&query=Crest%20Community%20Church%203431%20Mt%20Vernon%20Ave%20Riverside%20CA%2092507">
-            <span data-i18n="contact.gffMap">好朋友团契周五地址：Crest Community Church, 3431 Mt Vernon Ave</span>
-          </a>
-          <a class="contact-link" href="https://www.google.com/maps/search/?api=1&query=Riverside%20Mandarin%20Baptist%20Church%204889%20Tyler%20Street%20Riverside%20CA%2092503">
-            <span data-i18n="contact.rmbcMap">RMBC 主日地址：4889 Tyler Street</span>
-          </a>
+        </div>
+        <div class="contact-map-grid">
+          <article class="contact-map-card">
+            <div class="contact-map-info">
+              <p class="eyebrow" data-i18n="contact.fridayLabel">周五团契</p>
+              <h3 data-i18n="contact.fridayTitle">好朋友团契周五地址</h3>
+              <a href="https://www.google.com/maps/search/?api=1&query=Crest%20Community%20Church%203431%20Mt%20Vernon%20Ave%20Riverside%20CA%2092507" target="_blank" rel="noopener">
+                <span data-i18n="contact.gffMap">Crest Community Church, 3431 Mt Vernon Ave</span>
+              </a>
+            </div>
+            <iframe
+              title="Crest Community Church map"
+              src="https://www.google.com/maps?q=Crest%20Community%20Church%2C%203431%20Mt%20Vernon%20Ave%2C%20Riverside%2C%20CA%2092507&output=embed"
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+            ></iframe>
+          </article>
+          <article class="contact-map-card">
+            <div class="contact-map-info">
+              <p class="eyebrow" data-i18n="contact.sundayLabel">主日崇拜</p>
+              <h3 data-i18n="contact.sundayTitle">RMBC 主日地址</h3>
+              <a href="https://www.google.com/maps/search/?api=1&query=Riverside%20Mandarin%20Baptist%20Church%204889%20Tyler%20Street%20Riverside%20CA%2092503" target="_blank" rel="noopener">
+                <span data-i18n="contact.rmbcMap">4889 Tyler Street</span>
+              </a>
+            </div>
+            <iframe
+              title="Riverside Mandarin Baptist Church map"
+              src="https://www.google.com/maps?q=Riverside%20Mandarin%20Baptist%20Church%2C%204889%20Tyler%20Street%2C%20Riverside%2C%20CA%2092503&output=embed"
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+            ></iframe>
+          </article>
         </div>
       </section>
     </main>
@@ -247,6 +273,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="./supabase-config.js?v=20260527-1"></script>
-    <script src="./script.js?v=20260605-2"></script>
+    <script src="./script.js?v=20260605-3"></script>
   </body>
 </html>
