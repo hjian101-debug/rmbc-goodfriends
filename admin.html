@@ -7,7 +7,7 @@
     <meta name="robots" content="noindex, nofollow" />
     <meta http-equiv="Cache-Control" content="no-store" />
     <title>RMBC 好朋友团契管理员</title>
-    <link rel="stylesheet" href="./admin.css?v=20260604-1" />
+    <link rel="stylesheet" href="./admin.css?v=20260605-1" />
   </head>
   <body>
     <main class="admin-shell">
@@ -41,7 +41,13 @@
           <nav class="admin-nav" aria-label="后台导航">
             <button type="button" data-admin-page="gatherings">聚会信息</button>
             <button type="button" data-admin-page="studies">查经归档</button>
-            <button type="button" data-admin-page="gallery">照片管理</button>
+            <div class="admin-nav-group">
+              <button type="button" data-admin-page="gallery">照片管理</button>
+              <div class="admin-subnav" aria-label="照片分类">
+                <button type="button" data-admin-gallery-category="fellowship">团契聚会</button>
+                <button type="button" data-admin-gallery-category="activity">活动日</button>
+              </div>
+            </div>
             <button type="button" data-admin-page="team">同工管理</button>
             <button type="button" data-admin-page="announcements">公告管理</button>
           </nav>
@@ -122,6 +128,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="./supabase-config.js?v=20260530-5"></script>
-    <script src="./admin.js?v=20260604-1"></script>
+    <script src="./admin.js?v=20260605-1"></script>
   </body>
 </html>

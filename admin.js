@@ -11,6 +11,7 @@ const saveStatus = document.querySelector("[data-save-status]");
 const addButtons = document.querySelectorAll("[data-add]");
 const adminPageButtons = document.querySelectorAll("[data-admin-page]");
 const adminSections = document.querySelectorAll("[data-admin-section]");
+const adminGalleryCategoryButtons = document.querySelectorAll("[data-admin-gallery-category]");
 
 const adminStorageKey = "rmbc-admin-content";
 const adminPageStorageKey = "rmbc-admin-page";
@@ -20,6 +21,7 @@ let supabaseClient = null;
 let hasUnsavedChanges = false;
 let isSaving = false;
 let activeAdminPage = "gatherings";
+let activeGalleryCategory = "fellowship";
 
 const defaultContent = {
   announcements: [
@@ -184,6 +186,7 @@ const photoCategories = [
   { id: "fellowship", title: "团契聚会" },
   { id: "activity", title: "活动日" },
 ];
+const placeholderPhotoTitles = new Set(["团契照片", "Fellowship Photo"]);
 
 let content = normalizeContent(defaultContent);
 
@@ -202,6 +205,14 @@ function ensureLocalizedValue(value) {
   return {
     zh: value || "",
     en: "",
+  };
+}
+
+function normalizePhotoTitle(value) {
+  const title = ensureLocalizedValue(value);
+  return {
+    zh: placeholderPhotoTitles.has(title.zh) ? "" : title.zh,
+    en: placeholderPhotoTitles.has(title.en) ? "" : title.en,
   };
 }
 
@@ -228,7 +239,7 @@ function normalizeContent(value) {
   next.gallery = (Array.isArray(next.gallery) ? next.gallery : []).map((item) => ({
     ...item,
     category: photoCategories.some((category) => category.id === item.category) ? item.category : "fellowship",
-    title: ensureLocalizedValue(item.title),
+    title: normalizePhotoTitle(item.title),
     caption: ensureLocalizedValue(item.caption),
     alt: ensureLocalizedValue(item.alt),
     image: item.image || "",
@@ -444,28 +455,6 @@ function createInput(labelText, value, onInput, options = {}) {
   return label;
 }
 
-function createSelect(labelText, value, options, onChange) {
-  const label = document.createElement("label");
-  const field = document.createElement("select");
-
-  label.textContent = labelText;
-  options.forEach((option) => {
-    const entry = document.createElement("option");
-    entry.value = option.value;
-    entry.textContent = option.label;
-    field.append(entry);
-  });
-  field.value = value;
-  field.addEventListener("change", () => {
-    onChange(field.value);
-    saveContent();
-    renderAll();
-  });
-
-  label.append(field);
-  return label;
-}
-
 function createEditorSubsection(title, ...children) {
   const wrapper = document.createElement("div");
   const heading = document.createElement("h4");
@@ -487,6 +476,23 @@ function moveItem(collection, index, direction) {
 
   const entries = content[collection];
   [entries[index], entries[nextIndex]] = [entries[nextIndex], entries[index]];
+  saveContent();
+  renderAll();
+}
+
+function moveGalleryItem(index, categoryId, direction) {
+  const categoryIndexes = content.gallery
+    .map((item, itemIndex) => ((item.category || "fellowship") === categoryId ? itemIndex : -1))
+    .filter((itemIndex) => itemIndex >= 0);
+  const currentPosition = categoryIndexes.indexOf(index);
+  const nextPosition = currentPosition + direction;
+
+  if (currentPosition < 0 || nextPosition < 0 || nextPosition >= categoryIndexes.length) {
+    return;
+  }
+
+  const nextIndex = categoryIndexes[nextPosition];
+  [content.gallery[index], content.gallery[nextIndex]] = [content.gallery[nextIndex], content.gallery[index]];
   saveContent();
   renderAll();
 }
@@ -529,6 +535,55 @@ function cardHeader(title, subtitle, collection, item, index) {
     }
 
     content[collection] = content[collection].filter((entry) => entry.id !== item.id);
+    saveContent();
+    renderAll();
+  });
+
+  titleBlock.append(heading, note);
+  actions.append(up, down, remove);
+  header.append(titleBlock, actions);
+  return header;
+}
+
+function galleryCardHeader(title, subtitle, item, index, categoryId, position, total) {
+  const header = document.createElement("header");
+  const titleBlock = document.createElement("div");
+  const heading = document.createElement("h3");
+  const note = document.createElement("p");
+  const actions = document.createElement("div");
+  const up = document.createElement("button");
+  const down = document.createElement("button");
+  const remove = document.createElement("button");
+  const displayTitle = title || "照片";
+
+  heading.textContent = displayTitle;
+  note.textContent = subtitle;
+  actions.className = "card-actions";
+  up.className = "small-button";
+  up.type = "button";
+  up.textContent = "上移";
+  up.disabled = position === 0;
+  up.addEventListener("click", () => {
+    moveGalleryItem(index, categoryId, -1);
+  });
+
+  down.className = "small-button";
+  down.type = "button";
+  down.textContent = "下移";
+  down.disabled = position === total - 1;
+  down.addEventListener("click", () => {
+    moveGalleryItem(index, categoryId, 1);
+  });
+
+  remove.className = "small-button danger-button";
+  remove.type = "button";
+  remove.textContent = "删除";
+  remove.addEventListener("click", () => {
+    if (!window.confirm(`确定删除「${displayTitle}」吗？删除后需要点击「保存到网站」才会更新公开网站。`)) {
+      return;
+    }
+
+    content.gallery = content.gallery.filter((entry) => entry.id !== item.id);
     saveContent();
     renderAll();
   });
@@ -717,62 +772,51 @@ function renderGatherings() {
 
 function renderGallery() {
   const list = document.querySelector('[data-list="gallery"]');
-  list.replaceChildren(
-    ...photoCategories.map((category) => {
-      const section = document.createElement("section");
-      const heading = document.createElement("h3");
-      const categoryItems = content.gallery
-        .map((item, index) => ({ item, index }))
-        .filter((entry) => (entry.item.category || "fellowship") === category.id);
+  const category = photoCategories.find((entry) => entry.id === activeGalleryCategory) || photoCategories[0];
+  const section = document.createElement("section");
+  const heading = document.createElement("h3");
+  const categoryItems = content.gallery
+    .map((item, index) => ({ item, index }))
+    .filter((entry) => (entry.item.category || "fellowship") === category.id);
 
-      section.className = "editor-group";
-      heading.textContent = category.title;
-      section.append(heading);
+  section.className = "editor-group";
+  heading.textContent = category.title;
+  section.append(heading);
 
-      if (categoryItems.length === 0) {
-        const empty = document.createElement("p");
-        empty.className = "empty-note";
-        empty.textContent = "这个分类还没有照片。";
-        section.append(empty);
-      }
+  if (categoryItems.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "empty-note";
+    empty.textContent = "这个分类还没有照片。点击右上角「新增照片」后，照片会直接加入这里。";
+    section.append(empty);
+  }
 
-      categoryItems.forEach(({ item, index }) => {
-        const card = document.createElement("article");
-        const fields = document.createElement("div");
-        card.className = "editor-card";
-        fields.className = "field-grid";
+  categoryItems.forEach(({ item, index }, position) => {
+    const card = document.createElement("article");
+    const fields = document.createElement("div");
+    card.className = "editor-card";
+    fields.className = "field-grid";
 
-        fields.append(
-          createGalleryUpload(item),
-          createSelect(
-            "照片分类",
-            item.category || "fellowship",
-            photoCategories.map((entry) => ({ value: entry.id, label: entry.title })),
-            (value) => {
-              item.category = value;
-            },
-          ),
-          createInput("中文标题", item.title.zh, (value) => {
-            item.title.zh = value;
-            item.alt.zh = value;
-          }),
-          createInput("English title", item.title.en, (value) => {
-            item.title.en = value;
-            item.alt.en = value;
-          }),
-        );
+    fields.append(
+      createGalleryUpload(item),
+      createInput("中文标题", item.title.zh, (value) => {
+        item.title.zh = value;
+        item.alt.zh = value;
+      }),
+      createInput("English title", item.title.en, (value) => {
+        item.title.en = value;
+        item.alt.en = value;
+      }),
+    );
 
-        card.append(
-          cardHeader(item.title.zh || "照片", item.image ? category.title : "等待上传照片", "gallery", item, index),
-          fields,
-          activeToggle(item),
-        );
-        section.append(card);
-      });
+    card.append(
+      galleryCardHeader(item.title.zh || "", item.image ? category.title : "等待上传照片", item, index, category.id, position, categoryItems.length),
+      fields,
+      activeToggle(item),
+    );
+    section.append(card);
+  });
 
-      return section;
-    }),
-  );
+  list.replaceChildren(section);
 }
 
 function renderStudies() {
@@ -886,6 +930,14 @@ function setActiveAdminPage(page) {
     button.classList.toggle("is-active", isActive);
     button.setAttribute("aria-current", isActive ? "page" : "false");
   });
+
+  adminGalleryCategoryButtons.forEach((button) => {
+    const isActive = nextPage === "gallery" && button.dataset.adminGalleryCategory === activeGalleryCategory;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-current", isActive ? "page" : "false");
+  });
+
+  document.querySelector(".admin-nav-group")?.classList.toggle("is-open", nextPage === "gallery");
 }
 
 function createEmptyItem(collection) {
@@ -911,8 +963,8 @@ function createEmptyItem(collection) {
       id,
       active: true,
       image: "",
-      category: "fellowship",
-      title: { zh: "团契照片", en: "Fellowship Photo" },
+      category: activeGalleryCategory,
+      title: { zh: "", en: "" },
       caption: { zh: "", en: "" },
       alt: { zh: "", en: "" },
     };
@@ -1041,6 +1093,18 @@ addButtons.forEach((button) => {
 adminPageButtons.forEach((button) => {
   button.addEventListener("click", () => {
     setActiveAdminPage(button.dataset.adminPage);
+    renderAll();
+  });
+});
+
+adminGalleryCategoryButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    const category = button.dataset.adminGalleryCategory;
+    if (photoCategories.some((entry) => entry.id === category)) {
+      activeGalleryCategory = category;
+    }
+    setActiveAdminPage("gallery");
+    renderAll();
   });
 });
 

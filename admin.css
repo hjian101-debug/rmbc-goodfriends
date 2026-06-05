@@ -233,6 +233,34 @@ textarea {
   cursor: default;
 }
 
+.admin-nav-group {
+  display: grid;
+  gap: 6px;
+}
+
+.admin-subnav {
+  display: none;
+  gap: 6px;
+  padding-left: 14px;
+}
+
+.admin-nav-group:hover .admin-subnav,
+.admin-nav-group:focus-within .admin-subnav,
+.admin-nav-group.is-open .admin-subnav {
+  display: grid;
+}
+
+.admin-subnav button {
+  min-height: 36px;
+  padding: 8px 12px;
+  font-size: 14px;
+}
+
+.admin-subnav button.is-active {
+  color: var(--moss-dark);
+  background: var(--soft);
+}
+
 .ghost-button {
   color: var(--white);
   background: transparent;

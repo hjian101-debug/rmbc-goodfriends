@@ -183,6 +183,7 @@ const photoCategories = [
   { id: "fellowship", title: { zh: "团契聚会", en: "Fellowship Gatherings" } },
   { id: "activity", title: { zh: "活动日", en: "Activity Days" } },
 ];
+const placeholderPhotoTitles = new Set(["团契照片", "Fellowship Photo"]);
 
 const translations = {
   zh: {
@@ -450,6 +451,11 @@ const getVisiblePhotos = (content) => {
   const savedPhotos = (content.gallery || []).filter((item) => item.active !== false && item.image);
   const defaultPhotos = defaultContent.gallery.filter((item) => item.active !== false && item.image);
   return savedPhotos.length > 0 ? savedPhotos : defaultPhotos;
+};
+
+const photoTitleText = (item, language) => {
+  const title = localText(item.title, language).trim();
+  return placeholderPhotoTitles.has(title) ? "" : title;
 };
 
 const createElement = (tagName, className, text) => {
@@ -796,7 +802,7 @@ const renderContent = (language) => {
             photos.forEach((item) => {
               const article = document.createElement("article");
               const image = document.createElement("img");
-              const title = localText(item.title, language);
+              const title = photoTitleText(item, language);
 
               article.className = "photo-card";
               image.src = item.image;
