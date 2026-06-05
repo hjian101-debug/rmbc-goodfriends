@@ -5,18 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="RMBC 好朋友团契过去中文查经内容归档，整理 UCR 与 Riverside 华人教会朋友一起学习过的圣经经文、主题和查经重点。"
-      data-i18n-content="studies.copy"
+      content="RMBC 好朋友团契精彩瞬间，按团契聚会和活动日分类整理照片。"
+      data-i18n-content="photos.copy"
     />
     <meta
       name="keywords"
-      content="好朋友团契查经, RMBC 好朋友团契, UCR 查经, Riverside 中文查经, Riverside 华人教会, 河滨国语浸信会, Good Friends Fellowship Bible study"
+      content="好朋友团契照片, RMBC 好朋友团契, 团契聚会照片, 活动日照片, Riverside 华人教会照片"
     />
     <meta name="robots" content="index, follow" />
-    <title>过去查经内容 | RMBC 好朋友团契 UCR Riverside</title>
+    <title>精彩瞬间 | RMBC 好朋友团契</title>
     <link rel="stylesheet" href="./styles.css?v=20260604-1" />
   </head>
-  <body data-page="studies">
+  <body data-page="photos">
     <header class="site-header is-scrolled" data-header>
       <a class="brand" href="./index.html#home" aria-label="RMBC 好朋友团契首页">
         <span class="brand-mark">好</span>
@@ -49,24 +49,27 @@
       <a href="./index.html#contact" data-i18n="nav.contact">联系</a>
     </nav>
 
-    <main class="studies-page">
-      <section class="section studies-hero">
+    <main class="photos-page">
+      <section class="section photos-hero">
         <div>
-          <p class="eyebrow">Bible Study Archive</p>
-          <h1 data-i18n="studies.title">过去查经内容</h1>
-          <p data-i18n="studies.copy">这里会整理已经查过的经文、主题和重点，方便回顾。</p>
+          <p class="eyebrow">Photo Moments</p>
+          <h1 data-i18n="photos.title">精彩瞬间</h1>
+          <p data-i18n="photos.copy">按团契聚会和活动日整理照片，回看一起走过的时间。</p>
         </div>
-        <a class="button primary" href="./index.html" data-i18n="studies.back">返回首页</a>
+        <a class="button primary" href="./index.html#gallery" data-i18n="photos.backToWall">返回照片墙</a>
       </section>
 
-      <section class="section studies-archive" aria-label="过去查经内容">
-        <div class="study-list" data-studies-list></div>
+      <section class="section photos-archive" aria-label="精彩瞬间">
+        <div class="photo-category-list" data-photo-category-list></div>
       </section>
     </main>
 
-    <footer class="site-footer">
+    <footer class="footer">
       <p>© <span data-year></span> <span data-i18n="footer.name">河滨国语浸信会 RMBC 好朋友团契</span></p>
-      <a href="./admin.html" data-i18n="footer.admin">管理员登录</a>
+      <div class="footer-links">
+        <a href="./admin.html" data-i18n="footer.admin">管理员登录</a>
+        <a href="./index.html#home" data-i18n="footer.top">回到顶部</a>
+      </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

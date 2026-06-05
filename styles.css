@@ -737,6 +737,15 @@ h3 {
   transform: scale(1.03);
 }
 
+.gallery-actions {
+  width: min(1120px, calc(100% - 36px));
+  margin: 26px auto 0;
+}
+
+.gallery-more-button {
+  min-width: 190px;
+}
+
 @keyframes gallery-drift {
   from {
     transform: translateX(0);
@@ -752,7 +761,8 @@ h3 {
   background: var(--paper);
 }
 
-.studies-hero {
+.studies-hero,
+.photos-hero {
   display: flex;
   justify-content: space-between;
   gap: 32px;
@@ -760,18 +770,66 @@ h3 {
   padding-bottom: 48px;
 }
 
-.studies-hero h1 {
+.studies-hero h1,
+.photos-hero h1 {
   color: var(--ink);
 }
 
-.studies-hero p {
+.studies-hero p,
+.photos-hero p {
   max-width: 720px;
   color: var(--muted);
   font-size: clamp(18px, 2vw, 25px);
 }
 
-.studies-archive {
+.photos-page {
+  padding-top: 88px;
+  background: var(--paper);
+}
+
+.studies-archive,
+.photos-archive {
   padding-top: 0;
+}
+
+.photo-category-list {
+  display: grid;
+  gap: 54px;
+}
+
+.photo-category {
+  display: grid;
+  gap: 20px;
+}
+
+.photo-category-heading h2 {
+  font-size: clamp(28px, 4vw, 46px);
+}
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 16px;
+}
+
+.photo-card {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.photo-card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 8px;
+  background: var(--soft);
+  box-shadow: 0 14px 34px rgba(23, 33, 29, 0.1);
+}
+
+.photo-card h3 {
+  font-size: 18px;
 }
 
 .study-list {
@@ -1077,7 +1135,8 @@ h3 {
     width: 300px;
   }
 
-  .studies-hero {
+  .studies-hero,
+  .photos-hero {
     display: grid;
     align-items: start;
   }

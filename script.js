@@ -13,6 +13,7 @@ const galleryGrid = document.querySelector("[data-gallery-grid]");
 const galleryLinks = document.querySelectorAll("[data-gallery-link]");
 const teamGrid = document.querySelector("[data-team-grid]");
 const studiesList = document.querySelector("[data-studies-list]");
+const photoCategoryList = document.querySelector("[data-photo-category-list]");
 
 const adminStorageKey = "rmbc-admin-content";
 const supabaseConfig = window.RMBC_SUPABASE_CONFIG || {};
@@ -93,6 +94,7 @@ const defaultContent = {
       id: "meme-friday",
       active: true,
       image: "./assets/photos/meme-friday.svg",
+      category: "fellowship",
       title: { zh: "周五干饭预备", en: "Friday Dinner Ready" },
       caption: {
         zh: "临时表情包：真实聚会照片确认后再替换。",
@@ -104,6 +106,7 @@ const defaultContent = {
       id: "meme-study",
       active: true,
       image: "./assets/photos/meme-study.svg",
+      category: "fellowship",
       title: { zh: "查经脑洞打开", en: "Study Mode On" },
       caption: {
         zh: "带着问题来，也带着一点点周五晚上的精神状态。",
@@ -115,6 +118,7 @@ const defaultContent = {
       id: "meme-prayer",
       active: true,
       image: "./assets/photos/meme-prayer.svg",
+      category: "fellowship",
       title: { zh: "祷告中，请稍等", en: "BRB Praying" },
       caption: {
         zh: "人生加载慢一点也没关系，我们一起祷告。",
@@ -126,6 +130,7 @@ const defaultContent = {
       id: "meme-welcome",
       active: true,
       image: "./assets/photos/meme-welcome.svg",
+      category: "activity",
       title: { zh: "新朋友雷达启动", en: "Welcome Radar On" },
       caption: {
         zh: "第一次来不用紧张，接待同工已经上线。",
@@ -174,11 +179,17 @@ const defaultContent = {
   ],
 };
 
+const photoCategories = [
+  { id: "fellowship", title: { zh: "团契聚会", en: "Fellowship Gatherings" } },
+  { id: "activity", title: { zh: "活动日", en: "Activity Days" } },
+];
+
 const translations = {
   zh: {
     "meta.description": "RMBC 好朋友团契是 Riverside 华人教会河滨国语浸信会的青年与家庭团契，欢迎 UCR 学生、Riverside 职场、家庭和朋友参加周五中文查经、晚餐、祷告和周日礼拜。",
     "page.title": "RMBC 好朋友团契 | UCR Riverside 华人教会中文查经与 Good Friends Fellowship",
     "studies.pageTitle": "过去查经内容 | RMBC 好朋友团契 UCR Riverside",
+    "photos.pageTitle": "精彩瞬间 | RMBC 好朋友团契",
     "brand.subtitle": "好朋友团契",
     "nav.about": "关于",
     "nav.gatherings": "聚会",
@@ -228,6 +239,11 @@ const translations = {
     "announcements.title": "团契公告",
     "gallery.title": "团契照片",
     "gallery.hint": "可左右滑动查看更多照片",
+    "gallery.moments": "📸 精彩瞬间",
+    "photos.title": "精彩瞬间",
+    "photos.copy": "按团契聚会和活动日整理照片，回看一起走过的时间。",
+    "photos.backToWall": "返回照片墙",
+    "photos.empty": "还没有上传照片。",
     "studies.title": "过去查经内容",
     "studies.copy": "这里会整理 RMBC 好朋友团契过去中文查经的经文、主题和重点，方便 UCR 与 Riverside 的朋友回顾。",
     "studies.empty": "还没有归档的查经内容。",
@@ -261,6 +277,7 @@ const translations = {
     "meta.description": "RMBC Good Friends Fellowship is a Chinese Christian fellowship near UCR in Riverside, welcoming students, professionals, families, and friends for Friday Bible study, dinner, prayer, and Sunday worship.",
     "page.title": "RMBC Good Friends Fellowship | UCR Riverside Chinese Church Bible Study",
     "studies.pageTitle": "Past Bible Studies | RMBC Good Friends Fellowship UCR Riverside",
+    "photos.pageTitle": "Photo Moments | RMBC Good Friends Fellowship",
     "brand.subtitle": "Good Friends Fellowship",
     "nav.about": "About",
     "nav.gatherings": "Gatherings",
@@ -310,6 +327,11 @@ const translations = {
     "announcements.title": "Fellowship News",
     "gallery.title": "Fellowship Photos",
     "gallery.hint": "Swipe horizontally to see more photos",
+    "gallery.moments": "📸 Photo Moments",
+    "photos.title": "Photo Moments",
+    "photos.copy": "Photos organized by fellowship gatherings and activity days.",
+    "photos.backToWall": "Back To Photo Wall",
+    "photos.empty": "No photos have been uploaded yet.",
     "studies.title": "Past Bible Studies",
     "studies.copy": "A simple archive of passages, themes, and notes from RMBC Good Friends Fellowship Bible studies for UCR and Riverside friends.",
     "studies.empty": "No archived Bible studies yet.",
@@ -422,6 +444,12 @@ const localText = (value, language) => {
   }
 
   return value[language] || value.zh || value.en || "";
+};
+
+const getVisiblePhotos = (content) => {
+  const savedPhotos = (content.gallery || []).filter((item) => item.active !== false && item.image);
+  const defaultPhotos = defaultContent.gallery.filter((item) => item.active !== false && item.image);
+  return savedPhotos.length > 0 ? savedPhotos : defaultPhotos;
 };
 
 const createElement = (tagName, className, text) => {
@@ -677,9 +705,9 @@ const renderContent = (language) => {
   }
 
   if (gallerySection && galleryGrid) {
-    const savedPhotos = content.gallery.filter((item) => item.active !== false && item.image);
+    const savedPhotos = (content.gallery || []).filter((item) => item.active !== false && item.image);
     const defaultPhotos = defaultContent.gallery.filter((item) => item.active !== false && item.image);
-    const activePhotos = savedPhotos.length > 0 ? savedPhotos : defaultPhotos;
+    const activePhotos = getVisiblePhotos(content);
 
     gallerySection.hidden = activePhotos.length === 0;
     galleryLinks.forEach((link) => {
@@ -739,6 +767,54 @@ const renderContent = (language) => {
     galleryLinks.forEach((link) => {
       link.hidden = true;
     });
+  }
+
+  if (photoCategoryList) {
+    const activePhotos = getVisiblePhotos(content);
+
+    if (activePhotos.length === 0) {
+      photoCategoryList.replaceChildren(createElement("p", "empty-state", translations[language]["photos.empty"]));
+    } else {
+      photoCategoryList.replaceChildren(
+        ...photoCategories.map((category) => {
+          const photos = activePhotos.filter((item) => (item.category || "fellowship") === category.id);
+          const section = document.createElement("section");
+          const heading = document.createElement("div");
+          const grid = document.createElement("div");
+
+          section.className = "photo-category";
+          heading.className = "photo-category-heading";
+          grid.className = "photo-grid";
+          heading.append(
+            createElement("p", "eyebrow", category.id === "fellowship" ? "Fellowship" : "Activities"),
+            createElement("h2", null, localText(category.title, language)),
+          );
+
+          if (photos.length === 0) {
+            grid.append(createElement("p", "empty-state", translations[language]["photos.empty"]));
+          } else {
+            photos.forEach((item) => {
+              const article = document.createElement("article");
+              const image = document.createElement("img");
+              const title = localText(item.title, language);
+
+              article.className = "photo-card";
+              image.src = item.image;
+              image.alt = title || localText(item.alt, language) || "Fellowship photo";
+              image.loading = "lazy";
+              article.append(image);
+              if (title) {
+                article.append(createElement("h3", null, title));
+              }
+              grid.append(article);
+            });
+          }
+
+          section.append(heading, grid);
+          return section;
+        }),
+      );
+    }
   }
 
   if (teamGrid) {
@@ -808,7 +884,12 @@ const renderContent = (language) => {
 const applyLanguage = (language) => {
   const dictionary = translations[language];
   document.documentElement.lang = language === "zh" ? "zh-Hans" : "en";
-  document.title = document.body.dataset.page === "studies" ? dictionary["studies.pageTitle"] : dictionary["page.title"];
+  const pageTitleKey = document.body.dataset.page === "studies"
+    ? "studies.pageTitle"
+    : document.body.dataset.page === "photos"
+      ? "photos.pageTitle"
+      : "page.title";
+  document.title = dictionary[pageTitleKey];
 
   document.querySelectorAll("[data-i18n]").forEach((element) => {
     const key = element.dataset.i18n;

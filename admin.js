@@ -95,6 +95,7 @@ const defaultContent = {
       id: "meme-friday",
       active: true,
       image: "./assets/photos/meme-friday.svg",
+      category: "fellowship",
       title: { zh: "周五干饭预备", en: "Friday Dinner Ready" },
       caption: {
         zh: "临时表情包：真实聚会照片确认后再替换。",
@@ -106,6 +107,7 @@ const defaultContent = {
       id: "meme-study",
       active: true,
       image: "./assets/photos/meme-study.svg",
+      category: "fellowship",
       title: { zh: "查经脑洞打开", en: "Study Mode On" },
       caption: {
         zh: "带着问题来，也带着一点点周五晚上的精神状态。",
@@ -117,6 +119,7 @@ const defaultContent = {
       id: "meme-prayer",
       active: true,
       image: "./assets/photos/meme-prayer.svg",
+      category: "fellowship",
       title: { zh: "祷告中，请稍等", en: "BRB Praying" },
       caption: {
         zh: "人生加载慢一点也没关系，我们一起祷告。",
@@ -128,6 +131,7 @@ const defaultContent = {
       id: "meme-welcome",
       active: true,
       image: "./assets/photos/meme-welcome.svg",
+      category: "activity",
       title: { zh: "新朋友雷达启动", en: "Welcome Radar On" },
       caption: {
         zh: "第一次来不用紧张，接待同工已经上线。",
@@ -176,6 +180,11 @@ const defaultContent = {
   ],
 };
 
+const photoCategories = [
+  { id: "fellowship", title: "团契聚会" },
+  { id: "activity", title: "活动日" },
+];
+
 let content = normalizeContent(defaultContent);
 
 function cloneContent(value) {
@@ -218,6 +227,7 @@ function normalizeContent(value) {
   }));
   next.gallery = (Array.isArray(next.gallery) ? next.gallery : []).map((item) => ({
     ...item,
+    category: photoCategories.some((category) => category.id === item.category) ? item.category : "fellowship",
     title: ensureLocalizedValue(item.title),
     caption: ensureLocalizedValue(item.caption),
     alt: ensureLocalizedValue(item.alt),
@@ -429,6 +439,28 @@ function createInput(labelText, value, onInput, options = {}) {
       resizeMultilineField(field);
     });
   }
+
+  label.append(field);
+  return label;
+}
+
+function createSelect(labelText, value, options, onChange) {
+  const label = document.createElement("label");
+  const field = document.createElement("select");
+
+  label.textContent = labelText;
+  options.forEach((option) => {
+    const entry = document.createElement("option");
+    entry.value = option.value;
+    entry.textContent = option.label;
+    field.append(entry);
+  });
+  field.value = value;
+  field.addEventListener("change", () => {
+    onChange(field.value);
+    saveContent();
+    renderAll();
+  });
 
   label.append(field);
   return label;
@@ -686,32 +718,59 @@ function renderGatherings() {
 function renderGallery() {
   const list = document.querySelector('[data-list="gallery"]');
   list.replaceChildren(
-    ...content.gallery.map((item, index) => {
-      const card = document.createElement("article");
-      const fields = document.createElement("div");
-      card.className = "editor-card";
-      fields.className = "field-grid";
+    ...photoCategories.map((category) => {
+      const section = document.createElement("section");
+      const heading = document.createElement("h3");
+      const categoryItems = content.gallery
+        .map((item, index) => ({ item, index }))
+        .filter((entry) => (entry.item.category || "fellowship") === category.id);
 
-      fields.append(
-        createGalleryUpload(item),
-        createInput("中文标题", item.title.zh, (value) => {
-          item.title.zh = value;
-          item.alt.zh = value;
-        }),
-        createInput("English title", item.title.en, (value) => {
-          item.title.en = value;
-          item.alt.en = value;
-        }),
-        createInput("中文照片说明", item.caption.zh, (value) => { item.caption.zh = value; }, { full: true, multiline: true }),
-        createInput("English photo caption", item.caption.en, (value) => { item.caption.en = value; }, { full: true, multiline: true }),
-      );
+      section.className = "editor-group";
+      heading.textContent = category.title;
+      section.append(heading);
 
-      card.append(
-        cardHeader(item.title.zh || "照片", item.image ? "已上传照片" : "等待上传照片", "gallery", item, index),
-        fields,
-        activeToggle(item),
-      );
-      return card;
+      if (categoryItems.length === 0) {
+        const empty = document.createElement("p");
+        empty.className = "empty-note";
+        empty.textContent = "这个分类还没有照片。";
+        section.append(empty);
+      }
+
+      categoryItems.forEach(({ item, index }) => {
+        const card = document.createElement("article");
+        const fields = document.createElement("div");
+        card.className = "editor-card";
+        fields.className = "field-grid";
+
+        fields.append(
+          createGalleryUpload(item),
+          createSelect(
+            "照片分类",
+            item.category || "fellowship",
+            photoCategories.map((entry) => ({ value: entry.id, label: entry.title })),
+            (value) => {
+              item.category = value;
+            },
+          ),
+          createInput("中文标题", item.title.zh, (value) => {
+            item.title.zh = value;
+            item.alt.zh = value;
+          }),
+          createInput("English title", item.title.en, (value) => {
+            item.title.en = value;
+            item.alt.en = value;
+          }),
+        );
+
+        card.append(
+          cardHeader(item.title.zh || "照片", item.image ? category.title : "等待上传照片", "gallery", item, index),
+          fields,
+          activeToggle(item),
+        );
+        section.append(card);
+      });
+
+      return section;
     }),
   );
 }
@@ -852,6 +911,7 @@ function createEmptyItem(collection) {
       id,
       active: true,
       image: "",
+      category: "fellowship",
       title: { zh: "团契照片", en: "Fellowship Photo" },
       caption: { zh: "", en: "" },
       alt: { zh: "", en: "" },
