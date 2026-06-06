@@ -626,12 +626,19 @@ h3 {
   overflow-y: hidden;
   padding-bottom: 16px;
   overscroll-behavior-x: contain;
-  scroll-snap-type: x proximity;
   scrollbar-color: var(--gold) rgba(41, 67, 54, 0.12);
 }
 
 .gallery-track {
   display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  width: max-content;
+}
+
+.gallery-loop {
+  display: flex;
+  flex: 0 0 auto;
   flex-direction: column;
   gap: 16px;
   width: max-content;
@@ -649,15 +656,6 @@ h3 {
   align-items: start;
 }
 
-.gallery-grid.is-scrollable .gallery-track {
-  animation: gallery-drift 58s linear infinite;
-}
-
-.gallery-grid.is-scrollable:hover .gallery-track,
-.gallery-grid.is-scrollable:focus-within .gallery-track {
-  animation-play-state: paused;
-}
-
 .gallery-card {
   position: relative;
   display: block;
@@ -669,7 +667,6 @@ h3 {
   border-radius: 8px;
   background: var(--white);
   box-shadow: 0 14px 34px rgba(23, 33, 29, 0.13);
-  scroll-snap-align: start;
 }
 
 .gallery-card.is-large {
@@ -711,6 +708,11 @@ h3 {
   width: auto;
 }
 
+.gallery-grid.is-single .gallery-loop {
+  display: block;
+  width: auto;
+}
+
 .gallery-grid.is-single .gallery-row {
   display: block;
   width: auto;
@@ -744,16 +746,6 @@ h3 {
 
 .gallery-more-button {
   min-width: 190px;
-}
-
-@keyframes gallery-drift {
-  from {
-    transform: translateX(0);
-  }
-
-  to {
-    transform: translateX(-50%);
-  }
 }
 
 .studies-page {

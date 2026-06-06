@@ -188,6 +188,9 @@ const photoCategories = [
   { id: "activity", title: { zh: "活动日", en: "Activity Days" } },
 ];
 const placeholderPhotoTitles = new Set(["团契照片", "Fellowship Photo"]);
+const galleryAutoScrollSpeed = 24;
+let galleryAutoScrollFrame = 0;
+let galleryAutoScrollController = null;
 
 const normalizePhotoCategoryDescriptions = (value) => Object.fromEntries(
   photoCategories.map((category) => [
@@ -484,6 +487,102 @@ const photoTitleText = (item, language) => {
   return placeholderPhotoTitles.has(title) ? "" : title;
 };
 
+const stopGalleryAutoScroll = () => {
+  if (galleryAutoScrollFrame) {
+    window.cancelAnimationFrame(galleryAutoScrollFrame);
+    galleryAutoScrollFrame = 0;
+  }
+
+  if (galleryAutoScrollController) {
+    galleryAutoScrollController.abort();
+    galleryAutoScrollController = null;
+  }
+};
+
+const startGalleryAutoScroll = () => {
+  stopGalleryAutoScroll();
+
+  if (!galleryGrid || !galleryGrid.classList.contains("is-scrollable")) {
+    return;
+  }
+
+  const track = galleryGrid.querySelector(".gallery-track");
+  const loops = track ? Array.from(track.querySelectorAll(".gallery-loop")) : [];
+  const reduceMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  if (!track || loops.length < 2 || reduceMotionQuery.matches) {
+    return;
+  }
+
+  galleryAutoScrollController = new AbortController();
+  const { signal } = galleryAutoScrollController;
+  let lastTimestamp = 0;
+  let resumeAt = 0;
+  let hoverPaused = false;
+  let focusPaused = false;
+  let scrollPosition = galleryGrid.scrollLeft;
+
+  const loopDistance = () => Math.max(0, loops[1].offsetLeft - loops[0].offsetLeft);
+  const pauseFor = (duration) => {
+    resumeAt = Math.max(resumeAt, performance.now() + duration);
+  };
+  const normalizeScroll = () => {
+    const distance = loopDistance();
+
+    if (!distance) {
+      return;
+    }
+
+    while (scrollPosition >= distance) {
+      scrollPosition -= distance;
+    }
+
+    galleryGrid.scrollLeft = scrollPosition;
+  };
+  const tick = (timestamp) => {
+    const elapsed = Math.min(50, timestamp - (lastTimestamp || timestamp));
+    lastTimestamp = timestamp;
+
+    if (!hoverPaused && !focusPaused && timestamp >= resumeAt) {
+      scrollPosition += (elapsed / 1000) * galleryAutoScrollSpeed;
+      normalizeScroll();
+    } else {
+      scrollPosition = galleryGrid.scrollLeft;
+    }
+
+    galleryAutoScrollFrame = window.requestAnimationFrame(tick);
+  };
+  const userPaused = (duration = 1800) => {
+    scrollPosition = galleryGrid.scrollLeft;
+    pauseFor(duration);
+  };
+
+  galleryGrid.addEventListener("mouseenter", () => {
+    hoverPaused = true;
+  }, { signal });
+  galleryGrid.addEventListener("mouseleave", () => {
+    hoverPaused = false;
+    pauseFor(450);
+  }, { signal });
+  galleryGrid.addEventListener("focusin", () => {
+    focusPaused = true;
+  }, { signal });
+  galleryGrid.addEventListener("focusout", () => {
+    focusPaused = false;
+    pauseFor(450);
+  }, { signal });
+  galleryGrid.addEventListener("pointerdown", () => userPaused(2400), { signal });
+  galleryGrid.addEventListener("touchstart", () => userPaused(2400), { passive: true, signal });
+  galleryGrid.addEventListener("touchmove", () => userPaused(900), { passive: true, signal });
+  galleryGrid.addEventListener("wheel", () => userPaused(1600), { passive: true, signal });
+  window.addEventListener("pointerup", () => userPaused(900), { signal });
+  window.addEventListener("touchend", () => userPaused(900), { passive: true, signal });
+  window.addEventListener("touchcancel", () => userPaused(900), { passive: true, signal });
+  window.addEventListener("resize", normalizeScroll, { signal });
+
+  galleryAutoScrollFrame = window.requestAnimationFrame(tick);
+};
+
 const createElement = (tagName, className, text) => {
   const element = document.createElement(tagName);
   if (className) {
@@ -748,50 +847,58 @@ const renderContent = (language) => {
 
     const renderGalleryCards = (photos, allowFallback) => {
       const shouldScroll = photos.length > 4;
-      const displayPhotos = shouldScroll ? [...photos, ...photos] : photos;
       const track = document.createElement("div");
-      const rows = [document.createElement("div"), document.createElement("div")];
+      const loopCount = shouldScroll ? 3 : 1;
       track.className = "gallery-track";
-      rows.forEach((row) => {
-        row.className = "gallery-row";
-      });
       galleryGrid.classList.toggle("is-scrollable", shouldScroll);
       galleryGrid.classList.toggle("is-single", photos.length === 1);
-      displayPhotos.forEach((item, index) => {
-        const article = createElement("article", "gallery-card");
-        const image = document.createElement("img");
-        const title = localText(item.title, language);
 
-        article.classList.add(["is-large", "is-small", "is-wide", "is-medium", "is-tall"][index % 5]);
-        if (index >= photos.length) {
-          article.setAttribute("aria-hidden", "true");
-        }
-        image.src = item.image;
-        image.alt = title || localText(item.alt, language) || "Fellowship photo";
-        image.loading = "lazy";
-        image.addEventListener("load", () => {
-          article.classList.add(image.naturalHeight > image.naturalWidth * 1.12 ? "is-portrait" : "is-landscape");
-        }, { once: true });
-        image.addEventListener("error", () => {
-          article.remove();
-          if (!galleryGrid.querySelector(".gallery-card")) {
-            const fallbackPhotos = defaultPhotos.filter((fallback) => !photos.some((photo) => photo.image === fallback.image));
-            if (allowFallback && fallbackPhotos.length > 0) {
-              renderGalleryCards(fallbackPhotos, false);
-            } else {
-              gallerySection.hidden = true;
-              galleryLinks.forEach((link) => {
-                link.hidden = true;
-              });
-            }
-          }
+      Array.from({ length: loopCount }, (_, loopIndex) => {
+        const loop = document.createElement("div");
+        const rows = [document.createElement("div"), document.createElement("div")];
+        loop.className = "gallery-loop";
+        rows.forEach((row) => {
+          row.className = "gallery-row";
         });
+        photos.forEach((item, index) => {
+          const article = createElement("article", "gallery-card");
+          const image = document.createElement("img");
+          const title = localText(item.title, language);
 
-        article.append(image);
-        rows[index % 2].append(article);
+          article.classList.add(["is-large", "is-small", "is-wide", "is-medium", "is-tall"][index % 5]);
+          if (loopIndex > 0) {
+            article.setAttribute("aria-hidden", "true");
+          }
+          image.src = item.image;
+          image.alt = title || localText(item.alt, language) || "Fellowship photo";
+          image.loading = "lazy";
+          image.addEventListener("load", () => {
+            article.classList.add(image.naturalHeight > image.naturalWidth * 1.12 ? "is-portrait" : "is-landscape");
+          }, { once: true });
+          image.addEventListener("error", () => {
+            article.remove();
+            if (!galleryGrid.querySelector(".gallery-card")) {
+              const fallbackPhotos = defaultPhotos.filter((fallback) => !photos.some((photo) => photo.image === fallback.image));
+              if (allowFallback && fallbackPhotos.length > 0) {
+                renderGalleryCards(fallbackPhotos, false);
+              } else {
+                gallerySection.hidden = true;
+                galleryLinks.forEach((link) => {
+                  link.hidden = true;
+                });
+                stopGalleryAutoScroll();
+              }
+            }
+          });
+
+          article.append(image);
+          rows[index % 2].append(article);
+        });
+        loop.replaceChildren(...rows);
+        track.append(loop);
       });
-      track.replaceChildren(...rows);
       galleryGrid.replaceChildren(track);
+      startGalleryAutoScroll();
     };
 
     renderGalleryCards(activePhotos, savedPhotos.length > 0);
