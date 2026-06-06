@@ -139,6 +139,10 @@ const defaultContent = {
       alt: { zh: "欢迎新朋友表情包插画", en: "Welcome radar meme illustration" },
     },
   ],
+  photoCategoryDescriptions: {
+    fellowship: { zh: "", en: "" },
+    activity: { zh: "", en: "" },
+  },
   team: [
     {
       id: "prayer-care",
@@ -184,6 +188,13 @@ const photoCategories = [
   { id: "activity", title: { zh: "活动日", en: "Activity Days" } },
 ];
 const placeholderPhotoTitles = new Set(["团契照片", "Fellowship Photo"]);
+
+const normalizePhotoCategoryDescriptions = (value) => Object.fromEntries(
+  photoCategories.map((category) => [
+    category.id,
+    localDescriptionValue(value?.[category.id]),
+  ]),
+);
 
 const translations = {
   zh: {
@@ -390,6 +401,7 @@ const normalizePublicContent = (value) => {
       gatherings: Array.isArray(value.gatherings) ? value.gatherings : defaultContent.gatherings,
       studies: Array.isArray(value.studies) ? value.studies : defaultContent.studies,
       gallery: Array.isArray(value.gallery) ? value.gallery : defaultContent.gallery,
+      photoCategoryDescriptions: normalizePhotoCategoryDescriptions(value.photoCategoryDescriptions),
       team: Array.isArray(value.team) ? value.team : defaultContent.team,
     };
   }
@@ -446,6 +458,20 @@ const localText = (value, language) => {
 
   return value[language] || value.zh || value.en || "";
 };
+
+function localDescriptionValue(value) {
+  if (value && typeof value === "object") {
+    return {
+      zh: value.zh || "",
+      en: value.en || "",
+    };
+  }
+
+  return {
+    zh: value || "",
+    en: "",
+  };
+}
 
 const getVisiblePhotos = (content) => {
   const savedPhotos = (content.gallery || []).filter((item) => item.active !== false && item.image);
@@ -787,6 +813,7 @@ const renderContent = (language) => {
           const section = document.createElement("section");
           const heading = document.createElement("div");
           const grid = document.createElement("div");
+          const description = localText(content.photoCategoryDescriptions?.[category.id], language);
 
           section.className = `photo-category photo-category-${category.id}`;
           heading.className = "photo-category-heading";
@@ -795,6 +822,9 @@ const renderContent = (language) => {
             createElement("p", "eyebrow", category.id === "fellowship" ? "Fellowship" : "Activities"),
             createElement("h2", null, localText(category.title, language)),
           );
+          if (description) {
+            heading.append(createElement("p", "photo-category-copy", description));
+          }
 
           if (photos.length === 0) {
             grid.append(createElement("p", "empty-state", translations[language]["photos.empty"]));

@@ -142,6 +142,10 @@ const defaultContent = {
       alt: { zh: "欢迎新朋友表情包插画", en: "Welcome radar meme illustration" },
     },
   ],
+  photoCategoryDescriptions: {
+    fellowship: { zh: "", en: "" },
+    activity: { zh: "", en: "" },
+  },
   team: [
     {
       id: "prayer-care",
@@ -216,6 +220,15 @@ function normalizePhotoTitle(value) {
   };
 }
 
+function normalizePhotoCategoryDescriptions(value) {
+  return Object.fromEntries(
+    photoCategories.map((category) => [
+      category.id,
+      ensureLocalizedValue(value?.[category.id]),
+    ]),
+  );
+}
+
 function normalizeContent(value) {
   const next = cloneContent(value && typeof value === "object" ? value : defaultContent);
 
@@ -223,6 +236,7 @@ function normalizeContent(value) {
   next.gatherings = Array.isArray(next.gatherings) ? next.gatherings : defaultContent.gatherings;
   next.studies = Array.isArray(next.studies) ? next.studies : defaultContent.studies;
   next.gallery = Array.isArray(next.gallery) ? next.gallery : defaultContent.gallery;
+  next.photoCategoryDescriptions = normalizePhotoCategoryDescriptions(next.photoCategoryDescriptions);
   next.team = Array.isArray(next.team) ? next.team : defaultContent.team;
 
   next.gatherings = next.gatherings.map((item) => ({
@@ -320,6 +334,7 @@ function loadLocalContent() {
         gatherings: Array.isArray(saved.gatherings) ? saved.gatherings : defaultContent.gatherings,
         studies: Array.isArray(saved.studies) ? saved.studies : defaultContent.studies,
         gallery: Array.isArray(saved.gallery) ? saved.gallery : defaultContent.gallery,
+        photoCategoryDescriptions: saved.photoCategoryDescriptions || defaultContent.photoCategoryDescriptions,
         team: Array.isArray(saved.team) ? saved.team : defaultContent.team,
       });
     }
@@ -778,10 +793,18 @@ function renderGallery() {
   const categoryItems = content.gallery
     .map((item, index) => ({ item, index }))
     .filter((entry) => (entry.item.category || "fellowship") === category.id);
+  const description = content.photoCategoryDescriptions[category.id];
 
   section.className = "editor-group";
   heading.textContent = category.title;
-  section.append(heading);
+  section.append(
+    heading,
+    createEditorSubsection(
+      "分类说明",
+      createInput("中文说明", description.zh, (value) => { description.zh = value; }, { full: true, multiline: true }),
+      createInput("English description", description.en, (value) => { description.en = value; }, { full: true, multiline: true }),
+    ),
+  );
 
   if (categoryItems.length === 0) {
     const empty = document.createElement("p");
