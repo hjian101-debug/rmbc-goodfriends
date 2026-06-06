@@ -188,9 +188,18 @@ const photoCategories = [
   { id: "activity", title: { zh: "活动日", en: "Activity Days" } },
 ];
 const placeholderPhotoTitles = new Set(["团契照片", "Fellowship Photo"]);
+const galleryCardVariants = [
+  { className: "is-wide", width: 430 },
+  { className: "is-medium", width: 330 },
+  { className: "is-large", width: 420 },
+  { className: "is-small", width: 260 },
+  { className: "is-medium", width: 330 },
+  { className: "is-wide", width: 430 },
+];
 const galleryAutoScrollSpeed = 24;
 let galleryAutoScrollFrame = 0;
 let galleryAutoScrollController = null;
+let galleryScrollbarHideTimer = 0;
 
 const normalizePhotoCategoryDescriptions = (value) => Object.fromEntries(
   photoCategories.map((category) => [
@@ -556,6 +565,17 @@ const startGalleryAutoScroll = () => {
     scrollPosition = galleryGrid.scrollLeft;
     pauseFor(duration);
   };
+  const showScrollbar = () => {
+    window.clearTimeout(galleryScrollbarHideTimer);
+    galleryGrid.classList.add("is-user-scrolling");
+    galleryScrollbarHideTimer = window.setTimeout(() => {
+      galleryGrid.classList.remove("is-user-scrolling");
+    }, 1200);
+  };
+  const userInteracted = (duration = 1800) => {
+    userPaused(duration);
+    showScrollbar();
+  };
 
   galleryGrid.addEventListener("mouseenter", () => {
     hoverPaused = true;
@@ -571,13 +591,13 @@ const startGalleryAutoScroll = () => {
     focusPaused = false;
     pauseFor(450);
   }, { signal });
-  galleryGrid.addEventListener("pointerdown", () => userPaused(2400), { signal });
-  galleryGrid.addEventListener("touchstart", () => userPaused(2400), { passive: true, signal });
-  galleryGrid.addEventListener("touchmove", () => userPaused(900), { passive: true, signal });
-  galleryGrid.addEventListener("wheel", () => userPaused(1600), { passive: true, signal });
-  window.addEventListener("pointerup", () => userPaused(900), { signal });
-  window.addEventListener("touchend", () => userPaused(900), { passive: true, signal });
-  window.addEventListener("touchcancel", () => userPaused(900), { passive: true, signal });
+  galleryGrid.addEventListener("pointerdown", () => userInteracted(2400), { signal });
+  galleryGrid.addEventListener("touchstart", () => userInteracted(2400), { passive: true, signal });
+  galleryGrid.addEventListener("touchmove", () => userInteracted(900), { passive: true, signal });
+  galleryGrid.addEventListener("wheel", () => userInteracted(1600), { passive: true, signal });
+  window.addEventListener("pointerup", () => userInteracted(900), { signal });
+  window.addEventListener("touchend", () => userInteracted(900), { passive: true, signal });
+  window.addEventListener("touchcancel", () => userInteracted(900), { passive: true, signal });
   window.addEventListener("resize", normalizeScroll, { signal });
 
   galleryAutoScrollFrame = window.requestAnimationFrame(tick);
@@ -856,6 +876,7 @@ const renderContent = (language) => {
       Array.from({ length: loopCount }, (_, loopIndex) => {
         const loop = document.createElement("div");
         const rows = [document.createElement("div"), document.createElement("div")];
+        const rowWidths = [0, 0];
         loop.className = "gallery-loop";
         rows.forEach((row) => {
           row.className = "gallery-row";
@@ -864,8 +885,10 @@ const renderContent = (language) => {
           const article = createElement("article", "gallery-card");
           const image = document.createElement("img");
           const title = localText(item.title, language);
+          const variant = galleryCardVariants[index % galleryCardVariants.length];
+          const rowIndex = rowWidths[0] <= rowWidths[1] ? 0 : 1;
 
-          article.classList.add(["is-large", "is-small", "is-wide", "is-medium", "is-tall"][index % 5]);
+          article.classList.add(variant.className);
           if (loopIndex > 0) {
             article.setAttribute("aria-hidden", "true");
           }
@@ -892,7 +915,8 @@ const renderContent = (language) => {
           });
 
           article.append(image);
-          rows[index % 2].append(article);
+          rows[rowIndex].append(article);
+          rowWidths[rowIndex] += variant.width;
         });
         loop.replaceChildren(...rows);
         track.append(loop);

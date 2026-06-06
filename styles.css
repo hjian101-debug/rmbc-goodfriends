@@ -624,15 +624,39 @@ h3 {
   height: 440px;
   overflow-x: auto;
   overflow-y: hidden;
-  padding-bottom: 16px;
+  padding-bottom: 30px;
   overscroll-behavior-x: contain;
-  scrollbar-color: var(--gold) rgba(41, 67, 54, 0.12);
+  scrollbar-color: transparent transparent;
+  scrollbar-width: none;
+  transition: scrollbar-color 160ms ease;
+}
+
+.gallery-grid.is-user-scrolling {
+  scrollbar-color: var(--gold) transparent;
+  scrollbar-width: thin;
+}
+
+.gallery-grid::-webkit-scrollbar {
+  height: 0;
+}
+
+.gallery-grid.is-user-scrolling::-webkit-scrollbar {
+  height: 9px;
+}
+
+.gallery-grid::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.gallery-grid::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: var(--gold);
 }
 
 .gallery-track {
   display: flex;
   align-items: flex-start;
-  gap: 16px;
+  gap: 14px;
   width: max-content;
 }
 
@@ -640,27 +664,26 @@ h3 {
   display: flex;
   flex: 0 0 auto;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
   width: max-content;
 }
 
 .gallery-row {
   display: flex;
-  align-items: end;
-  gap: 16px;
+  align-items: stretch;
+  gap: 14px;
   width: max-content;
 }
 
 .gallery-row:nth-child(2) {
-  margin-left: 250px;
-  align-items: start;
+  margin-left: 0;
 }
 
 .gallery-card {
   position: relative;
   display: block;
-  width: 360px;
-  height: 188px;
+  width: 330px;
+  height: 184px;
   flex: 0 0 auto;
   overflow: hidden;
   border: 0;
@@ -670,32 +693,23 @@ h3 {
 }
 
 .gallery-card.is-large {
-  width: 430px;
-  height: 210px;
+  width: 420px;
 }
 
 .gallery-card.is-wide {
-  width: 470px;
-  height: 188px;
+  width: 430px;
 }
 
 .gallery-card.is-medium {
-  width: 320px;
-  height: 188px;
+  width: 330px;
 }
 
 .gallery-card.is-small {
-  width: 230px;
-  height: 188px;
-}
-
-.gallery-card.is-tall {
-  width: 230px;
-  height: 210px;
+  width: 260px;
 }
 
 .gallery-card.is-portrait {
-  width: 230px;
+  width: 260px;
 }
 
 .gallery-grid.is-single {
@@ -1133,18 +1147,23 @@ h3 {
 
   .gallery-grid {
     height: 340px;
+    padding-bottom: 28px;
   }
 
   .gallery-track {
-    gap: 16px;
+    gap: 12px;
+  }
+
+  .gallery-loop {
+    gap: 12px;
   }
 
   .gallery-row {
-    gap: 16px;
+    gap: 12px;
   }
 
   .gallery-row:nth-child(2) {
-    margin-left: 110px;
+    margin-left: 0;
   }
 
   .gallery-card,
@@ -1152,18 +1171,20 @@ h3 {
   .gallery-card.is-wide,
   .gallery-card.is-medium {
     width: 260px;
-    height: 150px;
+    height: 142px;
   }
 
-  .gallery-card.is-small,
-  .gallery-card.is-tall,
-  .gallery-card.is-portrait {
-    width: 170px;
-    height: 150px;
+  .gallery-card.is-small {
+    width: 190px;
   }
 
-  .gallery-card.is-large {
+  .gallery-card.is-large,
+  .gallery-card.is-wide {
     width: 300px;
+  }
+
+  .gallery-card.is-portrait {
+    width: 190px;
   }
 
   .studies-hero,
