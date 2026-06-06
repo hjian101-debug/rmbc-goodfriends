@@ -200,6 +200,8 @@ const galleryAutoScrollSpeed = 24;
 let galleryAutoScrollFrame = 0;
 let galleryAutoScrollController = null;
 let galleryScrollbarHideTimer = 0;
+let photoLightbox = null;
+let photoLightboxPreviousFocus = null;
 
 const normalizePhotoCategoryDescriptions = (value) => Object.fromEntries(
   photoCategories.map((category) => [
@@ -614,6 +616,75 @@ const createElement = (tagName, className, text) => {
   return element;
 };
 
+const closePhotoLightbox = () => {
+  if (!photoLightbox) {
+    return;
+  }
+
+  photoLightbox.overlay.classList.remove("is-open");
+  photoLightbox.overlay.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("photo-lightbox-open");
+
+  if (photoLightboxPreviousFocus && document.contains(photoLightboxPreviousFocus)) {
+    photoLightboxPreviousFocus.focus();
+  }
+  photoLightboxPreviousFocus = null;
+};
+
+const ensurePhotoLightbox = () => {
+  if (photoLightbox) {
+    return photoLightbox;
+  }
+
+  const overlay = document.createElement("div");
+  const dialog = document.createElement("div");
+  const closeButton = document.createElement("button");
+  const image = document.createElement("img");
+  const caption = document.createElement("p");
+
+  overlay.className = "photo-lightbox";
+  overlay.setAttribute("aria-hidden", "true");
+  dialog.className = "photo-lightbox-dialog";
+  dialog.setAttribute("role", "dialog");
+  dialog.setAttribute("aria-modal", "true");
+  closeButton.type = "button";
+  closeButton.className = "photo-lightbox-close";
+  closeButton.textContent = "×";
+  image.className = "photo-lightbox-image";
+  caption.className = "photo-lightbox-caption";
+
+  closeButton.addEventListener("click", closePhotoLightbox);
+  overlay.addEventListener("click", (event) => {
+    if (event.target === overlay) {
+      closePhotoLightbox();
+    }
+  });
+
+  dialog.append(closeButton, image, caption);
+  overlay.append(dialog);
+  document.body.append(overlay);
+
+  photoLightbox = { overlay, dialog, closeButton, image, caption };
+  return photoLightbox;
+};
+
+const openPhotoLightbox = ({ src, title, alt }, language) => {
+  const lightbox = ensurePhotoLightbox();
+  const closeLabel = language === "en" ? "Close photo" : "关闭照片";
+
+  photoLightboxPreviousFocus = document.activeElement;
+  lightbox.closeButton.setAttribute("aria-label", closeLabel);
+  lightbox.image.src = src;
+  lightbox.image.alt = alt || title || "Fellowship photo";
+  lightbox.caption.textContent = title || "";
+  lightbox.caption.hidden = !title;
+  lightbox.dialog.setAttribute("aria-label", title || closeLabel);
+  lightbox.overlay.classList.add("is-open");
+  lightbox.overlay.setAttribute("aria-hidden", "false");
+  document.body.classList.add("photo-lightbox-open");
+  lightbox.closeButton.focus();
+};
+
 const siteUrl = "https://rmbc-goodfriends.pages.dev";
 const pacificTimeZone = "America/Los_Angeles";
 
@@ -962,14 +1033,23 @@ const renderContent = (language) => {
           } else {
             photos.forEach((item) => {
               const article = document.createElement("article");
+              const button = document.createElement("button");
               const image = document.createElement("img");
               const title = photoTitleText(item, language);
+              const alt = title || localText(item.alt, language) || "Fellowship photo";
 
               article.className = "photo-card";
+              button.type = "button";
+              button.className = "photo-card-button";
+              button.setAttribute("aria-label", title ? `${title} - ${language === "en" ? "view larger" : "放大查看"}` : (language === "en" ? "View photo larger" : "放大查看照片"));
               image.src = item.image;
-              image.alt = title || localText(item.alt, language) || "Fellowship photo";
+              image.alt = alt;
               image.loading = "lazy";
-              article.append(image);
+              button.addEventListener("click", () => {
+                openPhotoLightbox({ src: item.image, title, alt }, language);
+              });
+              button.append(image);
+              article.append(button);
               if (title) {
                 article.append(createElement("h3", null, title));
               }
@@ -1086,6 +1166,11 @@ const syncHeader = () => {
 
 syncHeader();
 window.addEventListener("scroll", syncHeader, { passive: true });
+window.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    closePhotoLightbox();
+  }
+});
 
 if (year) {
   year.textContent = new Date().getFullYear();

@@ -841,6 +841,21 @@ h3 {
   align-content: start;
 }
 
+.photo-card-button {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  cursor: zoom-in;
+}
+
+.photo-card-button:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 4px;
+}
+
 .photo-card img {
   display: block;
   width: 100%;
@@ -849,10 +864,85 @@ h3 {
   border-radius: 8px;
   background: var(--soft);
   box-shadow: 0 14px 34px rgba(23, 33, 29, 0.1);
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.photo-card-button:hover img {
+  box-shadow: 0 18px 42px rgba(23, 33, 29, 0.16);
+  transform: translateY(-2px);
 }
 
 .photo-card h3 {
   font-size: 18px;
+}
+
+body.photo-lightbox-open {
+  overflow: hidden;
+}
+
+.photo-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 28px;
+  background: rgba(16, 28, 24, 0.84);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease;
+}
+
+.photo-lightbox.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.photo-lightbox-dialog {
+  position: relative;
+  display: grid;
+  gap: 14px;
+  max-width: min(1120px, 100%);
+  max-height: calc(100vh - 56px);
+}
+
+.photo-lightbox-image {
+  display: block;
+  max-width: 100%;
+  max-height: calc(100vh - 130px);
+  object-fit: contain;
+  border-radius: 8px;
+  background: var(--ink);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.36);
+}
+
+.photo-lightbox-caption {
+  max-width: min(760px, 100%);
+  margin: 0 auto;
+  color: var(--paper);
+  font-size: clamp(18px, 2vw, 24px);
+  font-weight: 800;
+  text-align: center;
+}
+
+.photo-lightbox-close {
+  position: absolute;
+  top: -18px;
+  right: -18px;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 999px;
+  color: var(--paper);
+  background: rgba(16, 28, 24, 0.9);
+  cursor: pointer;
+  font-size: 32px;
+  line-height: 1;
+}
+
+.photo-lightbox-close:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 3px;
 }
 
 .study-list {
@@ -1200,6 +1290,23 @@ h3 {
   .photo-category-fellowship .photo-grid,
   .photo-category-activity .photo-grid {
     grid-template-columns: 1fr;
+  }
+
+  .photo-lightbox {
+    padding: 18px;
+  }
+
+  .photo-lightbox-dialog {
+    max-height: calc(100vh - 36px);
+  }
+
+  .photo-lightbox-image {
+    max-height: calc(100vh - 120px);
+  }
+
+  .photo-lightbox-close {
+    top: 10px;
+    right: 10px;
   }
 
   .study-card h2,
