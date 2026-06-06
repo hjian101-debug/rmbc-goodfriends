@@ -621,7 +621,7 @@ h3 {
 }
 
 .gallery-grid {
-  height: 440px;
+  height: 500px;
   overflow-x: auto;
   overflow-y: hidden;
   padding-bottom: 30px;
@@ -670,19 +670,20 @@ h3 {
 
 .gallery-row {
   display: flex;
-  align-items: stretch;
+  align-items: end;
   gap: 14px;
   width: max-content;
 }
 
 .gallery-row:nth-child(2) {
-  margin-left: 0;
+  align-items: start;
+  margin-left: 150px;
 }
 
 .gallery-card {
   position: relative;
   display: block;
-  width: 330px;
+  width: auto;
   height: 184px;
   flex: 0 0 auto;
   overflow: hidden;
@@ -693,23 +694,23 @@ h3 {
 }
 
 .gallery-card.is-large {
-  width: 420px;
+  height: 218px;
 }
 
 .gallery-card.is-wide {
-  width: 430px;
+  height: 188px;
 }
 
 .gallery-card.is-medium {
-  width: 330px;
+  height: 176px;
 }
 
 .gallery-card.is-small {
-  width: 260px;
+  height: 154px;
 }
 
 .gallery-card.is-portrait {
-  width: 260px;
+  height: 218px;
 }
 
 .gallery-grid.is-single {
@@ -743,9 +744,9 @@ h3 {
 
 .gallery-card img {
   display: block;
-  width: 100%;
+  width: auto;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   transition: transform 180ms ease;
 }
 
@@ -1236,7 +1237,7 @@ body.photo-lightbox-open {
   }
 
   .gallery-grid {
-    height: 340px;
+    height: 380px;
     padding-bottom: 28px;
   }
 
@@ -1253,28 +1254,28 @@ body.photo-lightbox-open {
   }
 
   .gallery-row:nth-child(2) {
-    margin-left: 0;
+    margin-left: 56px;
   }
 
   .gallery-card,
   .gallery-card.is-large,
   .gallery-card.is-wide,
   .gallery-card.is-medium {
-    width: 260px;
+    width: auto;
     height: 142px;
   }
 
   .gallery-card.is-small {
-    width: 190px;
+    height: 118px;
   }
 
   .gallery-card.is-large,
   .gallery-card.is-wide {
-    width: 300px;
+    height: 164px;
   }
 
   .gallery-card.is-portrait {
-    width: 190px;
+    height: 164px;
   }
 
   .studies-hero,
