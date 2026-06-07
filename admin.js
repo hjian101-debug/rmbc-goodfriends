@@ -17,11 +17,39 @@ const adminStorageKey = "rmbc-admin-content";
 const adminPageStorageKey = "rmbc-admin-page";
 const supabaseConfig = window.RMBC_SUPABASE_CONFIG || {};
 const storageBucket = supabaseConfig.storageBucket || "site-media";
+const studiesSheetConfig = supabaseConfig.studiesSheet || {};
 let supabaseClient = null;
 let hasUnsavedChanges = false;
 let isSaving = false;
 let activeAdminPage = "gatherings";
 let activeGalleryCategory = "fellowship";
+
+function getStudiesSheetUrl() {
+  if (studiesSheetConfig.editUrl) {
+    return studiesSheetConfig.editUrl;
+  }
+
+  if (studiesSheetConfig.id) {
+    return `https://docs.google.com/spreadsheets/d/${studiesSheetConfig.id}/edit`;
+  }
+
+  return "";
+}
+
+function createElement(tagName, className, content) {
+  const element = document.createElement(tagName);
+  if (className) {
+    element.className = className;
+  }
+
+  if (Array.isArray(content)) {
+    element.append(...content);
+  } else if (content) {
+    element.textContent = content;
+  }
+
+  return element;
+}
 
 const defaultContent = {
   announcements: [
@@ -844,6 +872,58 @@ function renderGallery() {
 
 function renderStudies() {
   const list = document.querySelector('[data-list="studies"]');
+  const sheetUrl = getStudiesSheetUrl();
+  const addButton = document.querySelector('[data-add="studies"]');
+
+  if (addButton) {
+    addButton.hidden = Boolean(sheetUrl);
+  }
+
+  if (sheetUrl) {
+    const card = document.createElement("article");
+    const header = document.createElement("header");
+    const actions = document.createElement("div");
+    const columns = document.createElement("div");
+    const note = document.createElement("p");
+    const link = document.createElement("a");
+
+    card.className = "editor-card sheet-admin-card";
+    actions.className = "card-actions";
+    columns.className = "sheet-columns";
+    note.className = "empty-note";
+    note.textContent = "以后查经归档直接在 Google Sheet 里新增一行。公开网站会读取显示中的内容，按日期从新到旧排列。";
+    link.className = "sheet-link";
+    link.href = sheetUrl;
+    link.target = "_blank";
+    link.rel = "noopener";
+    link.textContent = "打开 Google Sheet";
+
+    header.append(
+      createElement("div", null, [
+        createElement("h3", null, "用 Google Sheet 管理查经归档"),
+        createElement("p", null, "后台这里不再堆很多查经表单，内容统一放在表格里。"),
+      ]),
+      actions,
+    );
+    actions.append(link);
+    [
+      "日期",
+      "中文题目",
+      "English title",
+      "中文经文",
+      "English passage",
+      "中文大致内容",
+      "English summary",
+      "是否显示",
+    ].forEach((label) => {
+      columns.append(createElement("span", null, label));
+    });
+
+    card.append(header, note, columns);
+    list.replaceChildren(card);
+    return;
+  }
+
   list.replaceChildren(
     ...content.studies.map((item, index) => {
       const card = document.createElement("article");

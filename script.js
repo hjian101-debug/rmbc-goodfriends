@@ -17,8 +17,10 @@ const photoCategoryList = document.querySelector("[data-photo-category-list]");
 
 const adminStorageKey = "rmbc-admin-content";
 const supabaseConfig = window.RMBC_SUPABASE_CONFIG || {};
+const studiesSheetConfig = supabaseConfig.studiesSheet || {};
 let supabaseClient = null;
 let remoteContent = null;
+let sheetStudies = null;
 
 const defaultContent = {
   announcements: [
@@ -437,6 +439,128 @@ const getLocalContent = () => {
 };
 
 const getAdminContent = () => remoteContent || getLocalContent();
+
+const normalizeStudyHeader = (value) => String(value || "")
+  .normalize("NFKC")
+  .trim()
+  .toLowerCase()
+  .replace(/[\s_/-]+/g, "");
+
+const studyHeaderAliases = {
+  date: ["日期", "date", "时间"],
+  titleZh: ["中文题目", "中文主题", "题目", "主题", "chinesetitle", "zhtitle", "titlezh"],
+  titleEn: ["englishtitle", "英文题目", "英文主题", "entitle", "titleen"],
+  passageZh: ["中文经文", "中文经文出处", "经文", "经文出处", "chinesepassage", "zhpassage", "passagezh"],
+  passageEn: ["englishpassage", "英文经文", "英文经文出处", "enpassage", "passageen"],
+  summaryZh: ["中文大致内容", "中文查经重点", "大致内容", "查经重点", "内容", "chinesesummary", "zhsummary", "summaryzh"],
+  summaryEn: ["englishsummary", "englishstudynotes", "英文大致内容", "英文查经重点", "ensummary", "summaryen"],
+  active: ["是否显示", "显示", "active", "show", "published"],
+};
+
+const getStudyColumnMap = (headers) => {
+  const normalizedHeaders = headers.map(normalizeStudyHeader);
+  return Object.fromEntries(
+    Object.entries(studyHeaderAliases).map(([key, aliases]) => [
+      key,
+      normalizedHeaders.findIndex((header) => aliases.map(normalizeStudyHeader).includes(header)),
+    ]),
+  );
+};
+
+const readSheetCell = (cells, index) => {
+  if (index < 0) {
+    return "";
+  }
+
+  const cell = cells[index];
+  if (!cell) {
+    return "";
+  }
+
+  return String(cell.f ?? cell.v ?? "").trim();
+};
+
+const isVisibleSheetValue = (value) => {
+  const normalized = normalizeStudyHeader(value);
+  return !["no", "n", "false", "0", "否", "不显示", "隐藏", "hide", "hidden"].includes(normalized);
+};
+
+const parseSheetStudies = (response) => {
+  const table = response?.table;
+  const headers = (table?.cols || []).map((column) => column.label || column.id || "");
+  const rows = table?.rows || [];
+  const columnMap = getStudyColumnMap(headers);
+
+  return rows
+    .map((row, index) => {
+      const cells = row.c || [];
+      const activeValue = readSheetCell(cells, columnMap.active);
+      const item = {
+        id: `sheet-study-${index + 1}`,
+        active: activeValue ? isVisibleSheetValue(activeValue) : true,
+        date: readSheetCell(cells, columnMap.date),
+        title: {
+          zh: readSheetCell(cells, columnMap.titleZh),
+          en: readSheetCell(cells, columnMap.titleEn),
+        },
+        passage: {
+          zh: readSheetCell(cells, columnMap.passageZh),
+          en: readSheetCell(cells, columnMap.passageEn),
+        },
+        scripture: { zh: "", en: "" },
+        summary: {
+          zh: readSheetCell(cells, columnMap.summaryZh),
+          en: readSheetCell(cells, columnMap.summaryEn),
+        },
+      };
+      const hasContent = item.date
+        || item.title.zh
+        || item.title.en
+        || item.passage.zh
+        || item.passage.en
+        || item.summary.zh
+        || item.summary.en;
+
+      return hasContent ? item : null;
+    })
+    .filter(Boolean);
+};
+
+const loadGoogleSheetStudies = () => new Promise((resolve) => {
+  if (!studiesSheetConfig.id) {
+    resolve([]);
+    return;
+  }
+
+  const callbackName = `rmbcStudiesSheet${Date.now()}`;
+  const sheetQuery = studiesSheetConfig.gid
+    ? `gid=${encodeURIComponent(studiesSheetConfig.gid)}`
+    : `sheet=${encodeURIComponent(studiesSheetConfig.sheetName || "查经归档")}`;
+  const script = document.createElement("script");
+  const cleanup = () => {
+    delete window[callbackName];
+    script.remove();
+  };
+
+  window[callbackName] = (response) => {
+    try {
+      resolve(parseSheetStudies(response));
+    } catch (error) {
+      console.warn("Unable to parse Google Sheet studies", error);
+      resolve([]);
+    } finally {
+      cleanup();
+    }
+  };
+
+  script.onerror = () => {
+    console.warn("Unable to load Google Sheet studies");
+    cleanup();
+    resolve([]);
+  };
+  script.src = `https://docs.google.com/spreadsheets/d/${encodeURIComponent(studiesSheetConfig.id)}/gviz/tq?${sheetQuery}&headers=1&tqx=responseHandler:${callbackName}`;
+  document.head.append(script);
+});
 
 const loadSupabaseContent = async () => {
   const client = getSupabaseClient();
@@ -1092,7 +1216,8 @@ const renderContent = (language) => {
   }
 
   if (studiesList) {
-    const studies = (content.studies || [])
+    const studiesSource = sheetStudies && sheetStudies.length > 0 ? sheetStudies : content.studies;
+    const studies = (studiesSource || [])
       .filter((item) => item.active !== false)
       .sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
 
@@ -1180,6 +1305,12 @@ let currentLanguage = getSavedLanguage();
 applyLanguage(currentLanguage);
 injectEventStructuredData();
 loadSupabaseContent();
+loadGoogleSheetStudies().then((studies) => {
+  if (studies.length > 0) {
+    sheetStudies = studies;
+    applyLanguage(currentLanguage);
+  }
+});
 
 languageToggle?.addEventListener("click", () => {
   currentLanguage = currentLanguage === "zh" ? "en" : "zh";

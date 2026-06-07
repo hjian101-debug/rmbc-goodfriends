@@ -395,6 +395,44 @@ textarea {
   min-height: 46px;
 }
 
+.sheet-admin-card {
+  display: grid;
+  gap: 18px;
+}
+
+.sheet-admin-card header {
+  align-items: center;
+  margin-bottom: 0;
+}
+
+.sheet-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 42px;
+  padding: 10px 14px;
+  color: var(--white);
+  background: var(--moss);
+  font-weight: 850;
+}
+
+.sheet-link:hover {
+  background: var(--moss-dark);
+}
+
+.sheet-columns {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.sheet-columns span {
+  padding: 9px 10px;
+  color: var(--moss-dark);
+  background: var(--soft);
+  font-size: 13px;
+  font-weight: 850;
+}
+
 .card-actions {
   display: flex;
   flex-wrap: wrap;
@@ -483,6 +521,10 @@ textarea {
   }
 
   .field-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sheet-columns {
     grid-template-columns: 1fr;
   }
 
