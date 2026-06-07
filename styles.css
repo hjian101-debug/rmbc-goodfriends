@@ -832,6 +832,15 @@ h3 {
   font-weight: 850;
 }
 
+.study-directory-count {
+  margin: 0 0 7px auto;
+  padding: 10px 13px;
+  color: var(--moss-dark);
+  background: var(--soft);
+  font-size: 15px;
+  font-weight: 850;
+}
+
 .photo-category-list {
   display: grid;
   gap: 54px;
@@ -1323,6 +1332,10 @@ body.photo-lightbox-open {
   }
 
   .study-directory .eyebrow {
+    margin: 0;
+  }
+
+  .study-directory-count {
     margin: 0;
   }
 

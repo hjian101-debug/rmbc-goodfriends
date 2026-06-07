@@ -283,6 +283,7 @@ const translations = {
     "studies.directory": "分类目录",
     "studies.year": "年份",
     "studies.month": "月份",
+    "studies.monthCount": "本月 {count} 次查经",
     "team.title": "同工团队",
     "team.prayerTitle": "代祷关怀",
     "team.prayerCopy": "关心新朋友与团契成员近况，安排探访和代祷。",
@@ -374,6 +375,7 @@ const translations = {
     "studies.directory": "Archive Directory",
     "studies.year": "Year",
     "studies.month": "Month",
+    "studies.monthCount": "{count} studies this month",
     "team.title": "Serving Team",
     "team.prayerTitle": "Prayer And Care",
     "team.prayerCopy": "Cares for newcomers and fellowship members through prayer, follow-up, and visits.",
@@ -849,6 +851,11 @@ const renderStudyDirectory = (studies, language) => {
   const monthSelect = document.createElement("select");
   const yearLabel = createElement("label", "study-filter-field");
   const monthLabel = createElement("label", "study-filter-field");
+  const selectedStudies = studies.filter((item) => {
+    const parts = getStudyDateParts(item.date);
+    return parts?.year === selectedStudyYear && parts?.month === selectedStudyMonth;
+  });
+  const countText = translations[language]["studies.monthCount"].replace("{count}", selectedStudies.length);
 
   yearSelect.setAttribute("aria-label", translations[language]["studies.year"]);
   monthSelect.setAttribute("aria-label", translations[language]["studies.month"]);
@@ -887,12 +894,10 @@ const renderStudyDirectory = (studies, language) => {
     createElement("p", "eyebrow", translations[language]["studies.directory"]),
     yearLabel,
     monthLabel,
+    createElement("p", "study-directory-count", countText),
   );
 
-  return studies.filter((item) => {
-    const parts = getStudyDateParts(item.date);
-    return parts?.year === selectedStudyYear && parts?.month === selectedStudyMonth;
-  });
+  return selectedStudies;
 };
 
 const closePhotoLightbox = () => {
