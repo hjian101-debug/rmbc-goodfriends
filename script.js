@@ -946,21 +946,18 @@ const renderContent = (language) => {
 
       Array.from({ length: loopCount }, (_, loopIndex) => {
         const loop = document.createElement("div");
+        const rows = [document.createElement("div"), document.createElement("div")];
+        const rowWidths = [0, 0];
         loop.className = "gallery-loop";
+        rows.forEach((row) => {
+          row.className = "gallery-row";
+        });
         photos.forEach((item, index) => {
-          const pairIndex = Math.floor(index / 2);
-          let pair = loop.querySelector(`[data-gallery-pair="${pairIndex}"]`);
           const article = createElement("article", "gallery-card");
           const image = document.createElement("img");
           const title = localText(item.title, language);
           const variant = galleryCardVariants[index % galleryCardVariants.length];
-
-          if (!pair) {
-            pair = document.createElement("div");
-            pair.className = index % 4 === 0 ? "gallery-pair is-offset" : "gallery-pair";
-            pair.dataset.galleryPair = pairIndex;
-            loop.append(pair);
-          }
+          const rowIndex = rowWidths[0] <= rowWidths[1] ? 0 : 1;
 
           article.classList.add(variant.className);
           if (loopIndex > 0) {
@@ -989,8 +986,10 @@ const renderContent = (language) => {
           });
 
           article.append(image);
-          pair.append(article);
+          rows[rowIndex].append(article);
+          rowWidths[rowIndex] += variant.width;
         });
+        loop.replaceChildren(...rows);
         track.append(loop);
       });
       galleryGrid.replaceChildren(track);
