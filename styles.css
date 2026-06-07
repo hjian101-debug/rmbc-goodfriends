@@ -799,6 +799,39 @@ h3 {
   padding-top: 0;
 }
 
+.study-directory {
+  display: flex;
+  align-items: end;
+  gap: 14px;
+  margin-bottom: 22px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  background: var(--white);
+}
+
+.study-directory .eyebrow {
+  min-width: 120px;
+  margin: 0 12px 9px 0;
+}
+
+.study-filter-field {
+  display: grid;
+  gap: 7px;
+  min-width: 180px;
+  color: var(--moss-dark);
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.study-filter-field select {
+  min-height: 48px;
+  border: 1px solid var(--line);
+  padding: 0 40px 0 14px;
+  color: var(--ink);
+  background: var(--paper);
+  font-weight: 850;
+}
+
 .photo-category-list {
   display: grid;
   gap: 54px;
@@ -1282,6 +1315,15 @@ body.photo-lightbox-open {
   .photos-hero {
     display: grid;
     align-items: start;
+  }
+
+  .study-directory {
+    display: grid;
+    align-items: stretch;
+  }
+
+  .study-directory .eyebrow {
+    margin: 0;
   }
 
   .study-card {

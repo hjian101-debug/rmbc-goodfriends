@@ -12,6 +12,7 @@ const gallerySection = document.querySelector("[data-gallery-section]");
 const galleryGrid = document.querySelector("[data-gallery-grid]");
 const galleryLinks = document.querySelectorAll("[data-gallery-link]");
 const teamGrid = document.querySelector("[data-team-grid]");
+const studyDirectory = document.querySelector("[data-study-directory]");
 const studiesList = document.querySelector("[data-studies-list]");
 const photoCategoryList = document.querySelector("[data-photo-category-list]");
 
@@ -204,6 +205,8 @@ let galleryAutoScrollController = null;
 let galleryScrollbarHideTimer = 0;
 let photoLightbox = null;
 let photoLightboxPreviousFocus = null;
+let selectedStudyYear = "";
+let selectedStudyMonth = "";
 
 const normalizePhotoCategoryDescriptions = (value) => Object.fromEntries(
   photoCategories.map((category) => [
@@ -273,10 +276,13 @@ const translations = {
     "photos.backToWall": "返回照片墙",
     "photos.empty": "还没有上传照片。",
     "studies.title": "过去查经内容",
-    "studies.copy": "这里会整理 RMBC 好朋友团契过去中文查经的经文、主题和重点，方便 UCR 与 Riverside 的朋友回顾。",
+    "studies.copy": "这里会整理 RMBC 好朋友团契过去中文查经的经文、主题和重点。",
     "studies.empty": "还没有归档的查经内容。",
     "studies.back": "返回首页",
     "studies.notes": "查经重点",
+    "studies.directory": "分类目录",
+    "studies.year": "年份",
+    "studies.month": "月份",
     "team.title": "同工团队",
     "team.prayerTitle": "代祷关怀",
     "team.prayerCopy": "关心新朋友与团契成员近况，安排探访和代祷。",
@@ -361,10 +367,13 @@ const translations = {
     "photos.backToWall": "Back To Photo Wall",
     "photos.empty": "No photos have been uploaded yet.",
     "studies.title": "Past Bible Studies",
-    "studies.copy": "A simple archive of passages, themes, and notes from RMBC Good Friends Fellowship Bible studies for UCR and Riverside friends.",
+    "studies.copy": "A simple archive of passages, themes, and notes from RMBC Good Friends Fellowship Bible studies.",
     "studies.empty": "No archived Bible studies yet.",
     "studies.back": "Back Home",
     "studies.notes": "Study Notes",
+    "studies.directory": "Archive Directory",
+    "studies.year": "Year",
+    "studies.month": "Month",
     "team.title": "Serving Team",
     "team.prayerTitle": "Prayer And Care",
     "team.prayerCopy": "Cares for newcomers and fellowship members through prayer, follow-up, and visits.",
@@ -738,6 +747,152 @@ const createElement = (tagName, className, text) => {
     element.textContent = text;
   }
   return element;
+};
+
+const englishMonthNames = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+const padMonth = (month) => String(month).padStart(2, "0");
+
+const getStudyDateParts = (dateValue) => {
+  const value = String(dateValue || "").trim();
+  if (!value) {
+    return null;
+  }
+
+  const googleDate = value.match(/^Date\((\d{4}),\s*(\d{1,2}),\s*(\d{1,2})\)/);
+  if (googleDate) {
+    const year = googleDate[1];
+    const month = padMonth(Number(googleDate[2]) + 1);
+    return { year, month };
+  }
+
+  const yearFirstDate = value.match(/^(\d{4})[-/.年](\d{1,2})(?:[-/.月](\d{1,2}))?/);
+  if (yearFirstDate) {
+    return { year: yearFirstDate[1], month: padMonth(yearFirstDate[2]) };
+  }
+
+  const parsed = new Date(value);
+  if (!Number.isNaN(parsed.getTime())) {
+    return {
+      year: String(parsed.getFullYear()),
+      month: padMonth(parsed.getMonth() + 1),
+    };
+  }
+
+  return null;
+};
+
+const getMonthLabel = (month, language) => {
+  const monthNumber = Number(month);
+  return language === "zh" ? `${monthNumber}月` : englishMonthNames[monthNumber - 1] || month;
+};
+
+const getStudyArchiveIndex = (studies) => {
+  const index = new Map();
+
+  studies.forEach((item) => {
+    const parts = getStudyDateParts(item.date);
+    if (!parts) {
+      return;
+    }
+
+    if (!index.has(parts.year)) {
+      index.set(parts.year, new Set());
+    }
+    index.get(parts.year).add(parts.month);
+  });
+
+  return [...index.entries()]
+    .map(([year, months]) => ({
+      year,
+      months: [...months].sort((a, b) => Number(b) - Number(a)),
+    }))
+    .sort((a, b) => Number(b.year) - Number(a.year));
+};
+
+const renderStudyDirectory = (studies, language) => {
+  if (!studyDirectory) {
+    return studies;
+  }
+
+  const archiveIndex = getStudyArchiveIndex(studies);
+  if (archiveIndex.length === 0) {
+    studyDirectory.hidden = true;
+    return studies;
+  }
+
+  const years = archiveIndex.map((item) => item.year);
+  if (!years.includes(selectedStudyYear)) {
+    selectedStudyYear = years[0];
+    selectedStudyMonth = "";
+  }
+
+  const selectedYearEntry = archiveIndex.find((item) => item.year === selectedStudyYear) || archiveIndex[0];
+  if (!selectedYearEntry.months.includes(selectedStudyMonth)) {
+    selectedStudyMonth = selectedYearEntry.months[0];
+  }
+
+  const yearSelect = document.createElement("select");
+  const monthSelect = document.createElement("select");
+  const yearLabel = createElement("label", "study-filter-field");
+  const monthLabel = createElement("label", "study-filter-field");
+
+  yearSelect.setAttribute("aria-label", translations[language]["studies.year"]);
+  monthSelect.setAttribute("aria-label", translations[language]["studies.month"]);
+
+  archiveIndex.forEach(({ year }) => {
+    const option = document.createElement("option");
+    option.value = year;
+    option.textContent = language === "zh" ? `${year}年` : year;
+    option.selected = year === selectedStudyYear;
+    yearSelect.append(option);
+  });
+
+  selectedYearEntry.months.forEach((month) => {
+    const option = document.createElement("option");
+    option.value = month;
+    option.textContent = getMonthLabel(month, language);
+    option.selected = month === selectedStudyMonth;
+    monthSelect.append(option);
+  });
+
+  yearSelect.addEventListener("change", () => {
+    selectedStudyYear = yearSelect.value;
+    selectedStudyMonth = "";
+    renderContent(language);
+  });
+  monthSelect.addEventListener("change", () => {
+    selectedStudyMonth = monthSelect.value;
+    renderContent(language);
+  });
+
+  yearLabel.append(createElement("span", null, translations[language]["studies.year"]), yearSelect);
+  monthLabel.append(createElement("span", null, translations[language]["studies.month"]), monthSelect);
+
+  studyDirectory.hidden = false;
+  studyDirectory.replaceChildren(
+    createElement("p", "eyebrow", translations[language]["studies.directory"]),
+    yearLabel,
+    monthLabel,
+  );
+
+  return studies.filter((item) => {
+    const parts = getStudyDateParts(item.date);
+    return parts?.year === selectedStudyYear && parts?.month === selectedStudyMonth;
+  });
 };
 
 const closePhotoLightbox = () => {
@@ -1220,12 +1375,13 @@ const renderContent = (language) => {
     const studies = (studiesSource || [])
       .filter((item) => item.active !== false)
       .sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
+    const visibleStudies = renderStudyDirectory(studies, language);
 
-    if (studies.length === 0) {
+    if (visibleStudies.length === 0) {
       studiesList.replaceChildren(createElement("p", "empty-state", translations[language]["studies.empty"]));
     } else {
       studiesList.replaceChildren(
-        ...studies.map((item) => {
+        ...visibleStudies.map((item) => {
           const article = createElement("article", "study-card");
           const meta = createElement("div", "study-meta");
           const title = localText(item.title, language);
