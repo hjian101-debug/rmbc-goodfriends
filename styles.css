@@ -213,14 +213,14 @@ a {
   top: clamp(120px, 17vh, 190px);
   right: clamp(18px, 10vw, 160px);
   z-index: 2;
-  width: clamp(150px, 18vw, 260px);
-  aspect-ratio: 1;
+  width: clamp(104px, 10vw, 150px);
+  height: clamp(210px, 22vw, 320px);
   background:
-    linear-gradient(90deg, transparent 43%, rgba(246, 229, 185, 0.44) 43% 57%, transparent 57%),
-    linear-gradient(0deg, transparent 31%, rgba(246, 229, 185, 0.36) 31% 45%, transparent 45%);
+    linear-gradient(90deg, transparent 45%, rgba(74, 112, 125, 0.62) 45% 55%, transparent 55%),
+    linear-gradient(0deg, transparent 39%, rgba(74, 112, 125, 0.58) 39% 46%, transparent 46%);
   content: "";
-  filter: drop-shadow(0 18px 44px rgba(0, 0, 0, 0.18));
-  opacity: 0.55;
+  filter: drop-shadow(0 16px 34px rgba(0, 22, 34, 0.18));
+  opacity: 0.72;
   pointer-events: none;
 }
 
@@ -487,11 +487,11 @@ h3 {
   position: absolute;
   top: 18px;
   right: 20px;
-  width: 36px;
-  aspect-ratio: 1;
+  width: 28px;
+  height: 54px;
   background:
-    linear-gradient(90deg, transparent 43%, rgba(66, 106, 80, 0.24) 43% 57%, transparent 57%),
-    linear-gradient(0deg, transparent 30%, rgba(66, 106, 80, 0.18) 30% 44%, transparent 44%);
+    linear-gradient(90deg, transparent 43%, rgba(74, 112, 125, 0.34) 43% 57%, transparent 57%),
+    linear-gradient(0deg, transparent 39%, rgba(74, 112, 125, 0.3) 39% 47%, transparent 47%);
   content: "";
   pointer-events: none;
 }
@@ -1280,8 +1280,9 @@ body.photo-lightbox-open {
   .hero::after {
     top: 104px;
     right: -28px;
-    width: 150px;
-    opacity: 0.38;
+    width: 82px;
+    height: 168px;
+    opacity: 0.52;
   }
 
   .quick-info,
