@@ -213,11 +213,11 @@ a {
   top: clamp(120px, 17vh, 190px);
   right: clamp(18px, 10vw, 160px);
   z-index: 2;
-  width: clamp(104px, 10vw, 150px);
-  height: clamp(210px, 22vw, 320px);
+  width: clamp(118px, 11vw, 160px);
+  aspect-ratio: 1 / 2;
   background:
-    linear-gradient(90deg, transparent 45%, rgba(74, 112, 125, 0.62) 45% 55%, transparent 55%),
-    linear-gradient(0deg, transparent 39%, rgba(74, 112, 125, 0.58) 39% 46%, transparent 46%);
+    linear-gradient(to right, transparent 45%, rgba(74, 112, 125, 0.62) 45% 55%, transparent 55%),
+    linear-gradient(to bottom, transparent 24%, rgba(74, 112, 125, 0.58) 24% 31%, transparent 31%);
   content: "";
   filter: drop-shadow(0 16px 34px rgba(0, 22, 34, 0.18));
   opacity: 0.72;
@@ -488,10 +488,10 @@ h3 {
   top: 18px;
   right: 20px;
   width: 28px;
-  height: 54px;
+  aspect-ratio: 1 / 2;
   background:
-    linear-gradient(90deg, transparent 43%, rgba(74, 112, 125, 0.34) 43% 57%, transparent 57%),
-    linear-gradient(0deg, transparent 39%, rgba(74, 112, 125, 0.3) 39% 47%, transparent 47%);
+    linear-gradient(to right, transparent 43%, rgba(74, 112, 125, 0.34) 43% 57%, transparent 57%),
+    linear-gradient(to bottom, transparent 24%, rgba(74, 112, 125, 0.3) 24% 32%, transparent 32%);
   content: "";
   pointer-events: none;
 }
@@ -1281,7 +1281,6 @@ body.photo-lightbox-open {
     top: 104px;
     right: -28px;
     width: 82px;
-    height: 168px;
     opacity: 0.52;
   }
 
