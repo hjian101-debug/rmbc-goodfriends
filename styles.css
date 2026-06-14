@@ -194,6 +194,7 @@ a {
 }
 
 .hero-media {
+  z-index: 0;
   background-image: url("./assets/hero-fellowship.svg");
   background-position: center;
   background-size: cover;
@@ -201,14 +202,31 @@ a {
 }
 
 .hero-shade {
+  z-index: 1;
   background:
     linear-gradient(90deg, rgba(13, 24, 18, 0.78), rgba(13, 24, 18, 0.4), rgba(13, 24, 18, 0.12)),
     linear-gradient(0deg, rgba(13, 24, 18, 0.62), rgba(13, 24, 18, 0.05) 55%);
 }
 
+.hero::after {
+  position: absolute;
+  top: clamp(120px, 17vh, 190px);
+  right: clamp(18px, 10vw, 160px);
+  z-index: 2;
+  width: clamp(150px, 18vw, 260px);
+  aspect-ratio: 1;
+  background:
+    linear-gradient(90deg, transparent 43%, rgba(246, 229, 185, 0.44) 43% 57%, transparent 57%),
+    linear-gradient(0deg, transparent 31%, rgba(246, 229, 185, 0.36) 31% 45%, transparent 45%);
+  content: "";
+  filter: drop-shadow(0 18px 44px rgba(0, 0, 0, 0.18));
+  opacity: 0.55;
+  pointer-events: none;
+}
+
 .hero-content {
   position: relative;
-  z-index: 1;
+  z-index: 3;
   width: min(920px, calc(100% - 36px));
   margin: 0 auto;
   padding: 0 0 clamp(70px, 12vh, 118px);
@@ -457,10 +475,25 @@ h3 {
 }
 
 .event-card {
+  position: relative;
+  overflow: hidden;
   min-height: 274px;
   display: flex;
   flex-direction: column;
   padding: 26px;
+}
+
+.event-card::before {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  width: 36px;
+  aspect-ratio: 1;
+  background:
+    linear-gradient(90deg, transparent 43%, rgba(66, 106, 80, 0.24) 43% 57%, transparent 57%),
+    linear-gradient(0deg, transparent 30%, rgba(66, 106, 80, 0.18) 30% 44%, transparent 44%);
+  content: "";
+  pointer-events: none;
 }
 
 .event-card time {
@@ -1242,6 +1275,13 @@ body.photo-lightbox-open {
 
   .hero {
     min-height: 86vh;
+  }
+
+  .hero::after {
+    top: 104px;
+    right: -28px;
+    width: 150px;
+    opacity: 0.38;
   }
 
   .quick-info,
