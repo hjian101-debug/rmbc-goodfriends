@@ -16,7 +16,7 @@
         <div class="login-card">
           <p class="eyebrow">Admin</p>
           <h1>好朋友团契后台</h1>
-          <p>登录后可以管理同工、聚会信息和公告。</p>
+          <p>登录后可以管理区块显示、聚会信息、公告和照片。</p>
           <form data-login-form>
             <label>
               账号
@@ -39,6 +39,7 @@
             <strong>RMBC GFF</strong>
           </a>
           <nav class="admin-nav" aria-label="后台导航">
+            <button type="button" data-admin-page="sections">区块显示</button>
             <button type="button" data-admin-page="gatherings">聚会信息</button>
             <button type="button" data-admin-page="studies">查经归档</button>
             <div class="admin-nav-group">
@@ -68,7 +69,17 @@
             <a class="site-link" href="./index.html" target="_blank" rel="noopener">预览公开网站</a>
           </header>
 
-          <section class="admin-section" id="gatherings" data-admin-section="gatherings">
+          <section class="admin-section" id="sections" data-admin-section="sections">
+            <div class="section-bar">
+              <div>
+                <p class="eyebrow">Visibility</p>
+                <h2>区块显示</h2>
+              </div>
+            </div>
+            <div class="editor-list" data-list="sections"></div>
+          </section>
+
+          <section class="admin-section" id="gatherings" data-admin-section="gatherings" hidden>
             <div class="section-bar">
               <div>
                 <p class="eyebrow">Gatherings</p>
@@ -128,6 +139,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="./supabase-config.js?v=20260607-2"></script>
-    <script src="./admin.js?v=20260607-2"></script>
+    <script src="./admin.js?v=20260614-1"></script>
   </body>
 </html>

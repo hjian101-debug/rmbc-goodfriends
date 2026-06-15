@@ -23,7 +23,22 @@ let supabaseClient = null;
 let remoteContent = null;
 let sheetStudies = null;
 
+const siteSectionOptions = [
+  { id: "quick" },
+  { id: "announcements" },
+  { id: "about" },
+  { id: "gatherings" },
+  { id: "gallery" },
+  { id: "team", defaultVisible: false },
+  { id: "visit" },
+  { id: "contact" },
+];
+const defaultSiteSections = Object.fromEntries(
+  siteSectionOptions.map(({ id, defaultVisible = true }) => [id, defaultVisible]),
+);
+
 const defaultContent = {
+  siteSections: defaultSiteSections,
   announcements: [
     {
       id: "welcome",
@@ -214,6 +229,27 @@ const normalizePhotoCategoryDescriptions = (value) => Object.fromEntries(
     localDescriptionValue(value?.[category.id]),
   ]),
 );
+
+const normalizeSiteSections = (value) => Object.fromEntries(
+  siteSectionOptions.map(({ id }) => [
+    id,
+    value && Object.prototype.hasOwnProperty.call(value, id)
+      ? value[id] !== false
+      : defaultSiteSections[id] !== false,
+  ]),
+);
+
+const isSiteSectionVisible = (sections, id) => sections?.[id] !== false;
+
+const syncSiteSectionVisibility = (sections) => {
+  document.querySelectorAll("[data-site-section]").forEach((section) => {
+    section.hidden = !isSiteSectionVisible(sections, section.dataset.siteSection);
+  });
+
+  document.querySelectorAll("[data-section-link]").forEach((link) => {
+    link.hidden = !isSiteSectionVisible(sections, link.dataset.sectionLink);
+  });
+};
 
 const translations = {
   zh: {
@@ -424,6 +460,7 @@ const getSupabaseClient = () => {
 const normalizePublicContent = (value) => {
   if (value && typeof value === "object") {
     return {
+      siteSections: normalizeSiteSections(value.siteSections),
       announcements: Array.isArray(value.announcements) ? value.announcements : defaultContent.announcements,
       gatherings: Array.isArray(value.gatherings) ? value.gatherings : defaultContent.gatherings,
       studies: Array.isArray(value.studies) ? value.studies : defaultContent.studies,
@@ -433,7 +470,10 @@ const normalizePublicContent = (value) => {
     };
   }
 
-  return defaultContent;
+  return {
+    ...defaultContent,
+    siteSections: normalizeSiteSections(defaultContent.siteSections),
+  };
 };
 
 const getLocalContent = () => {
@@ -446,7 +486,10 @@ const getLocalContent = () => {
     window.localStorage.removeItem(adminStorageKey);
   }
 
-  return defaultContent;
+  return {
+    ...defaultContent,
+    siteSections: normalizeSiteSections(defaultContent.siteSections),
+  };
 };
 
 const getAdminContent = () => remoteContent || getLocalContent();
@@ -1106,10 +1149,13 @@ const injectEventStructuredData = () => {
 
 const renderContent = (language) => {
   const content = getAdminContent();
+  const siteSections = normalizeSiteSections(content.siteSections);
+  syncSiteSectionVisibility(siteSections);
 
   if (announcementList && announcementSection) {
     const activeAnnouncements = content.announcements.filter((item) => item.active !== false);
-    announcementSection.hidden = activeAnnouncements.length === 0;
+    const announcementsVisible = isSiteSectionVisible(siteSections, "announcements");
+    announcementSection.hidden = !announcementsVisible || activeAnnouncements.length === 0;
     announcementList.replaceChildren(
       ...activeAnnouncements.map((item) => {
         const article = createElement("article", "announcement-card");
@@ -1124,7 +1170,10 @@ const renderContent = (language) => {
   }
 
   if (eventGrid) {
-    const activeGatherings = content.gatherings.filter((item) => item.active !== false);
+    const gatheringsVisible = isSiteSectionVisible(siteSections, "gatherings");
+    const activeGatherings = gatheringsVisible
+      ? content.gatherings.filter((item) => item.active !== false)
+      : [];
     eventGrid.replaceChildren(
       ...activeGatherings.map((item) => {
         const article = createElement("article", "event-card");
@@ -1211,13 +1260,14 @@ const renderContent = (language) => {
   }
 
   if (gallerySection && galleryGrid) {
+    const galleryVisible = isSiteSectionVisible(siteSections, "gallery");
     const savedPhotos = (content.gallery || []).filter((item) => item.active !== false && item.image);
     const defaultPhotos = defaultContent.gallery.filter((item) => item.active !== false && item.image);
-    const activePhotos = getVisiblePhotos(content);
+    const activePhotos = galleryVisible ? getVisiblePhotos(content) : [];
 
-    gallerySection.hidden = activePhotos.length === 0;
+    gallerySection.hidden = !galleryVisible || activePhotos.length === 0;
     galleryLinks.forEach((link) => {
-      link.hidden = activePhotos.length === 0;
+      link.hidden = !galleryVisible || activePhotos.length === 0;
     });
 
     const renderGalleryCards = (photos, allowFallback) => {
@@ -1280,7 +1330,12 @@ const renderContent = (language) => {
       startGalleryAutoScroll();
     };
 
-    renderGalleryCards(activePhotos, savedPhotos.length > 0);
+    if (activePhotos.length === 0) {
+      galleryGrid.replaceChildren();
+      stopGalleryAutoScroll();
+    } else {
+      renderGalleryCards(activePhotos, savedPhotos.length > 0);
+    }
   } else {
     galleryLinks.forEach((link) => {
       link.hidden = true;

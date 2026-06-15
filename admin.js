@@ -21,7 +21,7 @@ const studiesSheetConfig = supabaseConfig.studiesSheet || {};
 let supabaseClient = null;
 let hasUnsavedChanges = false;
 let isSaving = false;
-let activeAdminPage = "gatherings";
+let activeAdminPage = "sections";
 let activeGalleryCategory = "fellowship";
 
 function getStudiesSheetUrl() {
@@ -51,7 +51,22 @@ function createElement(tagName, className, content) {
   return element;
 }
 
+const siteSectionOptions = [
+  { id: "quick", title: "首页摘要", description: "聚会时间、地点、适合对象。" },
+  { id: "announcements", title: "团契公告", description: "公开网站上的公告区块，有公告内容时显示。" },
+  { id: "about", title: "关于我们", description: "介绍好朋友团契和团契特点。" },
+  { id: "gatherings", title: "近期聚会", description: "周五查经、主日崇拜和本周经文。" },
+  { id: "gallery", title: "照片墙", description: "首页照片墙和精彩瞬间入口。" },
+  { id: "team", title: "同工团队", description: "公开网站上的同工介绍。", defaultVisible: false },
+  { id: "visit", title: "第一次来", description: "第一次参加的流程说明。" },
+  { id: "contact", title: "联系信息", description: "联系好朋友团契、地图和地址。" },
+];
+const defaultSiteSections = Object.fromEntries(
+  siteSectionOptions.map(({ id, defaultVisible = true }) => [id, defaultVisible]),
+);
+
 const defaultContent = {
+  siteSections: defaultSiteSections,
   announcements: [
     {
       id: "welcome",
@@ -257,9 +272,21 @@ function normalizePhotoCategoryDescriptions(value) {
   );
 }
 
+function normalizeSiteSections(value) {
+  return Object.fromEntries(
+    siteSectionOptions.map(({ id }) => [
+      id,
+      value && Object.prototype.hasOwnProperty.call(value, id)
+        ? value[id] !== false
+        : defaultSiteSections[id] !== false,
+    ]),
+  );
+}
+
 function normalizeContent(value) {
   const next = cloneContent(value && typeof value === "object" ? value : defaultContent);
 
+  next.siteSections = normalizeSiteSections(next.siteSections);
   next.announcements = Array.isArray(next.announcements) ? next.announcements : defaultContent.announcements;
   next.gatherings = Array.isArray(next.gatherings) ? next.gatherings : defaultContent.gatherings;
   next.studies = Array.isArray(next.studies) ? next.studies : defaultContent.studies;
@@ -358,6 +385,7 @@ function loadLocalContent() {
     const saved = JSON.parse(window.localStorage.getItem(adminStorageKey));
     if (saved && typeof saved === "object") {
       return normalizeContent({
+        siteSections: saved.siteSections || defaultContent.siteSections,
         announcements: Array.isArray(saved.announcements) ? saved.announcements : defaultContent.announcements,
         gatherings: Array.isArray(saved.gatherings) ? saved.gatherings : defaultContent.gatherings,
         studies: Array.isArray(saved.studies) ? saved.studies : defaultContent.studies,
@@ -773,6 +801,45 @@ function createAvatarUpload(item) {
   });
 }
 
+function renderSections() {
+  const list = document.querySelector('[data-list="sections"]');
+  if (!list) {
+    return;
+  }
+
+  const group = document.createElement("section");
+  group.className = "editor-group";
+  group.append(createElement("h3", null, "公开网站区块"));
+
+  siteSectionOptions.forEach((option) => {
+    const card = document.createElement("article");
+    const header = document.createElement("header");
+    const titleBlock = document.createElement("div");
+    const toggle = document.createElement("label");
+    const checkbox = document.createElement("input");
+
+    card.className = "editor-card";
+    toggle.className = "status-row";
+    checkbox.type = "checkbox";
+    checkbox.checked = content.siteSections?.[option.id] !== false;
+    checkbox.addEventListener("change", () => {
+      content.siteSections[option.id] = checkbox.checked;
+      saveContent(`${option.title}显示设置已修改`);
+    });
+
+    titleBlock.append(
+      createElement("h3", null, option.title),
+      createElement("p", null, option.description),
+    );
+    toggle.append(checkbox, document.createTextNode("在公开网站显示"));
+    header.append(titleBlock);
+    card.append(header, toggle);
+    group.append(card);
+  });
+
+  list.replaceChildren(group);
+}
+
 function renderGatherings() {
   const list = document.querySelector('[data-list="gatherings"]');
   list.replaceChildren(
@@ -1011,6 +1078,7 @@ function renderAnnouncements() {
 }
 
 function renderAll() {
+  renderSections();
   renderGatherings();
   renderGallery();
   renderStudies();
@@ -1020,7 +1088,7 @@ function renderAll() {
 
 function setActiveAdminPage(page) {
   const hasPage = [...adminSections].some((section) => section.dataset.adminSection === page);
-  const nextPage = hasPage ? page : "gatherings";
+  const nextPage = hasPage ? page : "sections";
   activeAdminPage = nextPage;
   window.localStorage.setItem(adminPageStorageKey, nextPage);
 

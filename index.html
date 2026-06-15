@@ -72,13 +72,13 @@
         </span>
       </a>
       <nav class="nav" aria-label="主导航">
-        <a href="#about" data-i18n="nav.about">关于</a>
-        <a href="#gatherings" data-i18n="nav.gatherings">聚会</a>
+        <a href="#about" data-i18n="nav.about" data-section-link="about">关于</a>
+        <a href="#gatherings" data-i18n="nav.gatherings" data-section-link="gatherings">聚会</a>
         <a href="./studies.html" data-i18n="nav.studies">查经归档</a>
-        <a href="#gallery" data-i18n="nav.gallery" data-gallery-link hidden>照片</a>
-        <a href="#team" data-i18n="nav.team">同工</a>
-        <a href="#visit" data-i18n="nav.visit">来访</a>
-        <a href="#contact" data-i18n="nav.contact">联系</a>
+        <a href="#gallery" data-i18n="nav.gallery" data-gallery-link data-section-link="gallery" hidden>照片</a>
+        <a href="#team" data-i18n="nav.team" data-section-link="team">同工</a>
+        <a href="#visit" data-i18n="nav.visit" data-section-link="visit">来访</a>
+        <a href="#contact" data-i18n="nav.contact" data-section-link="contact">联系</a>
       </nav>
       <button class="language-button" type="button" data-language-toggle aria-label="Switch to English">English</button>
       <button class="menu-button" type="button" aria-expanded="false" aria-controls="mobileNav" data-menu-button>
@@ -88,13 +88,13 @@
     </header>
 
     <nav class="mobile-nav" id="mobileNav" aria-label="移动端导航" data-mobile-nav>
-      <a href="#about" data-i18n="nav.about">关于</a>
-      <a href="#gatherings" data-i18n="nav.gatherings">聚会</a>
+      <a href="#about" data-i18n="nav.about" data-section-link="about">关于</a>
+      <a href="#gatherings" data-i18n="nav.gatherings" data-section-link="gatherings">聚会</a>
       <a href="./studies.html" data-i18n="nav.studies">查经归档</a>
-      <a href="#gallery" data-i18n="nav.gallery" data-gallery-link hidden>照片</a>
-      <a href="#team" data-i18n="nav.team">同工</a>
-      <a href="#visit" data-i18n="nav.visit">来访</a>
-      <a href="#contact" data-i18n="nav.contact">联系</a>
+      <a href="#gallery" data-i18n="nav.gallery" data-gallery-link data-section-link="gallery" hidden>照片</a>
+      <a href="#team" data-i18n="nav.team" data-section-link="team">同工</a>
+      <a href="#visit" data-i18n="nav.visit" data-section-link="visit">来访</a>
+      <a href="#contact" data-i18n="nav.contact" data-section-link="contact">联系</a>
     </nav>
 
     <main id="home">
@@ -108,14 +108,14 @@
             在 Riverside 和 UCR 附近一起吃饭、中文查经、祷告，也一起把日子过得更有盼望。
           </p>
           <div class="hero-actions">
-            <a class="button primary" href="#contact" data-i18n="hero.contactHost">第一次来？联系接待同工</a>
-            <a class="button secondary" href="#visit" data-i18n="hero.firstVisit">第一次来参加</a>
-            <a class="button secondary" href="#gatherings" data-i18n="hero.thisWeek">本周聚会地点</a>
+            <a class="button primary" href="#contact" data-i18n="hero.contactHost" data-section-link="contact">第一次来？联系接待同工</a>
+            <a class="button secondary" href="#visit" data-i18n="hero.firstVisit" data-section-link="visit">第一次来参加</a>
+            <a class="button secondary" href="#gatherings" data-i18n="hero.thisWeek" data-section-link="gatherings">本周聚会地点</a>
           </div>
         </div>
       </section>
 
-      <section class="quick-info" aria-label="团契摘要">
+      <section class="quick-info" aria-label="团契摘要" data-site-section="quick">
         <div>
           <span data-i18n="quick.timeLabel">聚会时间</span>
           <strong data-i18n="quick.time">周五 6:00 PM / 周日 10:00 AM</strong>
@@ -130,7 +130,7 @@
         </div>
       </section>
 
-      <section class="section announcements" aria-label="团契公告" data-announcements-section hidden>
+      <section class="section announcements" aria-label="团契公告" data-site-section="announcements" data-announcements-section hidden>
         <div class="section-heading">
           <div>
             <p class="eyebrow">News</p>
@@ -140,7 +140,7 @@
         <div class="announcement-list" data-announcement-list></div>
       </section>
 
-      <section class="section split" id="about">
+      <section class="section split" id="about" data-site-section="about">
         <div class="section-copy">
           <p class="eyebrow">About</p>
           <h2 data-i18n="about.title">一个可以慢慢熟起来的地方</h2>
@@ -168,7 +168,7 @@
         </div>
       </section>
 
-      <section class="section muted" id="gatherings">
+      <section class="section muted" id="gatherings" data-site-section="gatherings">
         <div class="section-heading">
           <p class="eyebrow">Gatherings</p>
           <h2 data-i18n="gatherings.title">近期聚会</h2>
@@ -179,7 +179,7 @@
         </div>
       </section>
 
-      <section class="section gallery" id="gallery" aria-label="团契照片" data-gallery-section hidden>
+      <section class="section gallery" id="gallery" aria-label="团契照片" data-site-section="gallery" data-gallery-section hidden>
         <div class="section-heading">
           <div>
             <p class="eyebrow">Photos</p>
@@ -193,7 +193,7 @@
         </div>
       </section>
 
-      <section class="section team" id="team">
+      <section class="section team" id="team" data-site-section="team">
         <div class="section-heading">
           <div>
             <p class="eyebrow">Servants</p>
@@ -203,7 +203,7 @@
         <div class="team-grid" data-team-grid></div>
       </section>
 
-      <section class="section visit" id="visit">
+      <section class="section visit" id="visit" data-site-section="visit">
         <div class="visit-panel">
           <p class="eyebrow">First Visit</p>
           <h2 data-i18n="visit.title">第一次来，可以很简单</h2>
@@ -219,7 +219,7 @@
         </div>
       </section>
 
-      <section class="section contact" id="contact">
+      <section class="section contact" id="contact" data-site-section="contact">
         <div class="contact-copy">
           <p class="eyebrow">Contact</p>
           <h2 data-i18n="contact.title">联系好朋友团契</h2>
@@ -234,7 +234,7 @@
         </div>
         <div class="contact-actions">
           <a class="contact-link" href="mailto:hello@rmbc.example" data-i18n="contact.email">团契邮箱 hello@rmbc.example</a>
-          <a class="contact-link" href="#team" data-i18n="contact.welcome">联系接待同工</a>
+          <a class="contact-link" href="#team" data-i18n="contact.welcome" data-section-link="team">联系接待同工</a>
           <a class="contact-link" href="https://www.google.com/maps/search/?api=1&query=Crest%20Community%20Church%203431%20Mt%20Vernon%20Ave%20Riverside%20CA%2092507" target="_blank" rel="noopener">
             <span data-i18n="contact.gffMap">好朋友团契周五地址：Crest Community Church, 3431 Mt Vernon Ave</span>
           </a>
@@ -255,6 +255,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="./supabase-config.js?v=20260607-2"></script>
-    <script src="./script.js?v=20260607-4"></script>
+    <script src="./script.js?v=20260614-1"></script>
   </body>
 </html>
