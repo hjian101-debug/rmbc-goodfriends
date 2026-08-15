@@ -88,3 +88,33 @@ using (
   bucket_id = 'site-media'
   and ((auth.jwt() ->> 'email') = 'gff@rmbc.local')
 );
+
+-- Fellowship grouping app
+create table if not exists public.group_people (
+  name text primary key,
+  kind text not null check (kind in ('member', 'new_friend')),
+  faith_status text not null default 'christian'
+    check (faith_status in ('christian', 'seeker')),
+  created_at timestamptz not null default now()
+);
+
+alter table public.group_people enable row level security;
+
+grant select, insert, update, delete on public.group_people to authenticated;
+grant insert on public.group_people to anon;
+
+drop policy if exists "Visitors can register as new friends" on public.group_people;
+drop policy if exists "Admin can manage group people" on public.group_people;
+
+create policy "Visitors can register as new friends"
+on public.group_people
+for insert
+to anon
+with check (kind = 'new_friend');
+
+create policy "Admin can manage group people"
+on public.group_people
+for all
+to authenticated
+using ((auth.jwt() ->> 'email') = 'gff@rmbc.local')
+with check ((auth.jwt() ->> 'email') = 'gff@rmbc.local');

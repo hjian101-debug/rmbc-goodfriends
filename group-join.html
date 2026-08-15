@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>新朋友报名 · 好朋友团契</title>
+  <link rel="stylesheet" href="./group.css?v=1" />
+</head>
+<body data-page="join">
+  <main class="card join-card">
+    <a class="brand" href="./index.html">RMBC 好朋友团契</a>
+    <h1 style="margin-top:18px">新朋友报名</h1>
+    <form data-join-form>
+      <input type="text" name="name" placeholder="请输入你的姓名" required />
+      <div class="choice-row">
+        <label class="choice"><input type="radio" name="faith_status" value="christian" required /> 基督徒</label>
+        <label class="choice"><input type="radio" name="faith_status" value="seeker" required /> 慕道友</label>
+      </div>
+      <button type="submit">提交报名</button>
+    </form>
+    <p class="message" data-join-message></p>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./supabase-config.js?v=20260607-2"></script>
+  <script src="./group.js?v=1"></script>
+</body>
+</html>

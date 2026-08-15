@@ -9,6 +9,7 @@ const pageConfig = new Map([
   ["index.html", { loc: "/", priority: "1.0" }],
   ["studies.html", { loc: "/studies.html", priority: "0.7" }],
   ["photos.html", { loc: "/photos.html", priority: "0.7" }],
+  ["group-join.html", { loc: "/group-join.html", priority: "0.6" }],
 ]);
 
 const pages = [...pageConfig.entries()]

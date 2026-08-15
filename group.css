@@ -1,0 +1,91 @@
+:root {
+  --primary: #5b6ee1;
+  --primary-dark: #4658ca;
+  --surface: #ffffff;
+  --soft: #f4f5fb;
+  --text: #202334;
+  --muted: #667085;
+  --danger: #dc3545;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  color: var(--text);
+  background: linear-gradient(135deg, #eef1ff, #f8f6ff);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "PingFang SC", sans-serif;
+  min-height: 100vh;
+}
+button, input, select { font: inherit; }
+button { cursor: pointer; }
+[hidden] { display: none !important; }
+
+.shell { width: min(1180px, calc(100% - 28px)); margin: 28px auto 60px; }
+.topbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 22px; }
+.brand { color: var(--text); text-decoration: none; font-weight: 800; }
+.top-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.card { background: var(--surface); border-radius: 18px; padding: 24px; margin-bottom: 22px; box-shadow: 0 10px 32px rgba(40, 48, 100, .1); }
+h1, h2, h3 { margin-top: 0; }
+.hint, .message { color: var(--muted); }
+.message[data-tone="error"] { color: #b42318; }
+.message[data-tone="success"] { color: #18794e; }
+
+.button, button {
+  border: 0; border-radius: 10px; padding: 11px 17px;
+  background: var(--primary); color: #fff; text-decoration: none; font-weight: 700;
+}
+.button:hover, button:hover { background: var(--primary-dark); }
+.button.secondary, button.secondary { background: #e9ecff; color: #3949ae; }
+.danger { background: var(--danger); }
+.form-row { display: flex; gap: 12px; align-items: stretch; flex-wrap: wrap; }
+.form-row > input { flex: 1 1 220px; }
+input[type="text"], input[type="password"], input[type="number"], select {
+  min-height: 46px; padding: 10px 13px; border: 1px solid #cfd3df; border-radius: 10px; background: #fff;
+}
+.choice-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.choice { padding: 11px 14px; background: var(--soft); border-radius: 10px; }
+
+.member-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+.member-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 11px; }
+.member-card, .friend-row, .group-member {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  background: var(--soft); border-radius: 11px; padding: 12px 13px;
+}
+.member-card label { display: flex; gap: 9px; align-items: center; }
+.friend-list { display: grid; gap: 10px; }
+.badge { display: inline-block; border-radius: 999px; padding: 3px 8px; font-size: 12px; background: #e8ecff; color: #4053be; }
+.leader-badge { background: #fff0b8; color: #725400; }
+.row-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.row-actions button { padding: 7px 10px; font-size: 13px; }
+
+.group-settings { display: grid; grid-template-columns: minmax(160px, 230px) 1fr; gap: 18px; align-items: start; }
+.leader-selects { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+.leader-selects label { display: grid; gap: 6px; font-weight: 700; }
+.group-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.group { background: #f0f2ff; border-radius: 15px; padding: 18px; min-height: 150px; }
+.group.drag-over { outline: 3px dashed var(--primary); background: #e3e7ff; }
+.group-list { display: grid; gap: 9px; }
+.group-member { background: white; cursor: grab; }
+.group-member.is-leader { cursor: default; }
+.move-button { padding: 7px 11px; font-size: 13px; }
+
+.sheet-backdrop { position: fixed; inset: 0; z-index: 20; background: rgba(0,0,0,.42); display: flex; align-items: flex-end; justify-content: center; }
+.sheet { width: min(520px, 100%); padding: 24px; background: white; border-radius: 22px 22px 0 0; }
+.sheet-options { display: grid; grid-template-columns: repeat(2, 1fr); gap: 11px; }
+.sheet-options button { min-height: 50px; }
+.sheet .secondary { width: 100%; margin-top: 12px; }
+
+.login-card, .join-card { width: min(440px, calc(100% - 28px)); margin: 8vh auto; text-align: center; }
+.login-card form, .join-card form { display: grid; gap: 14px; }
+.login-card input, .join-card input[type="text"] { width: 100%; }
+
+@media (max-width: 720px) {
+  .shell { margin-top: 16px; }
+  .card { padding: 18px; }
+  .topbar, .group-settings { display: grid; grid-template-columns: 1fr; }
+  .group-grid { grid-template-columns: 1fr; }
+  .form-row { display: grid; }
+  .choice-row { display: grid; grid-template-columns: 1fr 1fr; }
+  .choice { text-align: left; }
+  .top-actions .button, .top-actions button { flex: 1; text-align: center; }
+}

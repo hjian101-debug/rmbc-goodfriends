@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>团契分组 · 好朋友团契</title>
+  <link rel="stylesheet" href="./group.css?v=1" />
+</head>
+<body data-page="admin">
+  <section class="card login-card" data-login>
+    <h1>团契分组管理员</h1>
+    <p class="hint">使用团契网站管理员账号登录</p>
+    <form data-login-form>
+      <input name="username" autocomplete="username" placeholder="管理员账号" required />
+      <input name="password" type="password" autocomplete="current-password" placeholder="密码" required />
+      <button type="submit">登录</button>
+    </form>
+    <p class="message" data-login-message></p>
+    <a href="./index.html">返回团契网站</a>
+  </section>
+
+  <main class="shell" data-dashboard hidden>
+    <header class="topbar">
+      <div><a class="brand" href="./index.html">RMBC 好朋友团契</a><h1>团契分组</h1></div>
+      <div class="top-actions">
+        <a class="button secondary" href="./group-join.html" target="_blank">打开新朋友报名页</a>
+        <button class="secondary" type="button" data-logout>退出登录</button>
+      </div>
+    </header>
+
+    <p class="message" data-message></p>
+
+    <section class="card">
+      <h2>添加新朋友</h2>
+      <form class="form-row" data-add-friend>
+        <input type="text" name="name" placeholder="请输入新朋友姓名" required />
+        <div class="choice-row">
+          <label class="choice"><input type="radio" name="faith_status" value="christian" required /> 基督徒</label>
+          <label class="choice"><input type="radio" name="faith_status" value="seeker" required /> 慕道友</label>
+        </div>
+        <button type="submit">添加新朋友</button>
+      </form>
+    </section>
+
+    <form data-group-form>
+      <section class="card">
+        <h2>常来成员：勾选今天来了的人</h2>
+        <div class="member-actions">
+          <button type="button" data-select-all>全选</button>
+          <button type="button" class="secondary" data-select-none>取消全选</button>
+        </div>
+        <div class="member-grid" data-members></div>
+      </section>
+
+      <section class="card">
+        <h2>新朋友名单：<span data-friend-count>0</span> 人</h2>
+        <div class="friend-list" data-friends></div>
+        <div class="member-actions" style="margin-top:16px">
+          <button class="danger" type="button" data-clear-friends>清空新朋友名单</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>开始分组</h2>
+        <p class="hint">先输入组数，再为每组选择一位已勾选的组长。组长固定，不参与随机分配。</p>
+        <div class="group-settings">
+          <input type="number" name="group_count" min="1" max="20" placeholder="请输入分几组" required />
+          <div class="leader-selects" data-leader-selects></div>
+        </div>
+        <button type="submit" style="margin-top:16px">平均随机分组</button>
+      </section>
+    </form>
+
+    <section class="card" data-results hidden>
+      <h2>分组结果</h2>
+      <p class="hint">手机点“换组”；电脑也可把普通成员拖到其他组。</p>
+      <div class="group-grid" data-group-grid></div>
+    </section>
+  </main>
+
+  <div class="sheet-backdrop" data-sheet hidden>
+    <div class="sheet">
+      <h3>移动 <span data-move-name></span> 到：</h3>
+      <div class="sheet-options" data-move-options></div>
+      <button class="secondary" type="button" data-close-sheet>取消</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./supabase-config.js?v=20260607-2"></script>
+  <script src="./group.js?v=1"></script>
+</body>
+</html>
