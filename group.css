@@ -52,6 +52,7 @@ input[type="text"], input[type="password"], input[type="number"], select {
   background: var(--soft); border-radius: 11px; padding: 12px 13px;
 }
 .member-card label { display: flex; gap: 9px; align-items: center; }
+.faith-note { color: var(--muted); font-size: 12px; white-space: nowrap; }
 .member-delete { display: none; }
 .delete-mode .member-delete { display: inline-block; }
 .friend-list { display: grid; gap: 10px; }

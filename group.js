@@ -98,7 +98,10 @@ function renderPeople() {
       saveSelectedMembers();
       updateLeaderSelects();
     });
-    label.append(checkbox, document.createTextNode(person.name));
+    const faithNote = document.createElement("span");
+    faithNote.className = "faith-note";
+    faithNote.textContent = `（${faithLabel(person.faith_status)}）`;
+    label.append(checkbox, document.createTextNode(person.name), faithNote);
     const remove = document.createElement("button");
     remove.type = "button";
     remove.className = "danger member-delete";
