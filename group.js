@@ -46,6 +46,20 @@ let people = [];
 let groups = [];
 let leaders = [];
 let movingName = null;
+const attendanceStorageKey = "rmbc-group-selected-members";
+
+function savedMembers() {
+  try {
+    const value = JSON.parse(window.localStorage.getItem(attendanceStorageKey) || "[]");
+    return new Set(Array.isArray(value) ? value : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function saveSelectedMembers() {
+  window.localStorage.setItem(attendanceStorageKey, JSON.stringify(selectedMembers()));
+}
 
 function adminMessage(text, tone = "") {
   setMessage(document.querySelector("[data-message]"), text, tone);
@@ -65,7 +79,10 @@ function renderPeople() {
   const members = people.filter((person) => person.kind === "member");
   const friends = people.filter((person) => person.kind === "new_friend");
   const memberContainer = document.querySelector("[data-members]");
-  const selected = new Set([...memberContainer.querySelectorAll('input:checked')].map((box) => box.value));
+  const existingBoxes = [...memberContainer.querySelectorAll('input[type="checkbox"]')];
+  const selected = existingBoxes.length
+    ? new Set(existingBoxes.filter((box) => box.checked).map((box) => box.value))
+    : savedMembers();
   memberContainer.replaceChildren();
 
   members.forEach((person) => {
@@ -77,7 +94,10 @@ function renderPeople() {
     checkbox.name = "members";
     checkbox.value = person.name;
     checkbox.checked = selected.has(person.name);
-    checkbox.addEventListener("change", updateLeaderSelects);
+    checkbox.addEventListener("change", () => {
+      saveSelectedMembers();
+      updateLeaderSelects();
+    });
     label.append(checkbox, document.createTextNode(person.name));
     const remove = document.createElement("button");
     remove.type = "button";
@@ -121,6 +141,7 @@ function renderPeople() {
     row.append(identity, actions);
     friendContainer.append(row);
   });
+  saveSelectedMembers();
   updateLeaderSelects();
 }
 
@@ -324,10 +345,12 @@ async function initializeAdmin() {
   });
   document.querySelector("[data-select-all]").addEventListener("click", () => {
     document.querySelectorAll('[data-members] input[type="checkbox"]').forEach((box) => { box.checked = true; });
+    saveSelectedMembers();
     updateLeaderSelects();
   });
   document.querySelector("[data-select-none]").addEventListener("click", () => {
     document.querySelectorAll('[data-members] input[type="checkbox"]').forEach((box) => { box.checked = false; });
+    saveSelectedMembers();
     updateLeaderSelects();
   });
   document.querySelector("[data-delete-mode]").addEventListener("click", (event) => {
