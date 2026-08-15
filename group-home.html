@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Good Friends Fellowship · 团契分组</title>
+  <link rel="stylesheet" href="./group.css?v=2" />
+</head>
+<body data-page="home" class="qr-page">
+  <main class="qr-card">
+    <img class="qr-photo left" src="./assets/group-photo-1.jpg" alt="好朋友团契合照" />
+    <img class="qr-photo right" src="./assets/group-photo-2.jpg" alt="好朋友团契合照" />
+    <h1>🎯 Good Friends Fellowship</h1>
+    <h2>新朋友扫码填写姓名</h2>
+    <div class="qr-canvas" data-qr aria-label="新朋友报名二维码"></div>
+    <div>打不开二维码？复制链接：</div>
+    <div class="qr-link" data-join-url></div>
+    <a class="button" href="./group-admin.html">进入管理员页面</a>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <script src="./supabase-config.js?v=20260607-2"></script>
+  <script src="./group.js?v=2"></script>
+</body>
+</html>

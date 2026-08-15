@@ -81,7 +81,7 @@ function renderPeople() {
     label.append(checkbox, document.createTextNode(person.name));
     const remove = document.createElement("button");
     remove.type = "button";
-    remove.className = "danger";
+    remove.className = "danger member-delete";
     remove.textContent = "删除";
     remove.addEventListener("click", () => removePerson(person.name));
     card.append(label, remove);
@@ -330,6 +330,11 @@ async function initializeAdmin() {
     document.querySelectorAll('[data-members] input[type="checkbox"]').forEach((box) => { box.checked = false; });
     updateLeaderSelects();
   });
+  document.querySelector("[data-delete-mode]").addEventListener("click", (event) => {
+    const section = document.querySelector("[data-members]").closest("section");
+    const enabled = section.classList.toggle("delete-mode");
+    event.currentTarget.textContent = enabled ? "完成删除" : "删除成员";
+  });
   document.querySelector('[name="group_count"]').addEventListener("input", updateLeaderSelects);
   document.querySelector("[data-clear-friends]").addEventListener("click", async () => {
     if (!window.confirm("确定要清空全部新朋友吗？")) return;
@@ -355,7 +360,16 @@ async function initializeAdmin() {
   });
 }
 
-if (!db) {
+if (page === "home") {
+  const joinUrl = `${window.location.origin}/group-join`;
+  document.querySelector("[data-join-url]").textContent = joinUrl;
+  new window.QRCode(document.querySelector("[data-qr]"), {
+    text: joinUrl,
+    width: 260,
+    height: 260,
+    correctLevel: window.QRCode.CorrectLevel.M,
+  });
+} else if (!db) {
   document.body.textContent = "Supabase 尚未配置。";
 } else if (page === "join") {
   initializeJoin();

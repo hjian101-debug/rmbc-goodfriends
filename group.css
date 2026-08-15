@@ -52,6 +52,8 @@ input[type="text"], input[type="password"], input[type="number"], select {
   background: var(--soft); border-radius: 11px; padding: 12px 13px;
 }
 .member-card label { display: flex; gap: 9px; align-items: center; }
+.member-delete { display: none; }
+.delete-mode .member-delete { display: inline-block; }
 .friend-list { display: grid; gap: 10px; }
 .badge { display: inline-block; border-radius: 999px; padding: 3px 8px; font-size: 12px; background: #e8ecff; color: #4053be; }
 .leader-badge { background: #fff0b8; color: #725400; }
@@ -79,6 +81,16 @@ input[type="text"], input[type="password"], input[type="number"], select {
 .login-card form, .join-card form { display: grid; gap: 14px; }
 .login-card input, .join-card input[type="text"] { width: 100%; }
 
+.qr-page { display: grid; place-items: center; min-height: 100vh; padding: 28px; background: linear-gradient(135deg, #667eea, #6f45a8); }
+.qr-card { position: relative; width: min(820px, 72vw); min-height: 650px; padding: 54px 46px; background: white; border-radius: 24px; text-align: center; box-shadow: 0 20px 55px rgba(0,0,0,.25); }
+.qr-card h1 { font-size: 34px; }
+.qr-card h2 { color: #555; }
+.qr-canvas { width: 260px; height: 260px; margin: 30px auto; }
+.qr-link { margin: 12px auto 28px; padding: 13px; max-width: 520px; border-radius: 11px; background: #f2f2f2; word-break: break-all; }
+.qr-photo { position: absolute; top: 190px; width: 390px; height: 290px; object-fit: cover; border: 8px solid white; border-radius: 14px; box-shadow: 0 14px 35px rgba(0,0,0,.3); z-index: 2; }
+.qr-photo.left { left: -290px; transform: rotate(-8deg); }
+.qr-photo.right { right: -290px; transform: rotate(8deg); }
+
 @media (max-width: 720px) {
   .shell { margin-top: 16px; }
   .card { padding: 18px; }
@@ -88,4 +100,8 @@ input[type="text"], input[type="password"], input[type="number"], select {
   .choice-row { display: grid; grid-template-columns: 1fr 1fr; }
   .choice { text-align: left; }
   .top-actions .button, .top-actions button { flex: 1; text-align: center; }
+  .qr-page { padding: 14px; }
+  .qr-card { width: 100%; min-height: auto; padding: 34px 20px; }
+  .qr-card h1 { font-size: 25px; }
+  .qr-photo { display: none; }
 }
