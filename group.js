@@ -47,6 +47,7 @@ let groups = [];
 let leaders = [];
 let movingName = null;
 const attendanceStorageKey = "rmbc-group-selected-members";
+const groupingStorageKey = "rmbc-group-latest-result";
 
 function savedMembers() {
   try {
@@ -61,6 +62,35 @@ function saveSelectedMembers() {
   window.localStorage.setItem(attendanceStorageKey, JSON.stringify(selectedMembers()));
 }
 
+function saveGrouping() {
+  if (!groups.length) return;
+  window.localStorage.setItem(groupingStorageKey, JSON.stringify({ groups, leaders }));
+}
+
+function restoreGrouping() {
+  if (!groups.length) {
+    try {
+      const saved = JSON.parse(window.localStorage.getItem(groupingStorageKey) || "null");
+      if (saved && Array.isArray(saved.groups) && Array.isArray(saved.leaders)) {
+        groups = saved.groups;
+        leaders = saved.leaders;
+      }
+    } catch {
+      window.localStorage.removeItem(groupingStorageKey);
+    }
+  }
+
+  const existingNames = new Set(people.map((person) => person.name));
+  groups = groups.map((group) => group.filter((name) => existingNames.has(name)));
+  if (!groups.length || leaders.length !== groups.length || leaders.some((name) => !existingNames.has(name))) {
+    groups = [];
+    leaders = [];
+    window.localStorage.removeItem(groupingStorageKey);
+  } else {
+    saveGrouping();
+  }
+}
+
 function adminMessage(text, tone = "") {
   setMessage(document.querySelector("[data-message]"), text, tone);
 }
@@ -72,7 +102,9 @@ async function loadPeople() {
     .order("created_at", { ascending: true });
   if (error) throw error;
   people = data || [];
+  restoreGrouping();
   renderPeople();
+  if (groups.length) renderGroups(false);
 }
 
 function renderPeople() {
@@ -135,6 +167,13 @@ function renderPeople() {
     promote.type = "button";
     promote.textContent = "加入常来名单";
     promote.addEventListener("click", () => promotePerson(person.name));
+    if (groups.length && !groups.some((group) => group.includes(person.name))) {
+      const assign = document.createElement("button");
+      assign.type = "button";
+      assign.textContent = "加入分组";
+      assign.addEventListener("click", () => openMoveSheet(person.name));
+      actions.append(assign);
+    }
     const remove = document.createElement("button");
     remove.type = "button";
     remove.className = "danger";
@@ -205,7 +244,7 @@ function buildBalancedGroups(attendees, selectedLeaders, count) {
   return result;
 }
 
-function renderGroups() {
+function renderGroups(scrollToResults = true) {
   const status = new Map(people.map((person) => [person.name, person.faith_status]));
   const grid = document.querySelector("[data-group-grid]");
   grid.replaceChildren();
@@ -253,8 +292,9 @@ function renderGroups() {
     group.append(heading, list);
     grid.append(group);
   });
+  saveGrouping();
   document.querySelector("[data-results]").hidden = false;
-  document.querySelector("[data-results]").scrollIntoView({ behavior: "smooth" });
+  if (scrollToResults) document.querySelector("[data-results]").scrollIntoView({ behavior: "smooth" });
 }
 
 function openMoveSheet(name) {
@@ -279,11 +319,12 @@ function closeMoveSheet() {
 
 function movePerson(name, target) {
   const source = groups.findIndex((group) => group.includes(name));
-  if (source < 0 || source === target || leaders.includes(name)) return closeMoveSheet();
-  groups[source] = groups[source].filter((person) => person !== name);
+  if (source === target || leaders.includes(name)) return closeMoveSheet();
+  if (source >= 0) groups[source] = groups[source].filter((person) => person !== name);
   groups[target].push(name);
   closeMoveSheet();
   renderGroups();
+  renderPeople();
 }
 
 async function removePerson(name) {
@@ -344,7 +385,10 @@ async function initializeAdmin() {
     if (error) return adminMessage("添加失败，请检查姓名是否已存在。", "error");
     event.currentTarget.reset();
     await loadPeople();
-    adminMessage(`已添加 ${record.name}。`, "success");
+    adminMessage(
+      groups.length ? `已添加 ${record.name}，请在新朋友名单中点“加入分组”。` : `已添加 ${record.name}。`,
+      "success"
+    );
   });
   document.querySelector("[data-select-all]").addEventListener("click", () => {
     document.querySelectorAll('[data-members] input[type="checkbox"]').forEach((box) => { box.checked = true; });
