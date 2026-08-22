@@ -317,6 +317,20 @@ function closeMoveSheet() {
   movingName = null;
 }
 
+function clearGrouping() {
+  if (!window.confirm("确定要清空当前分组结果吗？成员名单不会被删除。")) return;
+  groups = [];
+  leaders = [];
+  movingName = null;
+  window.localStorage.removeItem(groupingStorageKey);
+  document.querySelector("[data-group-grid]").replaceChildren();
+  document.querySelector("[data-results]").hidden = true;
+  document.querySelector('[name="group_count"]').value = "";
+  updateLeaderSelects();
+  renderPeople();
+  adminMessage("分组结果已清空，成员名单仍然保留。", "success");
+}
+
 function movePerson(name, target) {
   const source = groups.findIndex((group) => group.includes(name));
   if (source === target || leaders.includes(name)) return closeMoveSheet();
@@ -425,6 +439,7 @@ async function initializeAdmin() {
     renderGroups();
   });
   document.querySelector("[data-close-sheet]").addEventListener("click", closeMoveSheet);
+  document.querySelector("[data-clear-groups]").addEventListener("click", clearGrouping);
   document.querySelector("[data-sheet]").addEventListener("click", (event) => {
     if (event.target === event.currentTarget) closeMoveSheet();
   });

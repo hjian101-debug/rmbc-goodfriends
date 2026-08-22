@@ -65,6 +65,8 @@ input[type="text"], input[type="password"], input[type="number"], select {
 .leader-selects { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
 .leader-selects label { display: grid; gap: 6px; font-weight: 700; }
 .group-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.results-heading { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.results-heading h2 { margin-bottom: 0; }
 .group { background: #f0f2ff; border-radius: 15px; padding: 18px; min-height: 150px; }
 .group.drag-over { outline: 3px dashed var(--primary); background: #e3e7ff; }
 .group-list { display: grid; gap: 9px; }

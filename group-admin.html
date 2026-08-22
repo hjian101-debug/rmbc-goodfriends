@@ -73,7 +73,10 @@
     </form>
 
     <section class="card" data-results hidden>
-      <h2>分组结果</h2>
+      <div class="results-heading">
+        <h2>分组结果</h2>
+        <button class="danger" type="button" data-clear-groups>清空分组</button>
+      </div>
       <p class="hint">手机点“换组”；电脑也可把普通成员拖到其他组。</p>
       <div class="group-grid" data-group-grid></div>
     </section>
@@ -89,6 +92,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./supabase-config.js?v=20260607-2"></script>
-  <script src="./group.js?v=5"></script>
+  <script src="./group.js?v=6"></script>
 </body>
 </html>
