@@ -442,9 +442,13 @@ h3 {
 }
 
 .announcement-card {
+  height: 420px;
   padding: 22px 24px;
   border: 1px solid var(--line);
   background: var(--white);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
 }
 
 .announcement-card span {
@@ -1338,6 +1342,10 @@ body.photo-lightbox-open {
 
   .section-heading {
     display: block;
+  }
+
+  .announcement-card {
+    height: 360px;
   }
 
   .section-note {
