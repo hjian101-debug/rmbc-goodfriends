@@ -437,6 +437,7 @@ h3 {
 
 .announcement-list {
   display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -1312,6 +1313,7 @@ body.photo-lightbox-open {
   .quick-info,
   .split,
   .gatherings-layout.has-scripture,
+  .announcement-list,
   .event-grid,
   .gallery-grid,
   .team-grid,
