@@ -1529,6 +1529,29 @@ const initPageMotion = () => {
     window.addEventListener("scroll", requestHeroDrift, { passive: true });
   }
 
+  const gallery = home.querySelector(".gallery");
+  const galleryGrid = gallery?.querySelector(".gallery-grid");
+  if (gallery && galleryGrid && !reducedMotion) {
+    let galleryFrame = 0;
+    const updateGalleryDepth = () => {
+      const rect = gallery.getBoundingClientRect();
+      const viewportHeight = Math.max(window.innerHeight, 1);
+      const progress = Math.min(Math.max((viewportHeight - rect.top) / (viewportHeight + rect.height), 0), 1);
+      const offset = (progress - 0.5) * 24;
+      galleryGrid.style.setProperty("--gallery-row-one", `${offset.toFixed(1)}px`);
+      galleryGrid.style.setProperty("--gallery-row-two", `${(-offset * 0.85).toFixed(1)}px`);
+      galleryFrame = 0;
+    };
+
+    const requestGalleryDepth = () => {
+      if (galleryFrame) return;
+      galleryFrame = window.requestAnimationFrame(updateGalleryDepth);
+    };
+
+    updateGalleryDepth();
+    window.addEventListener("scroll", requestGalleryDepth, { passive: true });
+  }
+
   const targetSelector = [
     ":scope > .section-heading",
     ":scope > .section-copy",
