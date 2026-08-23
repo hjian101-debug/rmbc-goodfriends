@@ -1505,7 +1505,36 @@ const syncHeader = () => {
   header.classList.toggle("is-scrolled", document.body.dataset.page === "studies" || window.scrollY > 20);
 };
 
+const initScrollReveal = () => {
+  const sections = document.querySelectorAll("#home > .section");
+  if (sections.length === 0) return;
+
+  sections.forEach((section) => section.classList.add("scroll-reveal"));
+
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) {
+    sections.forEach((section) => section.classList.add("is-visible"));
+    return;
+  }
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("is-visible");
+        observer.unobserve(entry.target);
+      });
+    },
+    {
+      rootMargin: "0px 0px -12%",
+      threshold: 0.12,
+    },
+  );
+
+  sections.forEach((section) => observer.observe(section));
+};
+
 syncHeader();
+initScrollReveal();
 window.addEventListener("scroll", syncHeader, { passive: true });
 window.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {

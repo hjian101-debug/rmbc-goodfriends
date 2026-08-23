@@ -522,6 +522,79 @@ h3 {
   }
 }
 
+.scroll-reveal > * {
+  opacity: 0;
+  transform: translate3d(0, 38px, 0);
+  transition:
+    opacity 760ms ease,
+    transform 900ms cubic-bezier(0.18, 0.78, 0.24, 1);
+}
+
+.scroll-reveal > :nth-child(2) {
+  transition-delay: 110ms;
+}
+
+.scroll-reveal > :nth-child(3) {
+  transition-delay: 190ms;
+}
+
+.scroll-reveal.is-visible > * {
+  opacity: 1;
+  transform: none;
+}
+
+.scroll-reveal .feature-list article,
+.scroll-reveal .announcement-card,
+.scroll-reveal .event-card,
+.scroll-reveal .gallery-card,
+.scroll-reveal .team-card,
+.scroll-reveal .steps > div,
+.scroll-reveal .contact-actions > * {
+  opacity: 0;
+  transform: translate3d(0, 24px, 0) scale(0.98);
+  transition:
+    opacity 620ms ease,
+    transform 760ms cubic-bezier(0.18, 0.78, 0.24, 1);
+}
+
+.scroll-reveal.is-visible .feature-list article,
+.scroll-reveal.is-visible .announcement-card,
+.scroll-reveal.is-visible .event-card,
+.scroll-reveal.is-visible .gallery-card,
+.scroll-reveal.is-visible .team-card,
+.scroll-reveal.is-visible .steps > div,
+.scroll-reveal.is-visible .contact-actions > * {
+  opacity: 1;
+  transform: none;
+}
+
+.scroll-reveal.is-visible :is(.feature-list article, .announcement-card, .event-card, .gallery-card, .team-card, .steps > div, .contact-actions > *):nth-child(2) {
+  transition-delay: 100ms;
+}
+
+.scroll-reveal.is-visible :is(.feature-list article, .announcement-card, .event-card, .gallery-card, .team-card, .steps > div, .contact-actions > *):nth-child(3) {
+  transition-delay: 180ms;
+}
+
+.scroll-reveal.is-visible :is(.announcement-card, .event-card, .gallery-card, .team-card):nth-child(n + 4) {
+  transition-delay: 240ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-reveal > *,
+  .scroll-reveal .feature-list article,
+  .scroll-reveal .announcement-card,
+  .scroll-reveal .event-card,
+  .scroll-reveal .gallery-card,
+  .scroll-reveal .team-card,
+  .scroll-reveal .steps > div,
+  .scroll-reveal .contact-actions > * {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
 .section {
   width: min(1120px, calc(100% - 36px));
   margin: 0 auto;
