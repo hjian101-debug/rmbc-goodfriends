@@ -376,6 +376,14 @@ h3 {
   align-items: start;
 }
 
+#about {
+  width: 100%;
+  max-width: none;
+  padding-left: max(18px, calc((100vw - 1120px) / 2));
+  padding-right: max(18px, calc((100vw - 1120px) / 2));
+  background: var(--soft);
+}
+
 .section-copy p:not(.eyebrow),
 .visit-panel p,
 .contact p,
