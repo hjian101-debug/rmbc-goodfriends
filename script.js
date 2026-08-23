@@ -1587,9 +1587,13 @@ const initPageMotion = () => {
   const observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        entry.target.classList.add("is-shown");
-        observer.unobserve(entry.target);
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-shown");
+          return;
+        }
+
+        entry.target.classList.toggle("motion-exit-up", entry.boundingClientRect.top < 0);
+        entry.target.classList.remove("is-shown");
       });
     },
     {

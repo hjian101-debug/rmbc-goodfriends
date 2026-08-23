@@ -536,6 +536,10 @@ h3 {
   transform: translate3d(-22px, 0, 0);
 }
 
+.motion-enabled .soft-reveal.motion-exit-up {
+  transform: translate3d(0, -18px, 0);
+}
+
 .motion-enabled .soft-reveal.is-shown {
   opacity: 1;
   transform: none;
@@ -543,7 +547,8 @@ h3 {
 
 @media (prefers-reduced-motion: reduce) {
   .motion-enabled .soft-reveal,
-  .motion-enabled .soft-reveal.motion-from-left {
+  .motion-enabled .soft-reveal.motion-from-left,
+  .motion-enabled .soft-reveal.motion-exit-up {
     opacity: 1;
     transform: none;
     transition: none;
