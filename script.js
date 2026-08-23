@@ -1505,6 +1505,79 @@ const syncHeader = () => {
   header.classList.toggle("is-scrolled", document.body.dataset.page === "studies" || window.scrollY > 20);
 };
 
+const initPageMotion = () => {
+  const home = document.querySelector("#home");
+  if (!home) return;
+
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const hero = home.querySelector(".hero");
+
+  if (hero && !reducedMotion) {
+    let scrollFrame = 0;
+    const updateHeroDrift = () => {
+      const progress = Math.min(window.scrollY / Math.max(hero.offsetHeight, 1), 1);
+      hero.style.setProperty("--hero-drift", `${Math.round(progress * 34)}px`);
+      scrollFrame = 0;
+    };
+
+    const requestHeroDrift = () => {
+      if (scrollFrame) return;
+      scrollFrame = window.requestAnimationFrame(updateHeroDrift);
+    };
+
+    updateHeroDrift();
+    window.addEventListener("scroll", requestHeroDrift, { passive: true });
+  }
+
+  const targetSelector = [
+    ":scope > .section-heading",
+    ":scope > .section-copy",
+    ":scope > .feature-list",
+    ":scope > .announcement-list",
+    ":scope > .gallery-grid",
+    ":scope > .gallery-actions",
+    ":scope > .gatherings-layout",
+    ":scope > .team-grid",
+    ":scope > .visit-panel",
+    ":scope > .contact-copy",
+    ":scope > .contact-actions",
+  ].join(",");
+
+  const targets = [];
+  home.querySelectorAll(":scope > .section").forEach((section) => {
+    section.querySelectorAll(targetSelector).forEach((target, index) => {
+      target.classList.add("soft-reveal");
+      if (index === 0) target.classList.add("motion-from-left");
+      target.style.setProperty("--motion-delay", `${index * 90}ms`);
+      targets.push(target);
+    });
+  });
+
+  if (targets.length === 0) return;
+  document.documentElement.classList.add("motion-enabled");
+
+  if (reducedMotion || !("IntersectionObserver" in window)) {
+    targets.forEach((target) => target.classList.add("is-shown"));
+    return;
+  }
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("is-shown");
+        observer.unobserve(entry.target);
+      });
+    },
+    {
+      rootMargin: "0px 0px -10%",
+      threshold: 0.08,
+    },
+  );
+
+  targets.forEach((target) => observer.observe(target));
+};
+
 syncHeader();
 window.addEventListener("scroll", syncHeader, { passive: true });
 window.addEventListener("keydown", (event) => {
@@ -1519,6 +1592,7 @@ if (year) {
 
 let currentLanguage = getSavedLanguage();
 applyLanguage(currentLanguage);
+initPageMotion();
 injectEventStructuredData();
 loadSupabaseContent();
 loadGoogleSheetStudies().then((studies) => {
