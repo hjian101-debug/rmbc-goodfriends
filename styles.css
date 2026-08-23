@@ -523,23 +523,68 @@ h3 {
 }
 
 .scroll-reveal > * {
+  clip-path: inset(0 12% 0 0);
+  filter: blur(8px);
   opacity: 0;
-  transform: translate3d(0, 38px, 0);
+  transform: translate3d(-72px, 30px, 0) scale(0.985);
   transition:
-    opacity 760ms ease,
-    transform 900ms cubic-bezier(0.18, 0.78, 0.24, 1);
+    clip-path 1.05s cubic-bezier(0.16, 0.8, 0.24, 1),
+    filter 820ms ease,
+    opacity 720ms ease,
+    transform 1.05s cubic-bezier(0.16, 0.8, 0.24, 1);
+}
+
+.scroll-reveal[data-reveal-direction="right"] > * {
+  clip-path: inset(0 0 0 12%);
+  transform: translate3d(72px, 30px, 0) scale(0.985);
 }
 
 .scroll-reveal > :nth-child(2) {
-  transition-delay: 110ms;
+  transition-delay: 130ms;
 }
 
 .scroll-reveal > :nth-child(3) {
-  transition-delay: 190ms;
+  transition-delay: 230ms;
 }
 
 .scroll-reveal.is-visible > * {
+  clip-path: inset(0);
+  filter: blur(0);
   opacity: 1;
+  transform: none;
+}
+
+.scroll-reveal .section-heading {
+  position: relative;
+}
+
+.scroll-reveal .section-heading::after {
+  position: absolute;
+  bottom: -14px;
+  left: 0;
+  width: 76px;
+  height: 4px;
+  background: var(--gold);
+  content: "";
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 720ms 380ms cubic-bezier(0.16, 0.8, 0.24, 1);
+}
+
+.scroll-reveal.is-visible .section-heading::after {
+  transform: scaleX(1);
+}
+
+.scroll-reveal h2 {
+  clip-path: inset(0 0 100% 0);
+  transform: translate3d(0, 22px, 0);
+  transition:
+    clip-path 860ms 160ms cubic-bezier(0.16, 0.8, 0.24, 1),
+    transform 860ms 160ms cubic-bezier(0.16, 0.8, 0.24, 1);
+}
+
+.scroll-reveal.is-visible h2 {
+  clip-path: inset(0);
   transform: none;
 }
 
@@ -550,11 +595,18 @@ h3 {
 .scroll-reveal .team-card,
 .scroll-reveal .steps > div,
 .scroll-reveal .contact-actions > * {
+  filter: blur(5px);
   opacity: 0;
-  transform: translate3d(0, 24px, 0) scale(0.98);
+  transform: perspective(900px) translate3d(0, 48px, 0) rotateX(7deg) rotateZ(-1.2deg) scale(0.95);
   transition:
+    box-shadow 820ms ease,
+    filter 620ms ease,
     opacity 620ms ease,
-    transform 760ms cubic-bezier(0.18, 0.78, 0.24, 1);
+    transform 900ms cubic-bezier(0.16, 0.84, 0.22, 1);
+}
+
+.scroll-reveal :is(.feature-list article, .announcement-card, .event-card, .gallery-card, .team-card, .steps > div, .contact-actions > *):nth-child(even) {
+  transform: perspective(900px) translate3d(0, 56px, 0) rotateX(7deg) rotateZ(1.2deg) scale(0.95);
 }
 
 .scroll-reveal.is-visible .feature-list article,
@@ -564,8 +616,13 @@ h3 {
 .scroll-reveal.is-visible .team-card,
 .scroll-reveal.is-visible .steps > div,
 .scroll-reveal.is-visible .contact-actions > * {
+  filter: blur(0);
   opacity: 1;
   transform: none;
+}
+
+.scroll-reveal.is-visible :is(.feature-list article, .announcement-card, .event-card, .gallery-card, .team-card) {
+  box-shadow: 0 16px 38px rgba(23, 33, 29, 0.08);
 }
 
 .scroll-reveal.is-visible :is(.feature-list article, .announcement-card, .event-card, .gallery-card, .team-card, .steps > div, .contact-actions > *):nth-child(2) {
@@ -589,8 +646,21 @@ h3 {
   .scroll-reveal .team-card,
   .scroll-reveal .steps > div,
   .scroll-reveal .contact-actions > * {
+    clip-path: none;
+    filter: none;
     opacity: 1;
     transform: none;
+    transition: none;
+  }
+
+  .scroll-reveal h2 {
+    clip-path: none;
+    transform: none;
+    transition: none;
+  }
+
+  .scroll-reveal .section-heading::after {
+    transform: scaleX(1);
     transition: none;
   }
 }

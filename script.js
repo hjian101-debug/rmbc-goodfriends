@@ -1509,7 +1509,10 @@ const initScrollReveal = () => {
   const sections = document.querySelectorAll("#home > .section");
   if (sections.length === 0) return;
 
-  sections.forEach((section) => section.classList.add("scroll-reveal"));
+  sections.forEach((section, index) => {
+    section.classList.add("scroll-reveal");
+    section.dataset.revealDirection = index % 2 === 0 ? "left" : "right";
+  });
 
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) {
     sections.forEach((section) => section.classList.add("is-visible"));
