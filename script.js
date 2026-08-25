@@ -1674,24 +1674,71 @@ announcementList?.addEventListener(
   "wheel",
   (event) => {
     const target = event.target instanceof Element ? event.target : null;
-    if (!target?.closest(".announcement-card") || announcementList.scrollWidth <= announcementList.clientWidth) {
+    const card = target?.closest(".announcement-card");
+    if (announcementList.scrollWidth <= announcementList.clientWidth) {
       return;
     }
 
-    const horizontalDelta = event.shiftKey
-      ? event.deltaY || event.deltaX
-      : Math.abs(event.deltaX) > Math.abs(event.deltaY)
-        ? event.deltaX
-        : 0;
+    const horizontalDelta = event.shiftKey ? event.deltaY || event.deltaX : event.deltaX;
     if (!horizontalDelta) {
       return;
     }
 
     announcementList.scrollLeft += horizontalDelta;
+    if (!event.shiftKey && event.deltaY && card) {
+      card.scrollTop += event.deltaY;
+    }
     event.preventDefault();
   },
   { passive: false },
 );
+
+let announcementDrag = null;
+announcementList?.addEventListener("pointerdown", (event) => {
+  if (event.pointerType !== "mouse" || event.button !== 0) {
+    return;
+  }
+
+  announcementDrag = {
+    pointerId: event.pointerId,
+    startX: event.clientX,
+    startY: event.clientY,
+    startScrollLeft: announcementList.scrollLeft,
+    active: false,
+  };
+});
+
+announcementList?.addEventListener("pointermove", (event) => {
+  if (!announcementDrag || event.pointerId !== announcementDrag.pointerId) {
+    return;
+  }
+
+  const deltaX = event.clientX - announcementDrag.startX;
+  const deltaY = event.clientY - announcementDrag.startY;
+  if (!announcementDrag.active) {
+    if (Math.abs(deltaX) < 6 || Math.abs(deltaX) <= Math.abs(deltaY)) {
+      return;
+    }
+    announcementDrag.active = true;
+    announcementList.setPointerCapture(event.pointerId);
+  }
+
+  announcementList.scrollLeft = announcementDrag.startScrollLeft - deltaX;
+  event.preventDefault();
+});
+
+const endAnnouncementDrag = (event) => {
+  if (!announcementDrag || event.pointerId !== announcementDrag.pointerId) {
+    return;
+  }
+  if (announcementList?.hasPointerCapture(event.pointerId)) {
+    announcementList.releasePointerCapture(event.pointerId);
+  }
+  announcementDrag = null;
+};
+
+announcementList?.addEventListener("pointerup", endAnnouncementDrag);
+announcementList?.addEventListener("pointercancel", endAnnouncementDrag);
 
 if (year) {
   year.textContent = new Date().getFullYear();
