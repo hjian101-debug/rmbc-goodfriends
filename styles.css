@@ -642,12 +642,41 @@ h3 {
 }
 
 .announcement-list {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  display: flex;
   gap: 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  scrollbar-color: transparent transparent;
+  scrollbar-width: thin;
+}
+
+.announcement-list.is-scrollable {
+  padding-bottom: 14px;
+  scrollbar-color: var(--gold) transparent;
+}
+
+.announcement-list::-webkit-scrollbar {
+  height: 0;
+}
+
+.announcement-list.is-scrollable::-webkit-scrollbar {
+  height: 9px;
+}
+
+.announcement-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.announcement-list::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: var(--gold);
 }
 
 .announcement-card {
+  flex: 0 0 calc((100% - 24px) / 3);
+  min-width: 0;
   height: 420px;
   padding: 22px 24px;
   border: 1px solid var(--line);
@@ -655,6 +684,11 @@ h3 {
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-gutter: stable;
+  scroll-snap-align: start;
+}
+
+.announcement-scroll-hint {
+  max-width: none;
 }
 
 .announcement-card span {
@@ -1585,6 +1619,7 @@ body.photo-lightbox-open {
   }
 
   .announcement-card {
+    flex-basis: calc(100% - 28px);
     height: 360px;
   }
 

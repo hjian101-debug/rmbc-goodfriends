@@ -5,6 +5,7 @@ const year = document.querySelector("[data-year]");
 const languageToggle = document.querySelector("[data-language-toggle]");
 const announcementSection = document.querySelector("[data-announcements-section]");
 const announcementList = document.querySelector("[data-announcement-list]");
+const announcementScrollHint = document.querySelector("[data-announcement-scroll-hint]");
 const gatheringsLayout = document.querySelector("[data-gatherings-layout]");
 const eventGrid = document.querySelector("[data-event-grid]");
 const scripturePanel = document.querySelector("[data-scripture-panel]");
@@ -304,6 +305,7 @@ const translations = {
     "gatherings.worshipCopy": "欢迎与我们一同敬拜，也可以在崇拜后留下来认识新朋友。",
     "gatherings.liveLabel": "主日直播",
     "announcements.title": "团契公告",
+    "announcements.hint": "左右滑动查看更多公告",
     "gallery.title": "团契照片",
     "gallery.hint": "可左右滑动查看更多照片",
     "gallery.moments": "📸 精彩瞬间",
@@ -396,6 +398,7 @@ const translations = {
     "gatherings.worshipCopy": "Join us for worship, and feel free to stay afterward to meet new friends.",
     "gatherings.liveLabel": "Sunday livestream",
     "announcements.title": "Fellowship News",
+    "announcements.hint": "Swipe horizontally for more announcements",
     "gallery.title": "Fellowship Photos",
     "gallery.hint": "Swipe horizontally to see more photos",
     "gallery.moments": "📸 Photo Moments",
@@ -1156,6 +1159,14 @@ const renderContent = (language) => {
     const activeAnnouncements = content.announcements.filter((item) => item.active !== false);
     const announcementsVisible = isSiteSectionVisible(siteSections, "announcements");
     announcementSection.hidden = !announcementsVisible || activeAnnouncements.length === 0;
+    announcementList.classList.toggle("is-scrollable", activeAnnouncements.length > 3);
+    announcementList.setAttribute(
+      "aria-label",
+      language === "en" ? "Fellowship announcements" : "团契公告列表",
+    );
+    if (announcementScrollHint) {
+      announcementScrollHint.hidden = activeAnnouncements.length <= 3;
+    }
     announcementList.replaceChildren(
       ...activeAnnouncements.map((item) => {
         const article = createElement("article", "announcement-card");
