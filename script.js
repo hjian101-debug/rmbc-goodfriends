@@ -44,6 +44,7 @@ const defaultContent = {
     {
       id: "welcome",
       active: true,
+      pinned: false,
       date: "2026-05-11",
       title: {
         zh: "欢迎来到好朋友团契",
@@ -306,6 +307,7 @@ const translations = {
     "gatherings.liveLabel": "主日直播",
     "announcements.title": "团契公告",
     "announcements.hint": "左右滑动查看更多公告",
+    "announcements.pinned": "置顶",
     "gallery.title": "团契照片",
     "gallery.hint": "可左右滑动查看更多照片",
     "gallery.moments": "📸 精彩瞬间",
@@ -399,6 +401,7 @@ const translations = {
     "gatherings.liveLabel": "Sunday livestream",
     "announcements.title": "Fellowship News",
     "announcements.hint": "Swipe horizontally for more announcements",
+    "announcements.pinned": "Pinned",
     "gallery.title": "Fellowship Photos",
     "gallery.hint": "Swipe horizontally to see more photos",
     "gallery.moments": "📸 Photo Moments",
@@ -1156,7 +1159,11 @@ const renderContent = (language) => {
   syncSiteSectionVisibility(siteSections);
 
   if (announcementList && announcementSection) {
-    const activeAnnouncements = content.announcements.filter((item) => item.active !== false);
+    const activeAnnouncements = content.announcements
+      .map((item, index) => ({ item, index }))
+      .filter(({ item }) => item.active !== false)
+      .sort((a, b) => Number(b.item.pinned === true) - Number(a.item.pinned === true) || a.index - b.index)
+      .map(({ item }) => item);
     const announcementsVisible = isSiteSectionVisible(siteSections, "announcements");
     announcementSection.hidden = !announcementsVisible || activeAnnouncements.length === 0;
     announcementList.classList.toggle("is-scrollable", activeAnnouncements.length > 3);
@@ -1170,8 +1177,15 @@ const renderContent = (language) => {
     announcementList.replaceChildren(
       ...activeAnnouncements.map((item) => {
         const article = createElement("article", "announcement-card");
+        const meta = createElement("div", "announcement-meta");
+        const date = createElement("span", "announcement-date", item.date || "");
+        meta.append(date);
+        if (item.pinned === true) {
+          article.classList.add("is-pinned");
+          meta.append(createElement("span", "announcement-pin", translations[language]["announcements.pinned"]));
+        }
         article.append(
-          createElement("span", null, item.date || ""),
+          meta,
           createElement("h3", null, localText(item.title, language)),
           createElement("p", null, localText(item.body, language)),
         );

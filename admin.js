@@ -71,6 +71,7 @@ const defaultContent = {
     {
       id: "welcome",
       active: true,
+      pinned: false,
       date: "2026-05-11",
       title: {
         zh: "欢迎来到好朋友团契",
@@ -679,6 +680,20 @@ function activeToggle(item) {
   return label;
 }
 
+function pinnedToggle(item) {
+  const label = document.createElement("label");
+  const input = document.createElement("input");
+  label.className = "status-row";
+  input.type = "checkbox";
+  input.checked = item.pinned === true;
+  input.addEventListener("change", () => {
+    item.pinned = input.checked;
+    saveContent();
+  });
+  label.append(input, document.createTextNode("置顶此公告"));
+  return label;
+}
+
 function safeFileName(fileName) {
   return String(fileName || "photo")
     .normalize("NFKD")
@@ -1070,6 +1085,7 @@ function renderAnnouncements() {
       card.append(
         cardHeader(item.title.zh || "公告", item.date || "", "announcements", item, index),
         fields,
+        pinnedToggle(item),
         activeToggle(item),
       );
       return card;
@@ -1168,6 +1184,7 @@ function createEmptyItem(collection) {
   return {
     id,
     active: true,
+    pinned: false,
     date: new Date().toISOString().slice(0, 10),
     title: { zh: "新公告", en: "New Announcement" },
     body: { zh: "", en: "" },

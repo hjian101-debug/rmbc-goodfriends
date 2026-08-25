@@ -710,11 +710,23 @@ h3 {
   box-shadow: 0 18px 38px rgba(23, 33, 29, 0.12);
 }
 
+.announcement-card.is-pinned {
+  --announcement-accent: var(--terracotta);
+  box-shadow: 0 16px 34px rgba(174, 99, 70, 0.13);
+}
+
 .announcement-scroll-hint {
   max-width: none;
 }
 
-.announcement-card span {
+.announcement-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.announcement-date {
   display: inline-flex;
   align-items: center;
   min-height: 28px;
@@ -726,6 +738,19 @@ h3 {
   font-size: 13px;
   font-weight: 850;
   letter-spacing: 0.025em;
+}
+
+.announcement-pin {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  color: var(--white);
+  background: var(--announcement-accent);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
 }
 
 .announcement-card h3 {
