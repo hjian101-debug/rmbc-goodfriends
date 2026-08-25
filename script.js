@@ -1163,6 +1163,27 @@ const injectEventStructuredData = () => {
   document.head.append(script);
 };
 
+const routeAnnouncementWheel = (event, card = null) => {
+  if (!announcementList || announcementList.scrollWidth <= announcementList.clientWidth) {
+    return;
+  }
+
+  const cardCanScrollVertically = card && card.scrollHeight > card.clientHeight + 1;
+  const horizontalDelta = event.shiftKey
+    ? event.deltaY || event.deltaX
+    : event.deltaX || (!cardCanScrollVertically ? event.deltaY : 0);
+  if (!horizontalDelta) {
+    return;
+  }
+
+  announcementList.scrollLeft += horizontalDelta;
+  if (!event.shiftKey && event.deltaX && event.deltaY && cardCanScrollVertically) {
+    card.scrollTop += event.deltaY;
+  }
+  event.preventDefault();
+  event.stopPropagation();
+};
+
 const renderContent = (language) => {
   const content = getAdminContent();
   const siteSections = normalizeSiteSections(content.siteSections);
@@ -1196,6 +1217,7 @@ const renderContent = (language) => {
     announcementList.replaceChildren(
       ...activeAnnouncements.map((item) => {
         const article = createElement("article", "announcement-card");
+        article.addEventListener("wheel", (event) => routeAnnouncementWheel(event, article), { passive: false });
         const cardHeader = createElement("div", "announcement-card-header");
         const meta = createElement("div", "announcement-meta");
         const date = createElement("span", "announcement-date", item.date || "");
@@ -1674,26 +1696,12 @@ announcementList?.addEventListener(
   "wheel",
   (event) => {
     const target = event.target instanceof Element ? event.target : null;
-    const card = target?.closest(".announcement-card");
-    if (announcementList.scrollWidth <= announcementList.clientWidth) {
+    if (target?.closest(".announcement-card")) {
       return;
     }
-
-    const cardCanScrollVertically = card && card.scrollHeight > card.clientHeight + 1;
-    const horizontalDelta = event.shiftKey
-      ? event.deltaY || event.deltaX
-      : event.deltaX || (!cardCanScrollVertically ? event.deltaY : 0);
-    if (!horizontalDelta) {
-      return;
-    }
-
-    announcementList.scrollLeft += horizontalDelta;
-    if (!event.shiftKey && event.deltaX && event.deltaY && cardCanScrollVertically) {
-      card.scrollTop += event.deltaY;
-    }
-    event.preventDefault();
+    routeAnnouncementWheel(event);
   },
-  { capture: true, passive: false },
+  { passive: false },
 );
 
 let announcementDrag = null;
