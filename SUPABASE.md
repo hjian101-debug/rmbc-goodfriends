@@ -50,3 +50,46 @@ The publishable key is designed to be used in browser code. Row Level Security i
 ## 5. First save
 
 After configuring Supabase, open `admin.html`, log in with the admin email/password, make any small edit, and the current content will be saved into Supabase.
+
+## 6. Enable automatic English translation and ESV scripture
+
+The admin dashboard calls the authenticated Edge Function in
+`supabase/functions/content-assistant`. It provides two actions:
+
+- translate Chinese titles, descriptions, announcements, captions, and team information into English
+- convert a Chinese Bible reference such as `以弗所书 2:1-3` to its English reference and retrieve the official ESV text
+
+Create an OpenAI API key and request an ESV API key at https://api.esv.org/.
+Store both as Supabase Edge Function secrets; never put them in
+`supabase-config.js` or any browser file.
+
+```bash
+supabase secrets set OPENAI_API_KEY=... ESV_API_KEY=...
+supabase functions deploy content-assistant
+```
+
+`OPENAI_MODEL` is optional and defaults to `gpt-5-mini`:
+
+```bash
+supabase secrets set OPENAI_MODEL=gpt-5-mini
+```
+
+Only the authenticated `gff@rmbc.local` administrator can call this function.
+English fields remain editable so the administrator can review every result
+before clicking **保存到网站**.
+
+For the Google Sheet Bible-study archive, use these columns in this order:
+
+1. 日期
+2. 中文题目
+3. English title
+4. 中文经文出处
+5. English passage
+6. 中文经文内容
+7. ESV scripture
+8. 中文大致内容
+9. English summary
+10. 是否显示
+
+The dashboard's Bible-study helper copies one tab-separated row in exactly
+this order for pasting into the sheet.

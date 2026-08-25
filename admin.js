@@ -25,6 +25,13 @@ let isSaving = false;
 let activeAdminPage = "sections";
 let activeGalleryCategory = "fellowship";
 const pendingAnnouncementIds = new Set();
+const studySheetDraft = {
+  date: new Date().toISOString().slice(0, 10),
+  title: { zh: "", en: "" },
+  passage: { zh: "", en: "" },
+  scripture: { zh: "", en: "" },
+  summary: { zh: "", en: "" },
+};
 
 function getStudiesSheetUrl() {
   if (studiesSheetConfig.editUrl) {
@@ -310,7 +317,9 @@ function normalizeContent(value) {
     location: ensureLocalizedValue(item.location),
     liveTime: ensureLocalizedValue(item.liveTime),
     liveUrl: item.liveUrl || "",
+    scriptureReference: ensureLocalizedValue(item.scriptureReference),
     scripture: ensureLocalizedValue(item.scripture),
+    scriptureVersion: item.scriptureVersion || "",
   }));
   next.gallery = (Array.isArray(next.gallery) ? next.gallery : []).map((item) => ({
     ...item,
@@ -326,6 +335,7 @@ function normalizeContent(value) {
     title: ensureLocalizedValue(item.title),
     passage: ensureLocalizedValue(item.passage),
     scripture: ensureLocalizedValue(item.scripture),
+    scriptureVersion: item.scriptureVersion || "",
     summary: ensureLocalizedValue(item.summary),
   }));
 
@@ -534,6 +544,162 @@ function createInput(labelText, value, onInput, options = {}) {
 
   label.append(field);
   return label;
+}
+
+function createAssistantButton(label, task) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "small-button assistant-button";
+  button.textContent = label;
+  button.addEventListener("click", async () => {
+    const originalLabel = button.textContent;
+    button.disabled = true;
+    button.textContent = "处理中...";
+    setSaveStatus(`${label}处理中...`, "saving");
+
+    try {
+      await task();
+      saveContent("自动生成的英文尚未保存");
+      setSaveStatus("英文已生成，请检查后保存", "dirty");
+      renderAll();
+    } catch (error) {
+      const message = error?.message || "自动翻译暂时不可用";
+      setSaveStatus(message, "error");
+      setLoginMessage(message);
+      console.error(error);
+      button.disabled = false;
+      button.textContent = originalLabel;
+    }
+  });
+  return button;
+}
+
+async function invokeContentAssistant(body) {
+  const client = getSupabaseClient();
+  if (!client) {
+    throw new Error("自动翻译需要连接 Supabase。 ");
+  }
+
+  const { data, error } = await client.functions.invoke("content-assistant", { body });
+  if (error) {
+    let details = error.message;
+    try {
+      const responseBody = await error.context?.json();
+      details = responseBody?.error || details;
+    } catch (_error) {
+      // Keep the original Supabase error when the response has no JSON body.
+    }
+    throw new Error(details || "自动翻译服务暂时不可用。请检查后台密钥设置。");
+  }
+  if (!data) {
+    throw new Error("自动翻译服务没有返回内容。");
+  }
+  return data;
+}
+
+async function translateLocalizedFields(fields) {
+  const requested = fields
+    .map((field, index) => ({ ...field, id: field.id || `field-${index}` }))
+    .filter((field) => String(field.source || "").trim());
+
+  if (requested.length === 0) {
+    throw new Error("请先填写中文内容。");
+  }
+
+  const result = await invokeContentAssistant({
+    action: "translate",
+    items: requested.map(({ id, source, context }) => ({ id, text: source, context })),
+  });
+
+  requested.forEach((field) => {
+    const translated = result.translations?.[field.id];
+    if (typeof translated === "string" && translated.trim()) {
+      field.apply(translated.trim());
+    }
+  });
+}
+
+async function fetchEsvScripture(reference, apply) {
+  if (!String(reference || "").trim()) {
+    throw new Error("请先填写中文经文出处，例如：以弗所书 2:1-3。");
+  }
+
+  const result = await invokeContentAssistant({ action: "scripture", reference });
+  if (!result.reference || !result.text) {
+    throw new Error("没有找到这段经文，请检查经文出处。");
+  }
+  apply(result);
+}
+
+function addCardAssistantAction(header, label, task) {
+  const actions = header.querySelector(".card-actions");
+  actions?.prepend(createAssistantButton(label, task));
+  return header;
+}
+
+function createStudySheetAssistant() {
+  const helper = document.createElement("section");
+  const heading = document.createElement("h4");
+  const note = document.createElement("p");
+  const fields = document.createElement("div");
+  const actions = document.createElement("div");
+  const copyButton = document.createElement("button");
+
+  helper.className = "sheet-translation-helper";
+  heading.textContent = "新增查经翻译助手";
+  note.textContent = "填写中文后生成英文，再复制整行到 Google Sheet。ESV 经文来自正式接口，不由 AI 改写。";
+  fields.className = "field-grid";
+  actions.className = "card-actions";
+  copyButton.type = "button";
+  copyButton.className = "small-button";
+  copyButton.textContent = "复制整行到表格";
+
+  fields.append(
+    createInput("日期", studySheetDraft.date, (value) => { studySheetDraft.date = value; }),
+    createInput("中文题目", studySheetDraft.title.zh, (value) => { studySheetDraft.title.zh = value; }),
+    createInput("English title", studySheetDraft.title.en, (value) => { studySheetDraft.title.en = value; }),
+    createInput("中文经文出处", studySheetDraft.passage.zh, (value) => { studySheetDraft.passage.zh = value; }),
+    createInput("English passage", studySheetDraft.passage.en, (value) => { studySheetDraft.passage.en = value; }),
+    createInput("中文经文内容", studySheetDraft.scripture.zh, (value) => { studySheetDraft.scripture.zh = value; }, { full: true, multiline: true }),
+    createInput("ESV scripture", studySheetDraft.scripture.en, (value) => { studySheetDraft.scripture.en = value; }, { full: true, multiline: true }),
+    createInput("中文大致内容", studySheetDraft.summary.zh, (value) => { studySheetDraft.summary.zh = value; }, { full: true, multiline: true }),
+    createInput("English summary", studySheetDraft.summary.en, (value) => { studySheetDraft.summary.en = value; }, { full: true, multiline: true }),
+  );
+
+  actions.append(
+    createAssistantButton("自动填写英文", () => translateLocalizedFields([
+      { id: "title", source: studySheetDraft.title.zh, context: "Bible study title", apply: (value) => { studySheetDraft.title.en = value; } },
+      { id: "summary", source: studySheetDraft.summary.zh, context: "Bible study notes; preserve Bible references", apply: (value) => { studySheetDraft.summary.en = value; } },
+    ])),
+    createAssistantButton("获取 ESV 经文", async () => {
+      await fetchEsvScripture(studySheetDraft.passage.zh, (result) => {
+        studySheetDraft.passage.en = result.reference;
+        studySheetDraft.scripture.en = result.text;
+      });
+    }),
+    copyButton,
+  );
+
+  copyButton.addEventListener("click", async () => {
+    const row = [
+      studySheetDraft.date,
+      studySheetDraft.title.zh,
+      studySheetDraft.title.en,
+      studySheetDraft.passage.zh,
+      studySheetDraft.passage.en,
+      studySheetDraft.scripture.zh,
+      studySheetDraft.scripture.en,
+      studySheetDraft.summary.zh,
+      studySheetDraft.summary.en,
+      "是",
+    ].map((value) => String(value || "").replace(/\t/g, " ")).join("\t");
+    await navigator.clipboard.writeText(row);
+    copyButton.textContent = "已复制，去表格粘贴";
+    window.setTimeout(() => { copyButton.textContent = "复制整行到表格"; }, 1800);
+  });
+
+  helper.append(heading, note, fields, actions);
+  return helper;
 }
 
 function createEditorSubsection(title, ...children) {
@@ -876,6 +1042,7 @@ function renderGatherings() {
       card.className = "editor-card";
       fields.className = "field-grid";
 
+      item.scriptureReference ||= { zh: "", en: "" };
       fields.append(
         createInput("中文日期", item.day.zh, (value) => { item.day.zh = value; }),
         createInput("English day", item.day.en, (value) => { item.day.en = value; }),
@@ -892,13 +1059,30 @@ function renderGatherings() {
         createInput("English description", item.description.en, (value) => { item.description.en = value; }, { full: true, multiline: true }),
         createEditorSubsection(
           "查经经文",
+          createInput("中文经文出处", item.scriptureReference.zh, (value) => { item.scriptureReference.zh = value; }),
+          createInput("English passage", item.scriptureReference.en, (value) => { item.scriptureReference.en = value; }),
           createInput("中文经文", item.scripture.zh, (value) => { item.scripture.zh = value; }, { full: true, multiline: true }),
           createInput("English scripture", item.scripture.en, (value) => { item.scripture.en = value; }, { full: true, multiline: true }),
+          createAssistantButton("获取 ESV 经文", async () => {
+            await fetchEsvScripture(item.scriptureReference.zh, (result) => {
+              item.scriptureReference.en = result.reference;
+              item.scripture.en = result.text;
+              item.scriptureVersion = "ESV";
+            });
+          }),
         ),
       );
 
+      const header = cardHeader(item.title.zh || "聚会", item.time.zh || "", "gatherings", item, index);
       card.append(
-        cardHeader(item.title.zh || "聚会", item.time.zh || "", "gatherings", item, index),
+        addCardAssistantAction(header, "自动填写英文", () => translateLocalizedFields([
+          { id: "day", source: item.day.zh, context: "gathering day or recurrence", apply: (value) => { item.day.en = value; } },
+          { id: "title", source: item.title.zh, context: "church gathering title", apply: (value) => { item.title.en = value; } },
+          { id: "time", source: item.time.zh, context: "event time; preserve numbers", apply: (value) => { item.time.en = value; } },
+          { id: "location", source: item.location.zh, context: "venue or address; preserve proper names", apply: (value) => { item.location.en = value; } },
+          { id: "liveTime", source: item.liveTime.zh, context: "livestream time; preserve numbers", apply: (value) => { item.liveTime.en = value; } },
+          { id: "description", source: item.description.zh, context: "warm church gathering description", apply: (value) => { item.description.en = value; } },
+        ])),
         fields,
         activeToggle(item),
       );
@@ -925,6 +1109,9 @@ function renderGallery() {
       "分类说明",
       createInput("中文说明", description.zh, (value) => { description.zh = value; }, { full: true, multiline: true }),
       createInput("English description", description.en, (value) => { description.en = value; }, { full: true, multiline: true }),
+      createAssistantButton("自动填写英文", () => translateLocalizedFields([
+        { id: "description", source: description.zh, context: "photo gallery category description", apply: (value) => { description.en = value; } },
+      ])),
     ),
   );
 
@@ -951,10 +1138,19 @@ function renderGallery() {
         item.title.en = value;
         item.alt.en = value;
       }),
+      createInput("中文照片说明", item.caption.zh, (value) => { item.caption.zh = value; }, { full: true, multiline: true }),
+      createInput("English caption", item.caption.en, (value) => { item.caption.en = value; }, { full: true, multiline: true }),
+      createInput("中文替代文字", item.alt.zh, (value) => { item.alt.zh = value; }, { full: true }),
+      createInput("English alt text", item.alt.en, (value) => { item.alt.en = value; }, { full: true }),
     );
 
+    const header = galleryCardHeader(item.title.zh || "", item.image ? category.title : "等待上传照片", item, index, category.id, position, categoryItems.length);
     card.append(
-      galleryCardHeader(item.title.zh || "", item.image ? category.title : "等待上传照片", item, index, category.id, position, categoryItems.length),
+      addCardAssistantAction(header, "自动填写英文", () => translateLocalizedFields([
+        { id: "title", source: item.title.zh, context: "short photo title", apply: (value) => { item.title.en = value; } },
+        { id: "caption", source: item.caption.zh, context: "photo caption", apply: (value) => { item.caption.en = value; } },
+        { id: "alt", source: item.alt.zh || item.title.zh, context: "concise accessible image alt text", apply: (value) => { item.alt.en = value; } },
+      ])),
       fields,
       activeToggle(item),
     );
@@ -985,7 +1181,7 @@ function renderStudies() {
     actions.className = "card-actions";
     columns.className = "sheet-columns";
     note.className = "empty-note";
-    note.textContent = "以后查经归档直接在 Google Sheet 里新增一行。公开网站会读取显示中的内容，按日期从新到旧排列。";
+    note.textContent = "以后查经归档直接在 Google Sheet 里新增一行。普通文字可在下方翻译助手生成英文；经文按出处获取 ESV 正式原文。";
     link.className = "sheet-link";
     link.href = sheetUrl;
     link.target = "_blank";
@@ -1004,8 +1200,10 @@ function renderStudies() {
       "日期",
       "中文题目",
       "English title",
-      "中文经文",
+      "中文经文出处",
       "English passage",
+      "中文经文内容",
+      "ESV scripture",
       "中文大致内容",
       "English summary",
       "是否显示",
@@ -1013,7 +1211,8 @@ function renderStudies() {
       columns.append(createElement("span", null, label));
     });
 
-    card.append(header, note, columns);
+    const helper = createStudySheetAssistant();
+    card.append(header, note, columns, helper);
     list.replaceChildren(card);
     return;
   }
@@ -1037,9 +1236,20 @@ function renderStudies() {
         createInput("English study notes", item.summary.en, (value) => { item.summary.en = value; }, { full: true, multiline: true }),
       );
 
+      const header = cardHeader(item.title.zh || "查经内容", item.date || item.passage.zh || "", "studies", item, index);
       card.append(
-        cardHeader(item.title.zh || "查经内容", item.date || item.passage.zh || "", "studies", item, index),
+        addCardAssistantAction(header, "自动填写英文", () => translateLocalizedFields([
+          { id: "title", source: item.title.zh, context: "Bible study title", apply: (value) => { item.title.en = value; } },
+          { id: "summary", source: item.summary.zh, context: "Bible study notes; preserve Bible references", apply: (value) => { item.summary.en = value; } },
+        ])),
         fields,
+        createAssistantButton("获取 ESV 经文", async () => {
+          await fetchEsvScripture(item.passage.zh, (result) => {
+            item.passage.en = result.reference;
+            item.scripture.en = result.text;
+            item.scriptureVersion = "ESV";
+          });
+        }),
         activeToggle(item),
       );
       return card;
@@ -1067,8 +1277,13 @@ function renderTeam() {
         createInput("English bio", item.bio.en, (value) => { item.bio.en = value; }, { full: true, multiline: true }),
       );
 
+      const header = cardHeader(item.name.zh || "同工", item.role.zh || "", "team", item, index);
       card.append(
-        cardHeader(item.name.zh || "同工", item.role.zh || "", "team", item, index),
+        addCardAssistantAction(header, "自动填写英文", () => translateLocalizedFields([
+          { id: "name", source: item.name.zh, context: "person name or church team position", apply: (value) => { item.name.en = value; } },
+          { id: "role", source: item.role.zh, context: "church ministry role", apply: (value) => { item.role.en = value; } },
+          { id: "bio", source: item.bio.zh, context: "short church team biography", apply: (value) => { item.bio.en = value; } },
+        ])),
         fields,
         activeToggle(item),
       );
@@ -1114,14 +1329,18 @@ function renderAnnouncements() {
         createInput("English announcement", item.body.en, (value) => { item.body.en = value; }, { full: true, multiline: true }),
       );
 
-      card.append(
-        cardHeader(
+      const header = cardHeader(
           item.title.zh || "公告",
           pending ? `新建未保存 · ${item.date || "未填写日期"}` : (item.date || ""),
           "announcements",
           item,
           index,
-        ),
+        );
+      card.append(
+        addCardAssistantAction(header, "自动填写英文", () => translateLocalizedFields([
+          { id: "title", source: item.title.zh, context: "church fellowship announcement title", apply: (value) => { item.title.en = value; } },
+          { id: "body", source: item.body.zh, context: "friendly church fellowship announcement; preserve formatting, dates, URLs, emoji, and Bible references", apply: (value) => { item.body.en = value; } },
+        ])),
         fields,
         pinnedToggle(item),
         activeToggle(item),
@@ -1179,7 +1398,9 @@ function createEmptyItem(collection) {
       location: { zh: "", en: "" },
       liveTime: { zh: "", en: "" },
       liveUrl: "",
+      scriptureReference: { zh: "", en: "" },
       scripture: { zh: "", en: "" },
+      scriptureVersion: "",
     };
   }
 
@@ -1203,6 +1424,7 @@ function createEmptyItem(collection) {
       title: { zh: "新查经内容", en: "New Bible Study" },
       passage: { zh: "", en: "" },
       scripture: { zh: "", en: "" },
+      scriptureVersion: "",
       summary: { zh: "", en: "" },
     };
   }

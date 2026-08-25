@@ -446,6 +446,34 @@ textarea {
   background: var(--soft);
 }
 
+.assistant-button {
+  color: var(--moss-dark);
+  border: 1px solid #c99a39;
+  background: #f3d889;
+}
+
+.assistant-button:hover {
+  color: var(--white);
+  background: #a9781f;
+}
+
+.sheet-translation-helper {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  background: var(--soft);
+}
+
+.sheet-translation-helper h4,
+.sheet-translation-helper p {
+  margin: 0;
+}
+
+.sheet-translation-helper p {
+  color: var(--muted);
+}
+
 .danger-button {
   color: var(--white);
   background: var(--terracotta);

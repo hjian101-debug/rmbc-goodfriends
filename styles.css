@@ -1955,3 +1955,16 @@ body.photo-lightbox-open {
     grid-column: 1;
   }
 }
+.scripture-reference {
+  display: block;
+  margin-top: 8px;
+  color: var(--moss-dark);
+}
+
+.esv-notice {
+  display: block;
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+}

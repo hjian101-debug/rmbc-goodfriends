@@ -517,6 +517,8 @@ const studyHeaderAliases = {
   titleEn: ["englishtitle", "英文题目", "英文主题", "entitle", "titleen"],
   passageZh: ["中文经文", "中文经文出处", "经文", "经文出处", "chinesepassage", "zhpassage", "passagezh"],
   passageEn: ["englishpassage", "英文经文", "英文经文出处", "enpassage", "passageen"],
+  scriptureZh: ["中文经文内容", "经文内容", "chinesescripture", "zhscripture", "scripturezh"],
+  scriptureEn: ["esvscripture", "englishscripture", "英文经文内容", "enscripture", "scriptureen"],
   summaryZh: ["中文大致内容", "中文查经重点", "大致内容", "查经重点", "内容", "chinesesummary", "zhsummary", "summaryzh"],
   summaryEn: ["englishsummary", "englishstudynotes", "英文大致内容", "英文查经重点", "ensummary", "summaryen"],
   active: ["是否显示", "显示", "active", "show", "published"],
@@ -572,7 +574,11 @@ const parseSheetStudies = (response) => {
           zh: readSheetCell(cells, columnMap.passageZh),
           en: readSheetCell(cells, columnMap.passageEn),
         },
-        scripture: { zh: "", en: "" },
+        scripture: {
+          zh: readSheetCell(cells, columnMap.scriptureZh),
+          en: readSheetCell(cells, columnMap.scriptureEn),
+        },
+        scriptureVersion: readSheetCell(cells, columnMap.scriptureEn) ? "ESV" : "",
         summary: {
           zh: readSheetCell(cells, columnMap.summaryZh),
           en: readSheetCell(cells, columnMap.summaryEn),
@@ -583,6 +589,8 @@ const parseSheetStudies = (response) => {
         || item.title.en
         || item.passage.zh
         || item.passage.en
+        || item.scripture.zh
+        || item.scripture.en
         || item.summary.zh
         || item.summary.en;
 
@@ -1269,7 +1277,9 @@ const renderContent = (language) => {
       const scriptureItems = activeGatherings
         .map((item) => ({
           title: localText(item.title, language),
+          passage: localText(item.scriptureReference, language),
           scripture: localText(item.scripture, language),
+          version: item.scriptureVersion || "",
         }))
         .filter((item) => item.scripture);
 
@@ -1294,7 +1304,13 @@ const renderContent = (language) => {
           if (item.title) {
             article.append(createElement("span", null, item.title));
           }
+          if (item.passage) {
+            article.append(createElement("strong", "scripture-reference", `${item.passage}${item.version ? ` · ${item.version}` : ""}`));
+          }
           article.append(createElement("p", null, item.scripture));
+          if (language === "en" && item.version === "ESV") {
+            article.append(createElement("small", "esv-notice", "Scripture quotations are from the ESV® Bible, copyright © 2001 by Crossway. Used by permission."));
+          }
           list.append(article);
           card.append(heading, list);
           scripturePanel.append(card);
@@ -1502,6 +1518,9 @@ const renderContent = (language) => {
           article.append(meta, createElement("h2", null, title || passage || translations[language]["studies.title"]));
           if (scripture) {
             article.append(createElement("blockquote", null, scripture));
+            if (language === "en" && item.scriptureVersion === "ESV") {
+              article.append(createElement("small", "esv-notice", "Scripture quotations are from the ESV® Bible, copyright © 2001 by Crossway. Used by permission."));
+            }
           }
           if (summary) {
             article.append(createElement("h3", null, translations[language]["studies.notes"]), createElement("p", null, summary));
