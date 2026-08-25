@@ -686,12 +686,16 @@ h3 {
 }
 
 .announcements > .section-heading,
-.announcements > .announcement-list {
+.announcements > .announcement-carousel {
   position: relative;
   z-index: 1;
   width: min(1120px, calc(100% - 36px));
   margin-left: auto;
   margin-right: auto;
+}
+
+.announcement-carousel {
+  position: relative;
 }
 
 .announcement-list {
@@ -725,6 +729,61 @@ h3 {
 .announcement-list::-webkit-scrollbar-thumb {
   border-radius: 999px;
   background: var(--gold);
+}
+
+.announcement-arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 5;
+  display: grid;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 1px solid rgba(181, 107, 80, 0.24);
+  border-radius: 50%;
+  color: var(--forest);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 8px 22px rgba(23, 33, 29, 0.16);
+  place-items: center;
+  transform: translateY(-50%);
+  cursor: pointer;
+  transition:
+    color 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.announcement-arrow[hidden] {
+  display: none;
+}
+
+.announcement-arrow span {
+  display: block;
+  margin-top: -3px;
+  font-size: 38px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.announcement-arrow:hover {
+  color: var(--white);
+  background: var(--terracotta);
+  box-shadow: 0 11px 28px rgba(23, 33, 29, 0.22);
+  transform: translateY(-50%) scale(1.06);
+}
+
+.announcement-arrow:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--gold) 55%, transparent);
+  outline-offset: 3px;
+}
+
+.announcement-arrow-left {
+  left: -21px;
+}
+
+.announcement-arrow-right {
+  right: -21px;
 }
 
 .announcement-card {
@@ -1791,6 +1850,23 @@ body.photo-lightbox-open {
   .announcement-card {
     flex-basis: calc(100% - 28px);
     height: 360px;
+  }
+
+  .announcement-arrow {
+    width: 36px;
+    height: 36px;
+  }
+
+  .announcement-arrow-left {
+    left: -9px;
+  }
+
+  .announcement-arrow-right {
+    right: -9px;
+  }
+
+  .announcement-arrow span {
+    font-size: 32px;
   }
 
   .section-note {

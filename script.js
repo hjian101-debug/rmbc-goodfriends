@@ -5,6 +5,8 @@ const year = document.querySelector("[data-year]");
 const languageToggle = document.querySelector("[data-language-toggle]");
 const announcementSection = document.querySelector("[data-announcements-section]");
 const announcementList = document.querySelector("[data-announcement-list]");
+const announcementPrevious = document.querySelector("[data-announcement-previous]");
+const announcementNext = document.querySelector("[data-announcement-next]");
 const gatheringsLayout = document.querySelector("[data-gatherings-layout]");
 const eventGrid = document.querySelector("[data-event-grid]");
 const scripturePanel = document.querySelector("[data-scripture-panel]");
@@ -1184,6 +1186,24 @@ const routeAnnouncementWheel = (event, card = null) => {
   event.stopPropagation();
 };
 
+const updateAnnouncementArrows = () => {
+  if (!announcementList || !announcementPrevious || !announcementNext) return;
+  const maxScrollLeft = Math.max(announcementList.scrollWidth - announcementList.clientWidth, 0);
+  const hasOverflow = maxScrollLeft > 2;
+  announcementPrevious.hidden = !hasOverflow || announcementList.scrollLeft <= 2;
+  announcementNext.hidden = !hasOverflow || announcementList.scrollLeft >= maxScrollLeft - 2;
+};
+
+const moveAnnouncementsByTwo = (direction) => {
+  const cards = announcementList?.querySelectorAll(".announcement-card");
+  if (!announcementList || !cards?.length) return;
+  const firstCard = cards[0];
+  const styles = window.getComputedStyle(announcementList);
+  const gap = Number.parseFloat(styles.columnGap || styles.gap) || 0;
+  const distance = (firstCard.getBoundingClientRect().width + gap) * 2;
+  announcementList.scrollBy({ left: direction * distance, behavior: "smooth" });
+};
+
 const renderContent = (language) => {
   const content = getAdminContent();
   const siteSections = normalizeSiteSections(content.siteSections);
@@ -1214,6 +1234,8 @@ const renderContent = (language) => {
       "aria-label",
       language === "en" ? "Fellowship announcements" : "团契公告列表",
     );
+    announcementPrevious.setAttribute("aria-label", language === "en" ? "View previous announcements" : "向左查看公告");
+    announcementNext.setAttribute("aria-label", language === "en" ? "View more announcements" : "向右查看公告");
     announcementList.replaceChildren(
       ...activeAnnouncements.map((item) => {
         const article = createElement("article", "announcement-card");
@@ -1235,6 +1257,7 @@ const renderContent = (language) => {
         return article;
       }),
     );
+    window.requestAnimationFrame(updateAnnouncementArrows);
   }
 
   if (eventGrid) {
@@ -1635,7 +1658,7 @@ const initPageMotion = () => {
     ":scope > .section-heading",
     ":scope > .section-copy",
     ":scope > .feature-list",
-    ":scope > .announcement-list",
+    ":scope > .announcement-carousel",
     ":scope > .gallery-grid",
     ":scope > .gallery-actions",
     ":scope > .gatherings-layout",
@@ -1750,6 +1773,10 @@ const endAnnouncementDrag = (event) => {
 
 announcementList?.addEventListener("pointerup", endAnnouncementDrag);
 announcementList?.addEventListener("pointercancel", endAnnouncementDrag);
+announcementList?.addEventListener("scroll", updateAnnouncementArrows, { passive: true });
+window.addEventListener("resize", updateAnnouncementArrows, { passive: true });
+announcementPrevious?.addEventListener("click", () => moveAnnouncementsByTwo(-1));
+announcementNext?.addEventListener("click", () => moveAnnouncementsByTwo(1));
 
 if (year) {
   year.textContent = new Date().getFullYear();

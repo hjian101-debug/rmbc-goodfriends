@@ -35,7 +35,7 @@
     />
     <meta name="twitter:image" content="https://rmbc-goodfriends.pages.dev/assets/hero-fellowship.svg" />
     <title>RMBC 好朋友团契 | Riverside 华人教会中文查经与 Good Friends Fellowship</title>
-    <link rel="stylesheet" href="./styles.css?v=20260825-4" />
+    <link rel="stylesheet" href="./styles.css?v=20260825-5" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -138,7 +138,27 @@
             <h2 data-i18n="announcements.title">团契公告</h2>
           </div>
         </div>
-        <div class="announcement-list" data-announcement-list tabindex="0"></div>
+        <div class="announcement-carousel">
+          <button
+            class="announcement-arrow announcement-arrow-left"
+            type="button"
+            data-announcement-previous
+            aria-label="向左查看公告"
+            hidden
+          >
+            <span aria-hidden="true">&#8249;</span>
+          </button>
+          <div class="announcement-list" data-announcement-list tabindex="0"></div>
+          <button
+            class="announcement-arrow announcement-arrow-right"
+            type="button"
+            data-announcement-next
+            aria-label="向右查看公告"
+            hidden
+          >
+            <span aria-hidden="true">&#8250;</span>
+          </button>
+        </div>
       </section>
 
       <section class="section split" id="about" data-site-section="about">
@@ -255,6 +275,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="./supabase-config.js?v=20260607-2"></script>
-    <script src="./script.js?v=20260825-4"></script>
+    <script src="./script.js?v=20260825-5"></script>
   </body>
 </html>
