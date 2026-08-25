@@ -76,19 +76,9 @@ function englishReference(input) {
   return reference.replace(/\s*:\s*/g, ":").replace(/\s*-\s*/g, "-");
 }
 
-function outputText(data) {
-  if (typeof data.output_text === "string") return data.output_text;
-  for (const output of data.output || []) {
-    for (const part of output.content || []) {
-      if (part.type === "output_text" && typeof part.text === "string") return part.text;
-    }
-  }
-  return "";
-}
-
 async function translate(items) {
-  const apiKey = Deno.env.get("OPENAI_API_KEY");
-  if (!apiKey) throw new Error("尚未设置 OPENAI_API_KEY。");
+  const apiKey = Deno.env.get("GEMINI_API_KEY");
+  if (!apiKey) throw new Error("尚未设置免费的 GEMINI_API_KEY。");
   if (!Array.isArray(items) || items.length === 0 || items.length > MAX_ITEMS) {
     throw new Error("翻译内容数量不正确。");
   }
@@ -99,46 +89,47 @@ async function translate(items) {
   }));
   if (normalized.some((item) => !item.id || !item.text)) throw new Error("翻译内容不能为空。");
 
-  const response = await fetch("https://api.openai.com/v1/responses", {
+  const model = Deno.env.get("GEMINI_MODEL") || "gemma-4-31b-it";
+  const prompt = [
+    "Translate the following Simplified or Traditional Chinese church fellowship content into natural, welcoming American English.",
+    "Preserve meaning, paragraph breaks, dates, times, addresses, URLs, emoji, Markdown, and Bible references.",
+    "Do not add facts, commentary, or quotation marks.",
+    "Return only valid JSON in this exact shape: {\"translations\":[{\"id\":\"original id\",\"text\":\"English translation\"}]}",
+    "Translate every item and preserve each id exactly.",
+    JSON.stringify(normalized),
+  ].join("\n\n");
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: Deno.env.get("OPENAI_MODEL") || "gpt-5-mini",
-      instructions: "Translate Simplified or Traditional Chinese church fellowship content into natural, welcoming American English. Preserve meaning, paragraph breaks, dates, times, addresses, URLs, emoji, Markdown, and Bible references. Do not add facts, commentary, or quotation marks. Return only valid JSON matching the schema.",
-      input: JSON.stringify(normalized),
-      text: {
-        format: {
-          type: "json_schema",
-          name: "translations",
-          strict: true,
-          schema: {
-            type: "object",
-            properties: {
-              translations: {
-                type: "array",
-                items: {
-                  type: "object",
-                  properties: { id: { type: "string" }, text: { type: "string" } },
-                  required: ["id", "text"],
-                  additionalProperties: false,
-                },
-              },
-            },
-            required: ["translations"],
-            additionalProperties: false,
-          },
-        },
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig: {
+        temperature: 0.1,
+        maxOutputTokens: 8192,
       },
     }),
   });
   const data = await response.json();
-  if (!response.ok) throw new Error(data?.error?.message || "OpenAI 翻译失败。");
-  const text = outputText(data);
-  if (!text) throw new Error("OpenAI 没有返回翻译内容。");
-  const parsed = JSON.parse(text);
+  if (!response.ok) throw new Error(data?.error?.message || "免费翻译服务暂时不可用。");
+  const text = (data?.candidates?.[0]?.content?.parts || [])
+    .map((part) => part.text || "")
+    .join("")
+    .trim()
+    .replace(/^```(?:json)?\s*/i, "")
+    .replace(/\s*```$/, "");
+  if (!text) throw new Error("免费翻译服务没有返回内容。");
+  let parsed;
+  try {
+    parsed = JSON.parse(text);
+  } catch (_error) {
+    throw new Error("免费翻译服务返回格式不正确，请重试一次。");
+  }
+  const allowedIds = new Set(normalized.map((item) => item.id));
   return {
     translations: Object.fromEntries(
-      (parsed.translations || []).map((item) => [item.id, item.text]),
+      (parsed.translations || [])
+        .filter((item) => allowedIds.has(item.id) && typeof item.text === "string")
+        .map((item) => [item.id, item.text]),
     ),
   };
 }
