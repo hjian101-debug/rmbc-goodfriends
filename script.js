@@ -1679,13 +1679,16 @@ announcementList?.addEventListener(
       return;
     }
 
-    const horizontalDelta = event.shiftKey ? event.deltaY || event.deltaX : event.deltaX;
+    const cardCanScrollVertically = card && card.scrollHeight > card.clientHeight + 1;
+    const horizontalDelta = event.shiftKey
+      ? event.deltaY || event.deltaX
+      : event.deltaX || (!cardCanScrollVertically ? event.deltaY : 0);
     if (!horizontalDelta) {
       return;
     }
 
     announcementList.scrollLeft += horizontalDelta;
-    if (!event.shiftKey && event.deltaY && card) {
+    if (!event.shiftKey && event.deltaX && event.deltaY && cardCanScrollVertically) {
       card.scrollTop += event.deltaY;
     }
     event.preventDefault();
