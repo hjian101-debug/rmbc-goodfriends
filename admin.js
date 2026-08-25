@@ -15,6 +15,7 @@ const adminGalleryCategoryButtons = document.querySelectorAll("[data-admin-galle
 
 const adminStorageKey = "rmbc-admin-content";
 const adminPageStorageKey = "rmbc-admin-page";
+const fellowshipContactEmail = "rmbctyler@yahoo.com";
 const supabaseConfig = window.RMBC_SUPABASE_CONFIG || {};
 const storageBucket = supabaseConfig.storageBucket || "site-media";
 const studiesSheetConfig = supabaseConfig.studiesSheet || {};
@@ -201,7 +202,7 @@ const defaultContent = {
         zh: "关心新朋友与团契成员近况，安排探访和代祷。",
         en: "Cares for newcomers and fellowship members through prayer, follow-up, and visits.",
       },
-      contact: "hello@rmbc.example",
+      contact: fellowshipContactEmail,
       avatar: "./assets/avatar-prayer.svg",
     },
     {
@@ -213,7 +214,7 @@ const defaultContent = {
         zh: "预备每周查经内容，带领小组讨论和回应。",
         en: "Prepares weekly Bible study and leads small-group discussion and response.",
       },
-      contact: "hello@rmbc.example",
+      contact: fellowshipContactEmail,
       avatar: "./assets/avatar-study.svg",
     },
     {
@@ -225,7 +226,7 @@ const defaultContent = {
         zh: "协助确认聚会地点、接送安排和第一次来访信息。",
         en: "Helps confirm gathering locations, rides, and first-visit details.",
       },
-      contact: "hello@rmbc.example",
+      contact: fellowshipContactEmail,
       avatar: "./assets/avatar-welcome.svg",
     },
   ],
@@ -295,6 +296,10 @@ function normalizeContent(value) {
   next.gallery = Array.isArray(next.gallery) ? next.gallery : defaultContent.gallery;
   next.photoCategoryDescriptions = normalizePhotoCategoryDescriptions(next.photoCategoryDescriptions);
   next.team = Array.isArray(next.team) ? next.team : defaultContent.team;
+  next.team = next.team.map((item) => ({
+    ...item,
+    contact: item.contact === "hello@rmbc.example" ? fellowshipContactEmail : item.contact,
+  }));
 
   next.gatherings = next.gatherings.map((item) => ({
     ...item,

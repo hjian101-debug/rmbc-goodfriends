@@ -18,6 +18,7 @@ const studiesList = document.querySelector("[data-studies-list]");
 const photoCategoryList = document.querySelector("[data-photo-category-list]");
 
 const adminStorageKey = "rmbc-admin-content";
+const fellowshipContactEmail = "rmbctyler@yahoo.com";
 const supabaseConfig = window.RMBC_SUPABASE_CONFIG || {};
 const studiesSheetConfig = supabaseConfig.studiesSheet || {};
 let supabaseClient = null;
@@ -173,7 +174,7 @@ const defaultContent = {
         zh: "关心新朋友与团契成员近况，安排探访和代祷。",
         en: "Cares for newcomers and fellowship members through prayer, follow-up, and visits.",
       },
-      contact: "hello@rmbc.example",
+      contact: fellowshipContactEmail,
       avatar: "./assets/avatar-prayer.svg",
     },
     {
@@ -185,7 +186,7 @@ const defaultContent = {
         zh: "预备每周查经内容，带领小组讨论和回应。",
         en: "Prepares weekly Bible study and leads small-group discussion and response.",
       },
-      contact: "hello@rmbc.example",
+      contact: fellowshipContactEmail,
       avatar: "./assets/avatar-study.svg",
     },
     {
@@ -197,7 +198,7 @@ const defaultContent = {
         zh: "协助确认聚会地点、接送安排和第一次来访信息。",
         en: "Helps confirm gathering locations, rides, and first-visit details.",
       },
-      contact: "hello@rmbc.example",
+      contact: fellowshipContactEmail,
       avatar: "./assets/avatar-welcome.svg",
     },
   ],
@@ -338,7 +339,7 @@ const translations = {
     "visit.step2": "确认本周地点",
     "visit.step3": "一起来吃饭和聚会",
     "contact.title": "联系好朋友团契",
-    "contact.email": "团契邮箱 hello@rmbc.example",
+    "contact.email": `团契邮箱 ${fellowshipContactEmail}`,
     "contact.welcome": "联系接待同工",
     "contact.gffMap": "好朋友团契周五地址：Crest Community Church, 3431 Mt Vernon Ave",
     "contact.rmbcMap": "RMBC 主日地址：4889 Tyler Street",
@@ -432,7 +433,7 @@ const translations = {
     "visit.step2": "Confirm this week's location",
     "visit.step3": "Join us for dinner and fellowship",
     "contact.title": "Contact Good Friends Fellowship",
-    "contact.email": "Fellowship email hello@rmbc.example",
+    "contact.email": `Fellowship email ${fellowshipContactEmail}`,
     "contact.welcome": "Contact the welcome team",
     "contact.gffMap": "Good Friends Friday location: Crest Community Church, 3431 Mt Vernon Ave",
     "contact.rmbcMap": "RMBC Sunday location: 4889 Tyler Street",
@@ -465,6 +466,7 @@ const getSupabaseClient = () => {
 
 const normalizePublicContent = (value) => {
   if (value && typeof value === "object") {
+    const team = Array.isArray(value.team) ? value.team : defaultContent.team;
     return {
       siteSections: normalizeSiteSections(value.siteSections),
       announcements: Array.isArray(value.announcements) ? value.announcements : defaultContent.announcements,
@@ -472,7 +474,10 @@ const normalizePublicContent = (value) => {
       studies: Array.isArray(value.studies) ? value.studies : defaultContent.studies,
       gallery: Array.isArray(value.gallery) ? value.gallery : defaultContent.gallery,
       photoCategoryDescriptions: normalizePhotoCategoryDescriptions(value.photoCategoryDescriptions),
-      team: Array.isArray(value.team) ? value.team : defaultContent.team,
+      team: team.map((item) => ({
+        ...item,
+        contact: item.contact === "hello@rmbc.example" ? fellowshipContactEmail : item.contact,
+      })),
     };
   }
 
