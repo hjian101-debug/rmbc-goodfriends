@@ -997,7 +997,6 @@ h3 {
   overflow: hidden;
   color: var(--ink);
   border-top: 1px solid rgba(181, 107, 80, 0.08);
-  border-bottom: 1px solid rgba(66, 106, 80, 0.09);
   background:
     radial-gradient(circle at 7% 32%, rgba(181, 107, 80, 0.12), transparent 26%),
     radial-gradient(circle at 92% 72%, rgba(66, 106, 80, 0.12), transparent 30%),
@@ -1007,22 +1006,9 @@ h3 {
 #gatherings {
   position: relative;
   overflow: hidden;
-  border-top: 5px solid rgba(214, 169, 77, 0.7);
   background:
     radial-gradient(circle at 88% 18%, rgba(214, 169, 77, 0.13), transparent 25%),
     linear-gradient(135deg, #eaf3ee 0%, #f0f5ef 58%, #e8f0ea 100%);
-}
-
-#gatherings::after {
-  position: absolute;
-  left: -110px;
-  bottom: -160px;
-  width: 330px;
-  height: 330px;
-  border: 1px solid rgba(66, 106, 80, 0.13);
-  border-radius: 50%;
-  content: "";
-  pointer-events: none;
 }
 
 #gatherings > * {
