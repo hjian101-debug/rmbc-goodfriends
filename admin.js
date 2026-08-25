@@ -23,6 +23,7 @@ let hasUnsavedChanges = false;
 let isSaving = false;
 let activeAdminPage = "sections";
 let activeGalleryCategory = "fellowship";
+const pendingAnnouncementIds = new Set();
 
 function getStudiesSheetUrl() {
   if (studiesSheetConfig.editUrl) {
@@ -420,6 +421,7 @@ async function loadRemoteContent() {
   }
 
   content = normalizeContent(data?.value || defaultContent);
+  pendingAnnouncementIds.clear();
   window.localStorage.setItem(adminStorageKey, JSON.stringify(content));
 }
 
@@ -453,10 +455,12 @@ async function saveRemoteContent() {
   }
 
   setLoginMessage("已保存到 Supabase。");
+  pendingAnnouncementIds.clear();
   hasUnsavedChanges = false;
   isSaving = false;
   setSaveStatus(`已保存到网站 ${new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" })}`, "saved");
   updateSaveButton();
+  renderAnnouncements();
   return true;
 }
 
@@ -607,6 +611,9 @@ function cardHeader(title, subtitle, collection, item, index) {
     }
 
     content[collection] = content[collection].filter((entry) => entry.id !== item.id);
+    if (collection === "announcements") {
+      pendingAnnouncementIds.delete(item.id);
+    }
     saveContent();
     renderAll();
   });
@@ -1067,8 +1074,28 @@ function renderTeam() {
 
 function renderAnnouncements() {
   const list = document.querySelector('[data-list="announcements"]');
+  const sortedAnnouncements = content.announcements
+    .map((item, index) => {
+      const timestamp = Date.parse(item.date || "");
+      return {
+        item,
+        index,
+        pending: pendingAnnouncementIds.has(item.id),
+        timestamp: Number.isNaN(timestamp) ? Number.NEGATIVE_INFINITY : timestamp,
+      };
+    })
+    .sort((a, b) => {
+      if (a.pending !== b.pending) return Number(b.pending) - Number(a.pending);
+      if (a.pending && b.pending) return b.index - a.index;
+
+      const pinOrder = Number(b.item.pinned === true) - Number(a.item.pinned === true);
+      if (pinOrder !== 0) return pinOrder;
+      if (a.item.pinned === true) return a.index - b.index;
+      return b.timestamp - a.timestamp || a.index - b.index;
+    });
+
   list.replaceChildren(
-    ...content.announcements.map((item, index) => {
+    ...sortedAnnouncements.map(({ item, index, pending }) => {
       const card = document.createElement("article");
       const fields = document.createElement("div");
       card.className = "editor-card";
@@ -1083,7 +1110,13 @@ function renderAnnouncements() {
       );
 
       card.append(
-        cardHeader(item.title.zh || "公告", item.date || "", "announcements", item, index),
+        cardHeader(
+          item.title.zh || "公告",
+          pending ? `新建未保存 · ${item.date || "未填写日期"}` : (item.date || ""),
+          "announcements",
+          item,
+          index,
+        ),
         fields,
         pinnedToggle(item),
         activeToggle(item),
@@ -1265,6 +1298,7 @@ resetButton?.addEventListener("click", () => {
   }
 
   content = normalizeContent(defaultContent);
+  pendingAnnouncementIds.clear();
   saveContent();
   renderAll();
 });
@@ -1272,7 +1306,11 @@ resetButton?.addEventListener("click", () => {
 addButtons.forEach((button) => {
   button.addEventListener("click", () => {
     const collection = button.dataset.add;
-    content[collection].push(createEmptyItem(collection));
+    const item = createEmptyItem(collection);
+    content[collection].push(item);
+    if (collection === "announcements") {
+      pendingAnnouncementIds.add(item.id);
+    }
     saveContent();
     renderAll();
   });
