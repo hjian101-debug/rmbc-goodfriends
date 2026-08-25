@@ -644,15 +644,19 @@ function createStudySheetAssistant() {
   const fields = document.createElement("div");
   const actions = document.createElement("div");
   const copyButton = document.createElement("button");
+  const copyScriptureButton = document.createElement("button");
 
   helper.className = "sheet-translation-helper";
   heading.textContent = "新增查经翻译助手";
-  note.textContent = "填写中文后生成英文，再复制整行到 Google Sheet。ESV 经文来自正式接口，不由 AI 改写。";
+  note.textContent = "填写中文后生成英文，再复制整行到现有 Google Sheet。ESV 经文来自正式接口，可另行复制使用，不由 AI 改写。";
   fields.className = "field-grid";
   actions.className = "card-actions";
   copyButton.type = "button";
   copyButton.className = "small-button";
   copyButton.textContent = "复制整行到表格";
+  copyScriptureButton.type = "button";
+  copyScriptureButton.className = "small-button";
+  copyScriptureButton.textContent = "复制 ESV 经文";
 
   fields.append(
     createInput("日期", studySheetDraft.date, (value) => { studySheetDraft.date = value; }),
@@ -678,6 +682,7 @@ function createStudySheetAssistant() {
       });
     }),
     copyButton,
+    copyScriptureButton,
   );
 
   copyButton.addEventListener("click", async () => {
@@ -687,8 +692,6 @@ function createStudySheetAssistant() {
       studySheetDraft.title.en,
       studySheetDraft.passage.zh,
       studySheetDraft.passage.en,
-      studySheetDraft.scripture.zh,
-      studySheetDraft.scripture.en,
       studySheetDraft.summary.zh,
       studySheetDraft.summary.en,
       "是",
@@ -696,6 +699,16 @@ function createStudySheetAssistant() {
     await navigator.clipboard.writeText(row);
     copyButton.textContent = "已复制，去表格粘贴";
     window.setTimeout(() => { copyButton.textContent = "复制整行到表格"; }, 1800);
+  });
+
+  copyScriptureButton.addEventListener("click", async () => {
+    if (!studySheetDraft.scripture.en) {
+      setSaveStatus("请先获取 ESV 经文", "error");
+      return;
+    }
+    await navigator.clipboard.writeText(`${studySheetDraft.passage.en}\n${studySheetDraft.scripture.en}`.trim());
+    copyScriptureButton.textContent = "ESV 经文已复制";
+    window.setTimeout(() => { copyScriptureButton.textContent = "复制 ESV 经文"; }, 1800);
   });
 
   helper.append(heading, note, fields, actions);
@@ -1202,8 +1215,6 @@ function renderStudies() {
       "English title",
       "中文经文出处",
       "English passage",
-      "中文经文内容",
-      "ESV scripture",
       "中文大致内容",
       "English summary",
       "是否显示",

@@ -85,11 +85,10 @@ For the Google Sheet Bible-study archive, use these columns in this order:
 3. English title
 4. 中文经文出处
 5. English passage
-6. 中文经文内容
-7. ESV scripture
-8. 中文大致内容
-9. English summary
-10. 是否显示
+6. 中文大致内容
+7. English summary
+8. 是否显示
 
 The dashboard's Bible-study helper copies one tab-separated row in exactly
-this order for pasting into the sheet.
+this order for pasting into the existing sheet. It also provides a separate
+button for copying the retrieved ESV reference and text.
