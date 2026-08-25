@@ -582,8 +582,22 @@ h3 {
   padding-left: max(18px, calc((100vw - 1120px) / 2));
   padding-right: max(18px, calc((100vw - 1120px) / 2));
   background:
-    radial-gradient(circle at 8% 18%, rgba(66, 106, 80, 0.12), transparent 28%),
+    linear-gradient(145deg, rgba(66, 106, 80, 0.13) 0%, transparent 34%),
+    linear-gradient(315deg, rgba(214, 169, 77, 0.08) 0%, transparent 32%),
     linear-gradient(135deg, #edf4ef 0%, #f3f6ef 54%, #edf2ea 100%);
+}
+
+#about::before {
+  position: absolute;
+  right: -0.04em;
+  bottom: -0.24em;
+  color: rgba(36, 67, 52, 0.045);
+  content: "ABOUT";
+  font-size: clamp(112px, 18vw, 270px);
+  font-weight: 950;
+  letter-spacing: -0.06em;
+  line-height: 1;
+  pointer-events: none;
 }
 
 #about > * {
@@ -653,9 +667,22 @@ h3 {
   overflow: hidden;
   padding-bottom: clamp(56px, 7vw, 84px);
   background:
-    radial-gradient(circle at 88% 8%, rgba(214, 169, 77, 0.18), transparent 27%),
-    radial-gradient(circle at 4% 88%, rgba(181, 107, 80, 0.09), transparent 24%),
+    linear-gradient(300deg, rgba(214, 169, 77, 0.17) 0%, transparent 38%),
+    linear-gradient(135deg, rgba(181, 107, 80, 0.1) 0%, transparent 30%),
     linear-gradient(180deg, var(--paper) 0%, #faf7ef 100%);
+}
+
+.announcements::after {
+  position: absolute;
+  right: -0.03em;
+  bottom: -0.27em;
+  color: rgba(181, 107, 80, 0.045);
+  content: "NEWS";
+  font-size: clamp(130px, 21vw, 310px);
+  font-weight: 950;
+  letter-spacing: -0.055em;
+  line-height: 1;
+  pointer-events: none;
 }
 
 .announcements > .section-heading,
@@ -988,17 +1015,44 @@ h3 {
   color: var(--ink);
   border-top: 1px solid rgba(181, 107, 80, 0.08);
   background:
-    radial-gradient(circle at 7% 32%, rgba(181, 107, 80, 0.12), transparent 26%),
-    radial-gradient(circle at 92% 72%, rgba(66, 106, 80, 0.12), transparent 30%),
+    linear-gradient(125deg, rgba(181, 107, 80, 0.12) 0%, transparent 30%),
+    linear-gradient(305deg, rgba(66, 106, 80, 0.13) 0%, transparent 36%),
     linear-gradient(180deg, #fbfaf6 0%, #f8f7f0 100%);
+}
+
+.gallery::before {
+  position: absolute;
+  left: -0.04em;
+  bottom: -0.23em;
+  color: rgba(66, 106, 80, 0.04);
+  content: "MOMENTS";
+  font-size: clamp(105px, 17vw, 250px);
+  font-weight: 950;
+  letter-spacing: -0.065em;
+  line-height: 1;
+  pointer-events: none;
 }
 
 #gatherings {
   position: relative;
   overflow: hidden;
   background:
-    radial-gradient(circle at 88% 18%, rgba(214, 169, 77, 0.13), transparent 25%),
+    linear-gradient(305deg, rgba(214, 169, 77, 0.14) 0%, transparent 35%),
+    linear-gradient(140deg, rgba(66, 106, 80, 0.1) 0%, transparent 32%),
     linear-gradient(135deg, #eaf3ee 0%, #f0f5ef 58%, #e8f0ea 100%);
+}
+
+#gatherings::before {
+  position: absolute;
+  right: -0.03em;
+  bottom: -0.24em;
+  color: rgba(36, 67, 52, 0.042);
+  content: "TOGETHER";
+  font-size: clamp(96px, 15vw, 230px);
+  font-weight: 950;
+  letter-spacing: -0.07em;
+  line-height: 1;
+  pointer-events: none;
 }
 
 #gatherings > * {
@@ -1009,6 +1063,7 @@ h3 {
 .gallery > .section-heading,
 .gallery > .gallery-grid {
   position: relative;
+  z-index: 1;
   width: min(1120px, calc(100% - 36px));
   margin-left: auto;
   margin-right: auto;
@@ -1199,6 +1254,8 @@ h3 {
 }
 
 .gallery-actions {
+  position: relative;
+  z-index: 1;
   width: min(1120px, calc(100% - 36px));
   margin: 26px auto 0;
 }
