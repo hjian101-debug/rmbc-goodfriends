@@ -741,8 +741,11 @@ h3 {
     radial-gradient(circle at 100% 0, rgba(216, 171, 78, 0.14), transparent 34%),
     var(--white);
   box-shadow: 0 10px 26px rgba(23, 33, 29, 0.06);
+  overflow-x: hidden;
   overflow-y: auto;
-  overscroll-behavior: contain;
+  overscroll-behavior-x: auto;
+  overscroll-behavior-y: contain;
+  touch-action: pan-x pan-y;
   scrollbar-gutter: stable;
   scroll-snap-align: start;
   transition:
@@ -779,10 +782,6 @@ h3 {
 .announcement-card.is-pinned {
   --announcement-accent: var(--terracotta);
   box-shadow: 0 16px 34px rgba(174, 99, 70, 0.13);
-}
-
-.announcement-scroll-hint {
-  max-width: none;
 }
 
 .announcement-meta {
