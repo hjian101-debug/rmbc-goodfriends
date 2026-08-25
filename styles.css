@@ -705,7 +705,7 @@ h3 {
   flex: 0 0 calc((100% - 24px) / 3);
   min-width: 0;
   height: 420px;
-  padding: 26px 24px 22px;
+  padding: 0;
   border: 1px solid var(--line);
   border-top-color: transparent;
   border-radius: 5px;
@@ -721,6 +721,19 @@ h3 {
   transition:
     border-color 220ms ease,
     box-shadow 220ms ease;
+}
+
+.announcement-card-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 26px 24px 14px;
+  border-bottom: 1px solid rgba(217, 225, 219, 0.72);
+  background:
+    linear-gradient(90deg, var(--announcement-accent), var(--gold)) top / 100% 5px no-repeat,
+    radial-gradient(circle at 100% 0, rgba(216, 171, 78, 0.12), transparent 46%),
+    rgba(255, 255, 255, 0.97);
+  box-shadow: 0 8px 18px rgba(23, 33, 29, 0.035);
 }
 
 .announcement-card:nth-child(3n + 2) {
@@ -785,7 +798,8 @@ h3 {
 }
 
 .announcement-card p {
-  margin: 14px 0 0;
+  margin: 0;
+  padding: 14px 24px 24px;
   color: var(--muted);
   line-height: 1.68;
   white-space: pre-wrap;

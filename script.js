@@ -1194,16 +1194,18 @@ const renderContent = (language) => {
     announcementList.replaceChildren(
       ...activeAnnouncements.map((item) => {
         const article = createElement("article", "announcement-card");
+        const cardHeader = createElement("div", "announcement-card-header");
         const meta = createElement("div", "announcement-meta");
         const date = createElement("span", "announcement-date", item.date || "");
+        const title = createElement("h3", null, localText(item.title, language));
         meta.append(date);
         if (item.pinned === true) {
           article.classList.add("is-pinned");
           meta.append(createElement("span", "announcement-pin", translations[language]["announcements.pinned"]));
         }
+        cardHeader.append(meta, title);
         article.append(
-          meta,
-          createElement("h3", null, localText(item.title, language)),
+          cardHeader,
           createElement("p", null, localText(item.body, language)),
         );
         return article;
