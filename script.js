@@ -1690,7 +1690,7 @@ announcementList?.addEventListener(
     }
     event.preventDefault();
   },
-  { passive: false },
+  { capture: true, passive: false },
 );
 
 let announcementDrag = null;
