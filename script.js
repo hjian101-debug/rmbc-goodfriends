@@ -1160,9 +1160,21 @@ const renderContent = (language) => {
 
   if (announcementList && announcementSection) {
     const activeAnnouncements = content.announcements
-      .map((item, index) => ({ item, index }))
+      .map((item, index) => {
+        const timestamp = Date.parse(item.date || "");
+        return {
+          item,
+          index,
+          timestamp: Number.isNaN(timestamp) ? Number.NEGATIVE_INFINITY : timestamp,
+        };
+      })
       .filter(({ item }) => item.active !== false)
-      .sort((a, b) => Number(b.item.pinned === true) - Number(a.item.pinned === true) || a.index - b.index)
+      .sort((a, b) => {
+        const pinOrder = Number(b.item.pinned === true) - Number(a.item.pinned === true);
+        if (pinOrder !== 0) return pinOrder;
+        if (a.item.pinned === true) return a.index - b.index;
+        return b.timestamp - a.timestamp || a.index - b.index;
+      })
       .map(({ item }) => item);
     const announcementsVisible = isSiteSectionVisible(siteSections, "announcements");
     announcementSection.hidden = !announcementsVisible || activeAnnouncements.length === 0;
