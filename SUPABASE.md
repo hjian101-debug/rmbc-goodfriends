@@ -59,20 +59,26 @@ The admin dashboard calls the authenticated Edge Function in
 - translate Chinese titles, descriptions, announcements, captions, and team information into English
 - convert a Chinese Bible reference such as `以弗所书 2:1-3` to its English reference and retrieve the official ESV text
 
-Create an OpenAI API key and request an ESV API key at https://api.esv.org/.
+Create a free-tier Gemini API key at https://aistudio.google.com/app/apikey and
+request an ESV API key at https://api.esv.org/.
 Store both as Supabase Edge Function secrets; never put them in
 `supabase-config.js` or any browser file.
 
 ```bash
-supabase secrets set OPENAI_API_KEY=... ESV_API_KEY=...
+supabase secrets set GEMINI_API_KEY=... ESV_API_KEY=...
 supabase functions deploy content-assistant
 ```
 
-`OPENAI_MODEL` is optional and defaults to `gpt-5-mini`:
+`GEMINI_MODEL` is optional and defaults to the free-tier Gemma 4 model
+`gemma-4-31b-it`:
 
 ```bash
-supabase secrets set OPENAI_MODEL=gpt-5-mini
+supabase secrets set GEMINI_MODEL=gemma-4-31b-it
 ```
+
+Gemini's free tier has usage limits, and Google states that free-tier content
+may be used to improve its products. This site sends only the public-facing
+Chinese fields selected by the administrator for translation.
 
 Only the authenticated `gff@rmbc.local` administrator can call this function.
 English fields remain editable so the administrator can review every result
