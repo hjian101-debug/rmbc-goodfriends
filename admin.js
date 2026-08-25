@@ -580,7 +580,24 @@ async function invokeContentAssistant(body) {
     throw new Error("自动翻译需要连接 Supabase。 ");
   }
 
-  const { data, error } = await client.functions.invoke("content-assistant", { body });
+  let { data: sessionData, error: sessionError } = await client.auth.getSession();
+  let session = sessionData?.session;
+  const expiresSoon = session?.expires_at && session.expires_at * 1000 <= Date.now() + 30_000;
+
+  if (!sessionError && expiresSoon) {
+    const refreshed = await client.auth.refreshSession();
+    sessionError = refreshed.error;
+    session = refreshed.data?.session;
+  }
+
+  if (sessionError || !session?.access_token) {
+    throw new Error("登录已过期，请重新登录后台。");
+  }
+
+  const { data, error } = await client.functions.invoke("content-assistant", {
+    body,
+    headers: { Authorization: `Bearer ${session.access_token}` },
+  });
   if (error) {
     let details = error.message;
     try {
