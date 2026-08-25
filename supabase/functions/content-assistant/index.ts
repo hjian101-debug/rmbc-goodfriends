@@ -89,7 +89,7 @@ async function translate(items) {
   }));
   if (normalized.some((item) => !item.id || !item.text)) throw new Error("翻译内容不能为空。");
 
-  const model = Deno.env.get("GEMINI_MODEL") || "gemini-2.5-flash-lite";
+  const model = Deno.env.get("GEMINI_MODEL") || "gemini-3.5-flash-lite";
   const prompt = [
     "Translate the following Simplified or Traditional Chinese church fellowship content into natural, welcoming American English.",
     "Preserve meaning, paragraph breaks, dates, times, addresses, URLs, emoji, Markdown, and Bible references.",
