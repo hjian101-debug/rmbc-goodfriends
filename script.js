@@ -1309,7 +1309,7 @@ const renderContent = (language) => {
           }
           article.append(createElement("p", null, item.scripture));
           if (language === "en" && item.version === "ESV") {
-            article.append(createElement("small", "esv-notice", "Scripture quotations are from the ESV® Bible, copyright © 2001 by Crossway. Used by permission."));
+            article.append(createElement("small", "esv-notice", "Scripture quotations are from the ESV® Bible (The Holy Bible, English Standard Version®), © 2001 by Crossway, a publishing ministry of Good News Publishers. Used by permission. All rights reserved."));
           }
           list.append(article);
           card.append(heading, list);
@@ -1519,7 +1519,7 @@ const renderContent = (language) => {
           if (scripture) {
             article.append(createElement("blockquote", null, scripture));
             if (language === "en" && item.scriptureVersion === "ESV") {
-              article.append(createElement("small", "esv-notice", "Scripture quotations are from the ESV® Bible, copyright © 2001 by Crossway. Used by permission."));
+              article.append(createElement("small", "esv-notice", "Scripture quotations are from the ESV® Bible (The Holy Bible, English Standard Version®), © 2001 by Crossway, a publishing ministry of Good News Publishers. Used by permission. All rights reserved."));
             }
           }
           if (summary) {
