@@ -19,6 +19,7 @@ const studiesList = document.querySelector("[data-studies-list]");
 const photoCategoryList = document.querySelector("[data-photo-category-list]");
 const eventPosterModal = document.querySelector("[data-event-poster-modal]");
 const eventPosterClose = document.querySelector("[data-event-poster-close]");
+const eventPosterWebsite = document.querySelector("[data-event-poster-website]");
 
 let eventPosterPreviousFocus = null;
 
@@ -40,6 +41,7 @@ const initEventPosterModal = () => {
 };
 
 eventPosterClose?.addEventListener("click", closeEventPosterModal);
+eventPosterWebsite?.addEventListener("click", closeEventPosterModal);
 eventPosterModal?.addEventListener("click", (event) => {
   if (event.target === eventPosterModal) {
     closeEventPosterModal();

@@ -35,7 +35,7 @@
     />
     <meta name="twitter:image" content="https://rmbc-goodfriends.pages.dev/assets/hero-fellowship.svg" />
     <title>RMBC 好朋友团契 | Riverside 华人教会中文查经与 Good Friends Fellowship</title>
-    <link rel="stylesheet" href="./styles.css?v=20260831-1" />
+    <link rel="stylesheet" href="./styles.css?v=20260901-1" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -74,19 +74,27 @@
         <button class="event-poster-close" type="button" data-event-poster-close aria-label="关闭活动海报">
           <span aria-hidden="true">&times;</span>
         </button>
-        <a
-          href="https://docs.google.com/forms/d/e/1FAIpQLSdLdL_PBzmsZSLSH7eSYZB8tR_OAzI0GSMqohES55ZPg5qFXg/viewform"
-          target="_blank"
-          rel="noopener"
-          aria-label="打开中秋迎新活动报名表"
-        >
+        <div class="event-poster-media">
           <img
             class="event-poster-image"
             src="./assets/posters/2026gff-welcome-poster.png"
             alt="河滨国语浸信会 UCR 好朋友校园团契 2026 中秋迎心会活动海报"
             fetchpriority="high"
           />
-        </a>
+          <a
+            class="event-poster-hotspot event-poster-hotspot-website"
+            href="#home"
+            data-event-poster-website
+            aria-label="打开好朋友团契网站"
+          ></a>
+          <a
+            class="event-poster-hotspot event-poster-hotspot-registration"
+            href="https://docs.google.com/forms/d/e/1FAIpQLSdLdL_PBzmsZSLSH7eSYZB8tR_OAzI0GSMqohES55ZPg5qFXg/viewform"
+            target="_blank"
+            rel="noopener"
+            aria-label="打开中秋迎新活动报名表"
+          ></a>
+        </div>
       </div>
     </div>
 
@@ -300,6 +308,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="./supabase-config.js?v=20260607-2"></script>
-    <script src="./script.js?v=20260831-1"></script>
+    <script src="./script.js?v=20260901-1"></script>
   </body>
 </html>

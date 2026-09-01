@@ -62,7 +62,8 @@ body.event-poster-modal-open {
   animation: event-poster-arrive 240ms ease-out both;
 }
 
-.event-poster-dialog a {
+.event-poster-media {
+  position: relative;
   display: block;
   border-radius: 10px;
   box-shadow: 0 30px 90px rgba(0, 0, 0, 0.46);
@@ -75,6 +76,29 @@ body.event-poster-modal-open {
   max-width: min(560px, calc(100vw - 48px));
   max-height: calc(100dvh - 48px);
   border-radius: 10px;
+}
+
+.event-poster-hotspot {
+  position: absolute;
+  top: 67.4%;
+  width: 15.8%;
+  height: 14.5%;
+  border-radius: 0.35rem;
+  cursor: pointer;
+}
+
+.event-poster-hotspot-website {
+  left: 31.2%;
+}
+
+.event-poster-hotspot-registration {
+  left: 52.9%;
+}
+
+.event-poster-hotspot:hover,
+.event-poster-hotspot:focus-visible {
+  outline: 3px solid rgba(255, 213, 111, 0.95);
+  outline-offset: 3px;
 }
 
 .event-poster-close {
