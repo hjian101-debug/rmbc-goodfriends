@@ -39,6 +39,86 @@ body {
   line-height: 1.6;
 }
 
+body.event-poster-modal-open {
+  overflow: hidden;
+}
+
+.event-poster-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(5, 15, 24, 0.78);
+  backdrop-filter: blur(9px);
+  animation: event-poster-backdrop-in 180ms ease-out both;
+}
+
+.event-poster-dialog {
+  position: relative;
+  max-width: 100%;
+  max-height: 100%;
+  animation: event-poster-arrive 240ms ease-out both;
+}
+
+.event-poster-dialog a {
+  display: block;
+  border-radius: 10px;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.46);
+}
+
+.event-poster-image {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: min(560px, calc(100vw - 48px));
+  max-height: calc(100dvh - 48px);
+  border-radius: 10px;
+}
+
+.event-poster-close {
+  position: absolute;
+  top: -15px;
+  right: -15px;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 2px solid rgba(255, 255, 255, 0.88);
+  border-radius: 50%;
+  color: #102039;
+  background: #ffffff;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.32);
+  font: inherit;
+  font-size: 31px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.event-poster-close:hover,
+.event-poster-close:focus-visible {
+  color: #ffffff;
+  background: var(--terracotta);
+  outline: 3px solid rgba(255, 255, 255, 0.72);
+  outline-offset: 2px;
+}
+
+@keyframes event-poster-backdrop-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes event-poster-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.975);
+  }
+}
+
 a {
   color: inherit;
   text-decoration: none;
@@ -2006,6 +2086,22 @@ body.photo-lightbox-open {
 }
 
 @media (max-width: 520px) {
+  .event-poster-modal {
+    padding: 18px;
+  }
+
+  .event-poster-image {
+    max-width: calc(100vw - 36px);
+    max-height: calc(100dvh - 36px);
+  }
+
+  .event-poster-close {
+    top: -11px;
+    right: -11px;
+    width: 42px;
+    height: 42px;
+  }
+
   .brand small {
     display: none;
   }
@@ -2028,6 +2124,13 @@ body.photo-lightbox-open {
 
   .feature-list p {
     grid-column: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .event-poster-modal,
+  .event-poster-dialog {
+    animation: none;
   }
 }
 .scripture-reference {
