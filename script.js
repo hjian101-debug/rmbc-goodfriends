@@ -17,37 +17,6 @@ const teamGrid = document.querySelector("[data-team-grid]");
 const studyDirectory = document.querySelector("[data-study-directory]");
 const studiesList = document.querySelector("[data-studies-list]");
 const photoCategoryList = document.querySelector("[data-photo-category-list]");
-const eventPosterModal = document.querySelector("[data-event-poster-modal]");
-const eventPosterClose = document.querySelector("[data-event-poster-close]");
-const eventPosterWebsite = document.querySelector("[data-event-poster-website]");
-
-let eventPosterPreviousFocus = null;
-
-const closeEventPosterModal = () => {
-  if (!eventPosterModal || eventPosterModal.hidden) return;
-  eventPosterModal.hidden = true;
-  document.body.classList.remove("event-poster-modal-open");
-  if (eventPosterPreviousFocus instanceof HTMLElement && eventPosterPreviousFocus !== document.body) {
-    eventPosterPreviousFocus.focus({ preventScroll: true });
-  }
-};
-
-const initEventPosterModal = () => {
-  if (!eventPosterModal) return;
-  eventPosterPreviousFocus = document.activeElement;
-  eventPosterModal.hidden = false;
-  document.body.classList.add("event-poster-modal-open");
-  window.requestAnimationFrame(() => eventPosterClose?.focus({ preventScroll: true }));
-};
-
-eventPosterClose?.addEventListener("click", closeEventPosterModal);
-eventPosterWebsite?.addEventListener("click", closeEventPosterModal);
-eventPosterModal?.addEventListener("click", (event) => {
-  if (event.target === eventPosterModal) {
-    closeEventPosterModal();
-  }
-});
-
 const adminStorageKey = "rmbc-admin-content";
 const fellowshipContactEmail = "rmbctyler@yahoo.com";
 const supabaseConfig = window.RMBC_SUPABASE_CONFIG || {};
@@ -1737,7 +1706,6 @@ syncHeader();
 window.addEventListener("scroll", syncHeader, { passive: true });
 window.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
-    closeEventPosterModal();
     closePhotoLightbox();
   }
 });
@@ -1810,7 +1778,6 @@ if (year) {
 }
 
 let currentLanguage = getSavedLanguage();
-initEventPosterModal();
 applyLanguage(currentLanguage);
 initPageMotion();
 injectEventStructuredData();
