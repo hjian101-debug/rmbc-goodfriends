@@ -44,6 +44,8 @@ input[type="text"], input[type="password"], input[type="number"], select {
 }
 .choice-row { display: flex; gap: 10px; flex-wrap: wrap; }
 .choice { padding: 11px 14px; background: var(--soft); border-radius: 10px; }
+.add-to-group { display: flex; align-items: center; gap: 9px; font-weight: 700; }
+.add-to-group select { min-width: 130px; }
 
 .member-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
 .member-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 11px; }
