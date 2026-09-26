@@ -46,6 +46,7 @@ let people = [];
 let groups = [];
 let leaders = [];
 let movingName = null;
+let assignmentMode = false;
 const attendanceStorageKey = "rmbc-group-selected-members";
 const groupingStorageKey = "rmbc-group-latest-result";
 
@@ -108,7 +109,10 @@ async function loadPeople() {
 }
 
 function renderPeople() {
-  const members = people.filter((person) => person.kind === "member");
+  const allMembers = people.filter((person) => person.kind === "member");
+  const members = assignmentMode
+    ? allMembers.filter((person) => !groups.some((group) => group.includes(person.name)))
+    : allMembers;
   const friends = people.filter((person) => person.kind === "new_friend");
   const memberContainer = document.querySelector("[data-members]");
   const existingBoxes = [...memberContainer.querySelectorAll('input[type="checkbox"]')];
@@ -117,9 +121,29 @@ function renderPeople() {
     : savedMembers();
   memberContainer.replaceChildren();
 
+  if (assignmentMode && !members.length) {
+    const empty = document.createElement("p");
+    empty.className = "hint";
+    empty.textContent = "所有成员都已经在分组中。";
+    memberContainer.append(empty);
+  }
+
   members.forEach((person) => {
     const card = document.createElement("div");
     card.className = "member-card";
+    if (assignmentMode) {
+      const pick = document.createElement("button");
+      pick.type = "button";
+      pick.className = "member-pick";
+      const faithNote = document.createElement("span");
+      faithNote.className = "faith-note";
+      faithNote.textContent = `（${faithLabel(person.faith_status)}）`;
+      pick.append(document.createTextNode(person.name), faithNote);
+      pick.addEventListener("click", () => openMoveSheet(person.name));
+      card.append(pick);
+      memberContainer.append(card);
+      return;
+    }
     const label = document.createElement("label");
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
@@ -129,9 +153,6 @@ function renderPeople() {
     checkbox.addEventListener("change", () => {
       saveSelectedMembers();
       updateLeaderSelects();
-      if (checkbox.checked && groups.length && !groups.some((group) => group.includes(person.name))) {
-        openMoveSheet(person.name);
-      }
     });
     const faithNote = document.createElement("span");
     faithNote.className = "faith-note";
@@ -139,13 +160,6 @@ function renderPeople() {
     label.append(checkbox, document.createTextNode(person.name), faithNote);
     const actions = document.createElement("span");
     actions.className = "row-actions";
-    if (groups.length && !groups.some((group) => group.includes(person.name))) {
-      const assign = document.createElement("button");
-      assign.type = "button";
-      assign.textContent = "加入分组";
-      assign.addEventListener("click", () => openMoveSheet(person.name));
-      actions.append(assign);
-    }
     const remove = document.createElement("button");
     remove.type = "button";
     remove.className = "danger member-delete";
@@ -196,8 +210,10 @@ function renderPeople() {
     row.append(identity, actions);
     friendContainer.append(row);
   });
-  saveSelectedMembers();
-  updateLeaderSelects();
+  if (!assignmentMode) {
+    saveSelectedMembers();
+    updateLeaderSelects();
+  }
 }
 
 function selectedMembers() {
@@ -335,6 +351,7 @@ function clearGrouping() {
   groups = [];
   leaders = [];
   movingName = null;
+  setAssignmentMode(false);
   window.localStorage.removeItem(groupingStorageKey);
   document.querySelector("[data-group-grid]").replaceChildren();
   document.querySelector("[data-results]").hidden = true;
@@ -344,6 +361,17 @@ function clearGrouping() {
   adminMessage("分组结果已清空，成员名单仍然保留。", "success");
 }
 
+function setAssignmentMode(enabled) {
+  assignmentMode = enabled;
+  document.querySelector("[data-assign-mode]").textContent = enabled ? "完成加入" : "加入分组";
+  document.querySelector("[data-select-all]").hidden = enabled;
+  document.querySelector("[data-select-none]").hidden = enabled;
+  document.querySelector("[data-delete-mode]").hidden = enabled;
+  const memberSection = document.querySelector("[data-members]").closest("section");
+  memberSection.classList.remove("delete-mode");
+  document.querySelector("[data-delete-mode]").textContent = "删除成员";
+}
+
 function movePerson(name, target) {
   const source = groups.findIndex((group) => group.includes(name));
   if (source === target || leaders.includes(name)) return closeMoveSheet();
@@ -351,9 +379,11 @@ function movePerson(name, target) {
   groups[target].push(name);
   const memberBox = [...document.querySelectorAll('[data-members] input[type="checkbox"]')]
     .find((box) => box.value === name);
-  if (memberBox) {
-    memberBox.checked = true;
-    saveSelectedMembers();
+  if (people.some((person) => person.name === name && person.kind === "member")) {
+    const selected = savedMembers();
+    selected.add(name);
+    window.localStorage.setItem(attendanceStorageKey, JSON.stringify([...selected]));
+    if (memberBox) memberBox.checked = true;
   }
   closeMoveSheet();
   renderGroups();
@@ -439,6 +469,11 @@ async function initializeAdmin() {
     const enabled = section.classList.toggle("delete-mode");
     event.currentTarget.textContent = enabled ? "完成删除" : "删除成员";
   });
+  document.querySelector("[data-assign-mode]").addEventListener("click", () => {
+    if (!groups.length) return adminMessage("请先完成分组，再添加剩余人员。", "error");
+    setAssignmentMode(!assignmentMode);
+    renderPeople();
+  });
   document.querySelector('[name="group_count"]').addEventListener("input", updateLeaderSelects);
   document.querySelector("[data-clear-friends]").addEventListener("click", async () => {
     if (!window.confirm("确定要清空全部新朋友吗？")) return;
@@ -448,6 +483,10 @@ async function initializeAdmin() {
   });
   document.querySelector("[data-group-form]").addEventListener("submit", (event) => {
     event.preventDefault();
+    if (assignmentMode) {
+      setAssignmentMode(false);
+      renderPeople();
+    }
     const count = Number(new FormData(event.currentTarget).get("group_count"));
     leaders = [...document.querySelectorAll('[data-leader-selects] select')].map((select) => select.value);
     if (leaders.length !== count || leaders.some((name) => !name) || new Set(leaders).size !== count) {
