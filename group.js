@@ -95,25 +95,6 @@ function adminMessage(text, tone = "") {
   setMessage(document.querySelector("[data-message]"), text, tone);
 }
 
-function updateAddToGroupSelect() {
-  const field = document.querySelector("[data-add-to-group]");
-  const select = field.querySelector("select");
-  field.hidden = !groups.length;
-  select.replaceChildren();
-  if (!groups.length) return;
-
-  const unassigned = document.createElement("option");
-  unassigned.value = "";
-  unassigned.textContent = "暂不分组";
-  select.append(unassigned);
-  groups.forEach((_, index) => {
-    const option = document.createElement("option");
-    option.value = String(index);
-    option.textContent = `第 ${index + 1} 组`;
-    select.append(option);
-  });
-}
-
 async function loadPeople() {
   const { data, error } = await db
     .from("group_people")
@@ -122,7 +103,6 @@ async function loadPeople() {
   if (error) throw error;
   people = data || [];
   restoreGrouping();
-  updateAddToGroupSelect();
   renderPeople();
   if (groups.length) renderGroups(false);
 }
@@ -327,7 +307,6 @@ function renderGroups(scrollToResults = true) {
   });
   saveGrouping();
   document.querySelector("[data-results]").hidden = false;
-  updateAddToGroupSelect();
   if (scrollToResults) document.querySelector("[data-results]").scrollIntoView({ behavior: "smooth" });
 }
 
@@ -360,7 +339,6 @@ function clearGrouping() {
   document.querySelector("[data-group-grid]").replaceChildren();
   document.querySelector("[data-results]").hidden = true;
   document.querySelector('[name="group_count"]').value = "";
-  updateAddToGroupSelect();
   updateLeaderSelects();
   renderPeople();
   adminMessage("分组结果已清空，成员名单仍然保留。", "success");
@@ -437,15 +415,10 @@ async function initializeAdmin() {
     const form = event.currentTarget;
     const fields = new FormData(form);
     const record = { name: normalize(fields.get("name")), kind: "new_friend", faith_status: fields.get("faith_status") };
-    const targetGroup = fields.get("target_group");
     const { error } = await db.from("group_people").upsert(record);
     if (error) return adminMessage("添加失败，请检查姓名是否已存在。", "error");
     form.reset();
     await loadPeople();
-    if (targetGroup !== "" && groups[Number(targetGroup)]) {
-      movePerson(record.name, Number(targetGroup));
-      return adminMessage(`已添加 ${record.name}，并加入第 ${Number(targetGroup) + 1} 组。`, "success");
-    }
     adminMessage(
       groups.length ? `已添加 ${record.name}，请在新朋友名单中点“加入分组”。` : `已添加 ${record.name}。`,
       "success"
