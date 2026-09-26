@@ -154,12 +154,22 @@ function renderPeople() {
     faithNote.className = "faith-note";
     faithNote.textContent = `（${faithLabel(person.faith_status)}）`;
     label.append(checkbox, document.createTextNode(person.name), faithNote);
+    const actions = document.createElement("span");
+    actions.className = "row-actions";
+    if (groups.length && !groups.some((group) => group.includes(person.name))) {
+      const assign = document.createElement("button");
+      assign.type = "button";
+      assign.textContent = "加入分组";
+      assign.addEventListener("click", () => openMoveSheet(person.name));
+      actions.append(assign);
+    }
     const remove = document.createElement("button");
     remove.type = "button";
     remove.className = "danger member-delete";
     remove.textContent = "删除";
     remove.addEventListener("click", () => removePerson(person.name));
-    card.append(label, remove);
+    actions.append(remove);
+    card.append(label, actions);
     memberContainer.append(card);
   });
 
@@ -358,6 +368,12 @@ function movePerson(name, target) {
   if (source === target || leaders.includes(name)) return closeMoveSheet();
   if (source >= 0) groups[source] = groups[source].filter((person) => person !== name);
   groups[target].push(name);
+  const memberBox = [...document.querySelectorAll('[data-members] input[type="checkbox"]')]
+    .find((box) => box.value === name);
+  if (memberBox) {
+    memberBox.checked = true;
+    saveSelectedMembers();
+  }
   closeMoveSheet();
   renderGroups();
   renderPeople();
