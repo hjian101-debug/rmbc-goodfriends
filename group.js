@@ -149,6 +149,9 @@ function renderPeople() {
     checkbox.addEventListener("change", () => {
       saveSelectedMembers();
       updateLeaderSelects();
+      if (checkbox.checked && groups.length && !groups.some((group) => group.includes(person.name))) {
+        openMoveSheet(person.name);
+      }
     });
     const faithNote = document.createElement("span");
     faithNote.className = "faith-note";
