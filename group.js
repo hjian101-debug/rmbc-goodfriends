@@ -47,8 +47,10 @@ let groups = [];
 let leaders = [];
 let movingName = null;
 let assignmentMode = false;
+let groupingSaveQueue = Promise.resolve(true);
 const attendanceStorageKey = "rmbc-group-selected-members";
 const groupingStorageKey = "rmbc-group-latest-result";
+const groupingContentKey = "grouping-current";
 
 function savedMembers() {
   try {
@@ -63,13 +65,62 @@ function saveSelectedMembers() {
   window.localStorage.setItem(attendanceStorageKey, JSON.stringify(selectedMembers()));
 }
 
-function saveGrouping() {
-  if (!groups.length) return;
-  window.localStorage.setItem(groupingStorageKey, JSON.stringify({ groups, leaders }));
+function saveGroupingLocally() {
+  if (groups.length) {
+    window.localStorage.setItem(groupingStorageKey, JSON.stringify({ groups, leaders }));
+  } else {
+    window.localStorage.removeItem(groupingStorageKey);
+  }
 }
 
-function restoreGrouping() {
-  if (!groups.length) {
+function saveGrouping() {
+  saveGroupingLocally();
+  const snapshot = {
+    groups: groups.map((group) => [...group]),
+    leaders: [...leaders],
+  };
+  groupingSaveQueue = groupingSaveQueue.catch(() => false).then(async () => {
+    try {
+      const { error } = await db.from("site_content").upsert({
+        key: groupingContentKey,
+        value: snapshot,
+        updated_at: new Date().toISOString(),
+      });
+      if (!error) return true;
+      console.error(error);
+    } catch (error) {
+      console.error(error);
+    }
+    adminMessage("分组已保存在本机，但云端同步失败，请稍后重试。", "error");
+    return false;
+  });
+  return groupingSaveQueue;
+}
+
+function validateGrouping() {
+  const existingNames = new Set(people.map((person) => person.name));
+  groups = groups.map((group) => group.filter((name) => existingNames.has(name)));
+  if (!groups.length || leaders.length !== groups.length || leaders.some((name) => !existingNames.has(name))) {
+    groups = [];
+    leaders = [];
+  }
+  saveGroupingLocally();
+}
+
+async function restoreGrouping() {
+  const { data, error } = await db
+    .from("site_content")
+    .select("value")
+    .eq("key", groupingContentKey)
+    .maybeSingle();
+
+  if (error) console.error(error);
+  const hasSharedGrouping = !error && Boolean(data);
+  if (hasSharedGrouping) {
+    const shared = data.value || {};
+    groups = Array.isArray(shared.groups) ? shared.groups : [];
+    leaders = Array.isArray(shared.leaders) ? shared.leaders : [];
+  } else {
     try {
       const saved = JSON.parse(window.localStorage.getItem(groupingStorageKey) || "null");
       if (saved && Array.isArray(saved.groups) && Array.isArray(saved.leaders)) {
@@ -80,16 +131,8 @@ function restoreGrouping() {
       window.localStorage.removeItem(groupingStorageKey);
     }
   }
-
-  const existingNames = new Set(people.map((person) => person.name));
-  groups = groups.map((group) => group.filter((name) => existingNames.has(name)));
-  if (!groups.length || leaders.length !== groups.length || leaders.some((name) => !existingNames.has(name))) {
-    groups = [];
-    leaders = [];
-    window.localStorage.removeItem(groupingStorageKey);
-  } else {
-    saveGrouping();
-  }
+  validateGrouping();
+  if (!hasSharedGrouping && groups.length) await saveGrouping();
 }
 
 function adminMessage(text, tone = "") {
@@ -103,7 +146,7 @@ async function loadPeople() {
     .order("created_at", { ascending: true });
   if (error) throw error;
   people = data || [];
-  restoreGrouping();
+  await restoreGrouping();
   renderPeople();
   if (groups.length) renderGroups(false);
 }
@@ -321,7 +364,7 @@ function renderGroups(scrollToResults = true) {
     group.append(heading, list);
     grid.append(group);
   });
-  saveGrouping();
+  void saveGrouping();
   document.querySelector("[data-results]").hidden = false;
   if (scrollToResults) document.querySelector("[data-results]").scrollIntoView({ behavior: "smooth" });
 }
@@ -346,19 +389,19 @@ function closeMoveSheet() {
   movingName = null;
 }
 
-function clearGrouping() {
+async function clearGrouping() {
   if (!window.confirm("确定要清空当前分组结果吗？成员名单不会被删除。")) return;
   groups = [];
   leaders = [];
   movingName = null;
   setAssignmentMode(false);
-  window.localStorage.removeItem(groupingStorageKey);
+  const synced = await saveGrouping();
   document.querySelector("[data-group-grid]").replaceChildren();
   document.querySelector("[data-results]").hidden = true;
   document.querySelector('[name="group_count"]').value = "";
   updateLeaderSelects();
   renderPeople();
-  adminMessage("分组结果已清空，成员名单仍然保留。", "success");
+  if (synced) adminMessage("分组结果已清空，成员名单仍然保留。", "success");
 }
 
 function setAssignmentMode(enabled) {
