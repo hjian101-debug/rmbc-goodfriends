@@ -48,6 +48,10 @@ let leaders = [];
 let movingName = null;
 let assignmentMode = false;
 let groupingSaveQueue = Promise.resolve(true);
+let groupingSavesPending = 0;
+let groupingRefreshTimer = null;
+let groupingRefreshInFlight = false;
+let lastGroupingUpdatedAt = "";
 const attendanceStorageKey = "rmbc-group-selected-members";
 const groupingStorageKey = "rmbc-group-latest-result";
 const groupingContentKey = "grouping-current";
@@ -75,24 +79,30 @@ function saveGroupingLocally() {
 
 function saveGrouping() {
   saveGroupingLocally();
+  groupingSavesPending += 1;
   const snapshot = {
     groups: groups.map((group) => [...group]),
     leaders: [...leaders],
   };
   groupingSaveQueue = groupingSaveQueue.catch(() => false).then(async () => {
     try {
-      const { error } = await db.from("site_content").upsert({
+      const { data, error } = await db.from("site_content").upsert({
         key: groupingContentKey,
         value: snapshot,
         updated_at: new Date().toISOString(),
-      });
-      if (!error) return true;
+      }).select("updated_at").single();
+      if (!error) {
+        lastGroupingUpdatedAt = data?.updated_at || lastGroupingUpdatedAt;
+        return true;
+      }
       console.error(error);
     } catch (error) {
       console.error(error);
     }
     adminMessage("分组已保存在本机，但云端同步失败，请稍后重试。", "error");
     return false;
+  }).finally(() => {
+    groupingSavesPending = Math.max(0, groupingSavesPending - 1);
   });
   return groupingSaveQueue;
 }
@@ -110,13 +120,14 @@ function validateGrouping() {
 async function restoreGrouping() {
   const { data, error } = await db
     .from("site_content")
-    .select("value")
+    .select("value,updated_at")
     .eq("key", groupingContentKey)
     .maybeSingle();
 
   if (error) console.error(error);
   const hasSharedGrouping = !error && Boolean(data);
   if (hasSharedGrouping) {
+    lastGroupingUpdatedAt = data.updated_at || "";
     const shared = data.value || {};
     groups = Array.isArray(shared.groups) ? shared.groups : [];
     leaders = Array.isArray(shared.leaders) ? shared.leaders : [];
@@ -135,6 +146,46 @@ async function restoreGrouping() {
   if (!hasSharedGrouping && groups.length) await saveGrouping();
 }
 
+async function refreshSharedGrouping() {
+  if (groupingRefreshInFlight || groupingSavesPending || document.hidden) return;
+  const dashboard = document.querySelector("[data-dashboard]");
+  if (!dashboard || dashboard.hidden) return;
+  groupingRefreshInFlight = true;
+  try {
+    const { data, error } = await db
+      .from("site_content")
+      .select("value,updated_at")
+      .eq("key", groupingContentKey)
+      .maybeSingle();
+    if (error || !data || !data.updated_at || data.updated_at === lastGroupingUpdatedAt) return;
+
+    const shared = data.value || {};
+    groups = Array.isArray(shared.groups) ? shared.groups : [];
+    leaders = Array.isArray(shared.leaders) ? shared.leaders : [];
+    lastGroupingUpdatedAt = data.updated_at;
+    validateGrouping();
+    if (groups.length) {
+      renderPeople();
+      renderGroups(false, false);
+    } else {
+      setAssignmentMode(false);
+      document.querySelector("[data-group-grid]").replaceChildren();
+      document.querySelector("[data-results]").hidden = true;
+      renderPeople();
+    }
+    adminMessage("已自动同步另一台设备的最新分组。", "success");
+  } catch (error) {
+    console.error(error);
+  } finally {
+    groupingRefreshInFlight = false;
+  }
+}
+
+function startGroupingRefresh() {
+  window.clearInterval(groupingRefreshTimer);
+  groupingRefreshTimer = window.setInterval(refreshSharedGrouping, 4000);
+}
+
 function adminMessage(text, tone = "") {
   setMessage(document.querySelector("[data-message]"), text, tone);
 }
@@ -148,7 +199,7 @@ async function loadPeople() {
   people = data || [];
   await restoreGrouping();
   renderPeople();
-  if (groups.length) renderGroups(false);
+  if (groups.length) renderGroups(false, false);
 }
 
 function renderPeople() {
@@ -316,7 +367,7 @@ function buildBalancedGroups(attendees, selectedLeaders, count) {
   return result;
 }
 
-function renderGroups(scrollToResults = true) {
+function renderGroups(scrollToResults = true, persist = true) {
   const status = new Map(people.map((person) => [person.name, person.faith_status]));
   const grid = document.querySelector("[data-group-grid]");
   grid.replaceChildren();
@@ -364,7 +415,7 @@ function renderGroups(scrollToResults = true) {
     group.append(heading, list);
     grid.append(group);
   });
-  void saveGrouping();
+  if (persist) void saveGrouping();
   document.querySelector("[data-results]").hidden = false;
   if (scrollToResults) document.querySelector("[data-results]").scrollIntoView({ behavior: "smooth" });
 }
@@ -452,6 +503,7 @@ async function showDashboard() {
   adminMessage("正在读取名单…");
   try {
     await loadPeople();
+    startGroupingRefresh();
     adminMessage("名单已从 Supabase 读取。", "success");
   } catch (error) {
     console.error(error);
@@ -479,6 +531,7 @@ async function initializeAdmin() {
   });
 
   document.querySelector("[data-logout]").addEventListener("click", async () => {
+    window.clearInterval(groupingRefreshTimer);
     await db.auth.signOut();
     dashboard.hidden = true;
     loginPanel.hidden = false;
